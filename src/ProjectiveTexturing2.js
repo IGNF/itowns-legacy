@@ -79,11 +79,11 @@ function (graphicEngine, THREE, Ori, Shader, PanoramicProvider) {
          initOrientationCameraMatrices: function(){
             
             // New cameras
-            _mv_current_300 = Ori.getMatCam(300);
-            _mv_current_301 = Ori.getMatCam(301);
-            _mv_current_302 = Ori.getMatCam(302);
-            _mv_current_303 = Ori.getMatCam(303);
-            _mv_current_304 = Ori.getMatCam(304);
+            _mv_current_300 = Ori.getMatCam(0);
+            _mv_current_301 = Ori.getMatCam(1);
+            _mv_current_302 = Ori.getMatCam(2);
+            _mv_current_303 = Ori.getMatCam(3);
+            _mv_current_304 = Ori.getMatCam(4);
 
          },
 
@@ -91,11 +91,11 @@ function (graphicEngine, THREE, Ori, Shader, PanoramicProvider) {
          // Initialize matrices using global rotation (21) and local for each cam
          initMatrices: function(){
              
-            mat300 = new THREE.Matrix4().multiplyMatrices(_mv_current_300,Ori.getProjCam(300));
-            mat301 = new THREE.Matrix4().multiplyMatrices(_mv_current_301,Ori.getProjCam(301));
-            mat302 = new THREE.Matrix4().multiplyMatrices(_mv_current_302,Ori.getProjCam(302));
-            mat303 = new THREE.Matrix4().multiplyMatrices(_mv_current_303,Ori.getProjCam(303));
-            mat304 = new THREE.Matrix4().multiplyMatrices(_mv_current_304,Ori.getProjCam(304));
+            mat300 = new THREE.Matrix4().multiplyMatrices(_mv_current_300,Ori.getProjCam(0));
+            mat301 = new THREE.Matrix4().multiplyMatrices(_mv_current_301,Ori.getProjCam(1));
+            mat302 = new THREE.Matrix4().multiplyMatrices(_mv_current_302,Ori.getProjCam(2));
+            mat303 = new THREE.Matrix4().multiplyMatrices(_mv_current_303,Ori.getProjCam(3));
+            mat304 = new THREE.Matrix4().multiplyMatrices(_mv_current_304,Ori.getProjCam(4));
             console.log("mat300mat300",mat300);
             tabMatMVP.push(mat300);
             tabMatMVP.push(mat301);
@@ -121,11 +121,11 @@ function (graphicEngine, THREE, Ori, Shader, PanoramicProvider) {
          // Init translation using cam pos in applanix ref and global rotation
          initTranslations: function(){
              
-             var translation300 = Ori.getSommet(300).clone().applyProjection( rot21.clone()); translation300.w = 1;
-             var translation301 = Ori.getSommet(301).clone().applyProjection( rot21.clone()); translation301.w = 1;
-             var translation302 = Ori.getSommet(302).clone().applyProjection( rot21.clone()); translation302.w = 1;
-             var translation303 = Ori.getSommet(303).clone().applyProjection( rot21.clone()); translation303.w = 1;
-             var translation304 = Ori.getSommet(304).clone().applyProjection( rot21.clone()); translation304.w = 1;
+             var translation300 = Ori.getSommet(0).clone().applyProjection( rot21.clone()); translation300.w = 1;
+             var translation301 = Ori.getSommet(1).clone().applyProjection( rot21.clone()); translation301.w = 1;
+             var translation302 = Ori.getSommet(2).clone().applyProjection( rot21.clone()); translation302.w = 1;
+             var translation303 = Ori.getSommet(3).clone().applyProjection( rot21.clone()); translation303.w = 1;
+             var translation304 = Ori.getSommet(4).clone().applyProjection( rot21.clone()); translation304.w = 1;
              
              tabTranslations.push(translation300);
              tabTranslations.push(translation301);
@@ -166,11 +166,11 @@ function (graphicEngine, THREE, Ori, Shader, PanoramicProvider) {
             var disth = 1.0/height;
             
             //var arrAllDistoandMax = Ori.getArrayDistortionAndR2AllCam();
-            var distoAndMax300 = Ori.getDistortionAndR2ForCamAsVec4(300);
-            var distoAndMax301 = Ori.getDistortionAndR2ForCamAsVec4(301);
-            var distoAndMax302 = Ori.getDistortionAndR2ForCamAsVec4(302);
-            var distoAndMax303 = Ori.getDistortionAndR2ForCamAsVec4(303);
-            var distoAndMax304 = Ori.getDistortionAndR2ForCamAsVec4(304);
+            var distoAndMax300 = Ori.getDistortionAndR2ForCamAsVec4(0);
+            var distoAndMax301 = Ori.getDistortionAndR2ForCamAsVec4(1);
+            var distoAndMax302 = Ori.getDistortionAndR2ForCamAsVec4(2);
+            var distoAndMax303 = Ori.getDistortionAndR2ForCamAsVec4(3);
+            var distoAndMax304 = Ori.getDistortionAndR2ForCamAsVec4(4);
             
             var wid = _mobileVersion == 1 ? 512:1024;
             
@@ -345,7 +345,7 @@ function (graphicEngine, THREE, Ori, Shader, PanoramicProvider) {
                 _shaderMat.uniforms['mvpp_current_'+num].value = tabMatrices[numImg];
             }
 
-            var translationPlusSom = translation.clone().add((Ori.getSommet(300+num).clone().applyProjection( rotation.clone()))); translationPlusSom.w = 1;
+            var translationPlusSom = translation.clone().add((Ori.getSommet(num).clone().applyProjection( rotation.clone()))); translationPlusSom.w = 1;
             tabTranslations[numImg] = translationPlusSom; 		
             tabMatrices[numImg] = (new THREE.Matrix4().multiplyMatrices( rotation.clone(),tabMatMVP[numImg - 5].clone()) ).transpose();
               
