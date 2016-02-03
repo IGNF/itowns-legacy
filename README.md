@@ -66,6 +66,13 @@ Now open [http://localhost:8000](http://localhost:8000) and enjoy !
 
 The application should be able to work without the need of a local database or PHP scripts. But you will still need to have a local server running like apache.
 
+### Licence
+
+iTowns V1 is dual-licenced under Cecill-B V1 and MIT.
+Incorporated libraries are published under their original licences.
+
+See [LICENSE.md](LICENSE.md) for more information.
+
 ### Roadmap items
 
 The following tasks are currently worked on :
