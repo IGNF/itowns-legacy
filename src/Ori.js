@@ -10,13 +10,12 @@
 define (['GraphicEngine','lib/three','Utils','Sensor','jquery', 'Config', 'PanoramicProvider'],
 function (graphicEngine, THREE, Utils, Sensor, $, Config, PanoramicProvider) {
                                               
-      // Intrinseque parameters
-      var sensors = []; // Contains all the sensors
+      //var sensors = []; // Contains all the sensors
 
       var Ori = {
            
           initiated:false, 
-                 
+          sensors:[],
           init: function(){
                 var that = this;
                 $.getJSON(PanoramicProvider.getMetaDataSensorURL(), function (data){
@@ -30,7 +29,7 @@ function (graphicEngine, THREE, Utils, Sensor, $, Config, PanoramicProvider) {
           
           handleDBData :function(data){
                 for (var i =0; i< data.length; ++i){  // For all DB sens info we create sensor object
-                    sensors.push(new Sensor(data[i]));
+                    this.sensors.push(new Sensor(data[i]));
                 }
                 this.initiated = true;
                 console.log('Orientation module is loaded');
@@ -73,10 +72,10 @@ function (graphicEngine, THREE, Utils, Sensor, $, Config, PanoramicProvider) {
 
         getBarycentreV2: function(){
             var sum = new THREE.Vector3(0,0,0);
-               for (var i =0; i< sensors.length; ++i){  // For all DB sens info we create sensor object
-                    sum = sum.add(sensors[i].position);
+               for (var i =0; i< this.sensors.length; ++i){  // For all DB sens info we create sensor object
+                    sum = sum.add(this.sensors[i].position);
                 }
-            return sum.divideScalar(sensors.length);
+            return sum.divideScalar(this.sensors.length);
 
         },
         
@@ -84,20 +83,20 @@ function (graphicEngine, THREE, Utils, Sensor, $, Config, PanoramicProvider) {
 
         // return 3rd degree polynomes for camera number in parameter
         getDistortionsPolynomesForCam: function(num){
-        return sensors[num].distortion;
+        return this.sensors[num].distortion;
         },
           
 
         getSommet: function(num){
-        return sensors[num].position;
+        return this.sensors[num].position;
         },
 
         getProjCam: function(num){
-        return sensors[num].projection;
+        return this.sensors[num].projection;
         },
 
         getMatCam: function(num){
-        return sensors[num].rotation;
+        return this.sensors[num].rotation;
         }
     };
      

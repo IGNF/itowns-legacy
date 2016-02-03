@@ -126,7 +126,7 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
 
                 var panoWithDirName = this.getDirectoryFromPanoName(targetPanoInfo.filename);
                 
-                if(ProjectiveTexturing.isInitiated()) ProjectiveTexturing.changePanoTextureAfterloading(panoWithDirName,128,50,posWithPivot,matRotation,1);
+                if(ProjectiveTexturing.isInitiated()) ProjectiveTexturing.changePanoTextureAfterloading(targetPanoInfo,matRotation);
 
 
             /************************************************************************************************************/
@@ -181,7 +181,7 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
                                                        sinTeta,0,cosTeta,0,
                                                        0,0,0,1);
 
-                ProjectiveTexturing.changePanoTextureAfterloading(targetPanoInfo.filename,128,50,posWithPivot,matRotation,0);
+                ProjectiveTexturing.changePanoTextureAfterloading(targetPanoInfo,matRotation);
              //   ProjectiveTexturing.changePanoTextureAfterloading(targetPanoInfo.filename,1024,75,posWithPivot,matRotation);
             /************************************************************************************************************/
 
@@ -250,7 +250,7 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
 
                 var panoWithDirName = this.getDirectoryFromPanoName(targetPanoInfo.filename);
                
-                if(ProjectiveTexturing.isInitiated()) ProjectiveTexturing.changePanoTextureAfterloading(panoWithDirName,128,50,posWithPivot,matRotation,1);
+                if(ProjectiveTexturing.isInitiated()) ProjectiveTexturing.changePanoTextureAfterloading(targetPanoInfo,matRotation);
 
 
                if(tab.length>0 && _lookNextPano){ // Then we look at the next pos
@@ -322,7 +322,7 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
 
                 var panoWithDirName = this.getDirectoryFromPanoName(targetPanoInfo.filename);
                
-               if(ProjectiveTexturing.isInitiated()) ProjectiveTexturing.changePanoTextureAfterloading(panoWithDirName,128,50,posWithPivot,matRotation,1);
+               if(ProjectiveTexturing.isInitiated()) ProjectiveTexturing.changePanoTextureAfterloading(targetPanoInfo,matRotation);
 
 
                if(tab.length>0 && _lookNextPano){ // Then we look at the next pos
@@ -409,8 +409,8 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
 
             var version = 2;
             //if(name.charAt(0) == 'P' || (name.charAt(0) == 'T' && name.charAt(1) == 'e'))
-            if(name.substr(0, 6) == 'Paris_' || name.substr(0, 2) == 'Te')
-                version = 1;
+            //if(name.substr(0, 6) == 'Paris_' || name.substr(0, 2) == 'Te')
+            //    version = 1;
 
             return version;
         },
@@ -420,8 +420,8 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
         getDirectoryFromPanoName: function(name){
 
              var dirName = name;
-             var datee = name.substr(name.indexOf('-')+1,6);
-             dirName = datee + "/" + name;
+             //var datee = name.substr(name.indexOf('-')+1,6);
+             //dirName = datee + "/" + name;
 
              return dirName;
          },
