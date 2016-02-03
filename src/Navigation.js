@@ -126,7 +126,7 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
 
                 var panoWithDirName = this.getDirectoryFromPanoName(targetPanoInfo.filename);
                 
-                if(ProjectiveTexturing.isInitiated()) ProjectiveTexturing.changePanoTextureAfterloading(targetPanoInfo,matRotation);
+                if(ProjectiveTexturing.isInitiated()) ProjectiveTexturing.changePanoTextureAfterloading(targetPanoInfo,posWithPivot,matRotation);
 
 
             /************************************************************************************************************/
@@ -181,7 +181,7 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
                                                        sinTeta,0,cosTeta,0,
                                                        0,0,0,1);
 
-                ProjectiveTexturing.changePanoTextureAfterloading(targetPanoInfo,matRotation);
+                ProjectiveTexturing.changePanoTextureAfterloading(targetPanoInfo,posWithPivot,matRotation);
              //   ProjectiveTexturing.changePanoTextureAfterloading(targetPanoInfo.filename,1024,75,posWithPivot,matRotation);
             /************************************************************************************************************/
 
@@ -250,7 +250,7 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
 
                 var panoWithDirName = this.getDirectoryFromPanoName(targetPanoInfo.filename);
                
-                if(ProjectiveTexturing.isInitiated()) ProjectiveTexturing.changePanoTextureAfterloading(targetPanoInfo,matRotation);
+                if(ProjectiveTexturing.isInitiated()) ProjectiveTexturing.changePanoTextureAfterloading(targetPanoInfo,posWithPivot,matRotation);
 
 
                if(tab.length>0 && _lookNextPano){ // Then we look at the next pos
@@ -322,7 +322,7 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
 
                 var panoWithDirName = this.getDirectoryFromPanoName(targetPanoInfo.filename);
                
-               if(ProjectiveTexturing.isInitiated()) ProjectiveTexturing.changePanoTextureAfterloading(targetPanoInfo,matRotation);
+               if(ProjectiveTexturing.isInitiated()) ProjectiveTexturing.changePanoTextureAfterloading(targetPanoInfo,posWithPivot,matRotation);
 
 
                if(tab.length>0 && _lookNextPano){ // Then we look at the next pos

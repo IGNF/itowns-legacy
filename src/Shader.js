@@ -140,7 +140,18 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
   
         "vec4 color = vec4(0.,0.,0.,0.);",
         "vec2 corrected0,corrected1,corrected2,corrected3,corrected4;",
+        "float width = 2048.0;",
+        "float height = 2048.0;",
+        "float cpps = 1042.178;",
+        "float lpps = 1020.435;",
+        "vec2 pps = vec2(cpps,lpps);",
+      // Function to correct coordinate using 3rd degree polynome and max
+      " vec2 correctDistortionAndCoord(vec4 dist, vec4 v_texcoord){",     
+      "      vec2 v = v_texcoord.xy/v_texcoord.w - pps;",
+      "      vec2 normCoord = v_texcoord.xy/(v_texcoord.w);",
+      "      return vec2(normCoord.x/width , 1. - normCoord.y/height); ",
 
+      "  }",
        " void main(void)",
        " {  ",
            " corrected0 = vec2(v_texcoord0.x,v_texcoord0.y);",

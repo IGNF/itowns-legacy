@@ -9,7 +9,7 @@
 define ('Sensor',['lib/three'], function (THREE) { 
 
     Sensor = function (infos){
-        alert(JSON.stringify(infos)); 
+        //alert(JSON.stringify(infos)); 
         this.infos = infos;
         this.position = new THREE.Vector3().fromArray( infos.position );
         this.rotation = new THREE.Matrix4().fromArray( infos.rotation );
@@ -18,7 +18,7 @@ define ('Sensor',['lib/three'], function (THREE) {
         this.distortion = new THREE.Vector3().fromArray(infos.distortion.poly357);
         this.orientation = infos.orientation;
      
-        alert(JSON.stringify(this));
+        //alert(JSON.stringify(this));
 
 
 
