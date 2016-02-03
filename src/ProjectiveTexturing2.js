@@ -35,14 +35,6 @@ function (graphicEngine, THREE, Ori, Shader, PanoramicProvider) {
         // New cameras
         var _mv_current_300,_mv_current_301,_mv_current_302,_mv_current_303,_mv_current_304;        
 
-
-        var proj_cam = new THREE.Matrix4(  1129.284,	0,	0.,	0.,
-                                           0.,        1129.284,	0.,	0.,
-                                           1042.178,  1020.435,	0.,	1.,
-                                           0.,          0.,     0.,	0.);
-                                           
-
-
         var rot21 = new THREE.Matrix4(	1,0,0,0,
                                         0,1,0,0,
                                         0,0,1,0,
@@ -178,8 +170,7 @@ function (graphicEngine, THREE, Ori, Shader, PanoramicProvider) {
             var suffixeImage = this.localImageFiles ? ".jpg" : ".jp2&WID="+wid/4+"&QLT="+qlt+"&CVT=JPEG";
             console.log("localImageFiles: ",this.localImageFiles);
             var uniforms5 = {
-                
-                
+                                
                     //disto_and_max_tab:{type: 'fv1', value: arrAllDistoandMax},
                     intrinsic300: {type:"v4",value:distoAndMax300},
                     intrinsic301: {type:"v4",value:distoAndMax301},

@@ -6,31 +6,29 @@
 */
 
 
-define ('Sensor',['lib/three'], function (THREE) { 
+define ('Sensor',['lib/three','Utils'], function (THREE,Utils) { 
 
     Sensor = function (infos){
-        alert(JSON.stringify(infos)); 
         this.infos = infos;
         this.position = new THREE.Vector3().fromArray( infos.position );
-        this.rotation = new THREE.Matrix4().fromArray( infos.rotation );
-        this.projection = new THREE.Matrix4().fromArray( infos.projection );
+        this.rotation = new THREE.Matrix4().fromArray( infos.rotation ).transpose();
+        this.projection = new THREE.Matrix4().fromArray( infos.projection ).transpose();
         this.pps = new THREE.Vector2().fromArray(infos.distortion.pps);
-        this.distortion = new THREE.Vector3().fromArray(infos.distortion.poly357);
+        var disto = new THREE.Vector3().fromArray(infos.distortion.poly357);
+        var r2max = this.getDistortion_r2max(disto);
+        this.distortion = new THREE.Vector4(disto.x,disto.y,disto.z,r2max);
+
+        // change conventions
         this.orientation = infos.orientation;
-     
-        alert(JSON.stringify(this));
-
-
-
-        this._itownsWay =    new THREE.Matrix4( 0, 1, 0, 0,
-                                               0, 0,-1, 0,
-                                               1, 0, 0, 0,
-                                               0, 0, 0, 1 );
+        this._itownsWay = new THREE.Matrix4( 0, 1, 0, 0,
+                                             0, 0,-1, 0,
+                                             1, 0, 0, 0,
+                                             0, 0, 0, 1 );
                                            
-        this.Photogram_JMM    = new THREE.Matrix4( 0, 0,-1, 0,
-                                                 -1, 0, 0, 0,
-                                                  0, 1, 0, 0,
-                                                  0, 0, 0, 1);
+        this.Photogram_JMM = new THREE.Matrix4( 0, 0,-1, 0,
+                                               -1, 0, 0, 0,
+                                                0, 1, 0, 0,
+                                                0, 0, 0, 1);
                                                
         this.photgramme_image = new THREE.Matrix4( 1, 0, 0, 0,
                                                   0,-1, 0, 0,
@@ -39,8 +37,20 @@ define ('Sensor',['lib/three'], function (THREE) {
 
         this.rotation = this.getMatOrientationTotal();
         this.position.applyProjection(this._itownsWay);
+     };
 
-     };   
+
+     Sensor.prototype.getDistortion_r2max = function(disto){
+            // returned the square of the smallest positive root of the derivativeof the distortion polynomial
+            // which tells where the distortion might no longer be bijective.
+            var roots = Utils.cardan_cubic_roots(7*disto.z,5*disto.y,3*disto.x,1);
+            var imax=-1;
+                for (var i in roots)
+                    if(roots[i]>0 && (imax==-1 || roots[imax]>roots[i])) imax = i;
+            if(imax==-1) return Infinity; // no roots : all is valid !
+            return roots[imax];
+        },
+        
 
      Sensor.prototype.getMatOrientationTotal =
        function(){
@@ -56,7 +66,6 @@ define ('Sensor',['lib/three'], function (THREE) {
         
       }
       
-              // 4 different ori of the capteur
     Sensor.prototype.getMatOrientationCapteur =  function(){
          
             var ori0 = new THREE.Matrix4( 0,-1, 0, 0,
@@ -64,18 +73,15 @@ define ('Sensor',['lib/three'], function (THREE) {
                                           0, 0, 1, 0,
                                           0, 0, 0, 1);
 
-
             var ori1 = new THREE.Matrix4( 0, 1, 0, 0,
                                          -1, 0, 0, 0,
                                           0, 0, 1, 0,
                                           0, 0, 0, 1);
 
-
             var ori2 = new THREE.Matrix4(-1, 0, 0, 0,
                                           0,-1, 0, 0,
                                           0, 0, 1, 0,
                                           0, 0, 0, 1);
-
 
             var ori3 = new THREE.Matrix4( 1, 0, 0, 0,
                                           0, 1, 0, 0,
@@ -83,35 +89,12 @@ define ('Sensor',['lib/three'], function (THREE) {
                                           0, 0, 0, 1);
 
             switch(this.orientation){
-
                 case 0: return ori0;
                 case 1: return ori1;
                 case 2: return ori2; 
                 case 3: return ori3; 
             }                              
-
-         
        }
-
-
-
-
-/*          computeMatOriFromHeadingPitchRoll: function(heading,pitch,roll){
-              //  console.log(heading,pitch,roll);
-                heading = parseFloat(heading) / 180 * Math.PI;  // Deg to Rad // Axe Y
-                pitch = parseFloat(pitch)/ 180 * Math.PI;  // Deg to Rad // axe X
-                roll = parseFloat(roll)/ 180 * Math.PI;  // Deg to Rad   // axe Z
-                // With quaternion  //set rotation.order to "YXZ", which is equivalent to "heading, pitch, and roll"
-                var q = new THREE.Quaternion();
-                q.setFromEuler(new THREE.Euler(-pitch,heading,-roll,'YXZ'),true);
-                var matTotale = new THREE.Matrix4().makeRotationFromQuaternion(q);//qRoll);//quater);
-                //console.log('quater',qRoll);
-                return matTotale;//.transpose(); //mat2 //matRotation;
-          },
-*/
-
-     
     return Sensor
-
 
 });
