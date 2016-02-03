@@ -116,10 +116,6 @@
            checkStereopolisVersionFromPosition: function(){
      
             _configStereo = 1; // New camera system 
-            var name = this.panoInfo.filename;
-            if(name.substr(0, 6) == 'Paris_' || name.substr(0, 2) == 'Te')
-                _configStereo = 0;  // Old Stereopolis
-
 
            },
            
