@@ -53,14 +53,12 @@ You have to clone the iTowns and sample data repositories, start a webserver, an
 Open a command line and run :
 
 ```
-git clone https://github.com/iTowns/itowns.git itowns
+git clone https://github.com/iTowns/itowns.git
 git clone https://github.com/iTowns/itowns-sample-data.git
-cd itowns
-ln -s ../itowns-sample-data ./data
 python -m SimpleHTTPServer
 ```
 
-Now open [http://localhost:8000](http://localhost:8000) and enjoy !
+Now open [http://localhost:8000/itowns/](http://localhost:8000/itowns/) and enjoy !
 
 ### Notes
 
