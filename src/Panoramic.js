@@ -18,7 +18,7 @@ define (['lib/three', 'Ori','MeshManager', 'PanoramicProvider', 'lib/when', 'Nav
     _initiated = false,
     _visibility = true,
     _panoInfo = {
-        filename:'',
+        url_format:'',
         easting:0, 
         northing:0,
         altitude:0, 
@@ -27,7 +27,8 @@ define (['lib/three', 'Ori','MeshManager', 'PanoramicProvider', 'lib/when', 'Nav
         pan_xml_roll_pp:0,
         pan_time_utc:'',
         near_address_num:0,
-        near_address_name:''
+        near_address_name:'',
+        id_platform:''
     },
     _dataURL = null,
     _decalageUTC = 15;
@@ -80,7 +81,8 @@ define (['lib/three', 'Ori','MeshManager', 'PanoramicProvider', 'lib/when', 'Nav
         setInfos: function(url,infos){
   
             _url = url || '';
-            _panoInfo.filename = infos.filename || '';
+            _panoInfo.url_format = infos.url_format || '';
+            _panoInfo.id_platform = infos.id_platform || '';
             _panoInfo.easting = parseFloat(infos.easting) || 0;
             _panoInfo.northing = parseFloat(infos.northing) || 0;                            
             _panoInfo.altitude = parseFloat(infos.altitude) || 0;
