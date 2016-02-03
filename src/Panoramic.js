@@ -219,7 +219,6 @@ define (['lib/three', 'Ori','MeshManager', 'PanoramicProvider', 'lib/when', 'Nav
         
         // get date frome name (not db pan_date)
         getPanoDate: function(){
-
             var datee = _panoInfo.filename.substr(_panoInfo.filename.indexOf('-')+1,6);  // ex:080422
             var dateNewFormat = "20"+ datee.substr(0,2)+ "_"+ datee.substr(2,2) + "_"+ datee.substr(4,2);
             //ex: 2008_04_22

@@ -78,6 +78,97 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
              },
              
              
+
+    shaderTextureProjectiveVS : [
+        
+        "#ifdef GL_ES",
+        "precision  highp float;",
+        "#endif",
+
+        // Those uniforms are 
+        // ModelView * Projection * rotation of the rigid sys (Stereopolis)
+
+        "uniform mat4 mvpp0;",
+        "uniform mat4 mvpp1;",
+        "uniform mat4 mvpp2;",
+        "uniform mat4 mvpp3;",
+        "uniform mat4 mvpp4;",
+
+        "uniform vec4 translation0;",
+        "uniform vec4 translation1;",
+        "uniform vec4 translation2;",
+        "uniform vec4 translation3;",
+        "uniform vec4 translation4;",
+
+        "varying vec4 v_texcoord0;",
+        "varying vec4 v_texcoord1;",
+        "varying vec4 v_texcoord2;",
+        "varying vec4 v_texcoord3;",
+        "varying vec4 v_texcoord4;",
+
+        "vec4 pos;",
+
+        "void main() {",
+        "    pos =  vec4(position,1.);",
+        "        v_texcoord0 =  mvpp0 * (pos- translation0);",
+        "        v_texcoord1 =  mvpp1 * (pos- translation1);",
+        "        v_texcoord2 =  mvpp2 * (pos- translation2);",
+        "        v_texcoord3 =  mvpp3 * (pos- translation3);",
+        "        v_texcoord4 =  mvpp4 * (pos- translation4);",
+        "    gl_Position  =  projectionMatrix *  modelViewMatrix * pos;",
+        "}"
+    ],
+    
+     shaderTextureProjectiveFS : [
+         
+      
+        "#ifdef GL_ES",
+        "precision  highp float;",
+        "#endif",
+
+        "uniform sampler2D   texture0;",
+        "uniform sampler2D   texture1;",
+        "uniform sampler2D   texture2;",
+        "uniform sampler2D   texture3;",
+        "uniform sampler2D   texture4;",
+      
+        "varying vec4 v_texcoord0;",
+        "varying vec4 v_texcoord1;",
+        "varying vec4 v_texcoord2;",
+        "varying vec4 v_texcoord3;",
+        "varying vec4 v_texcoord4;",
+  
+        "vec4 color = vec4(0.,0.,0.,0.);",
+        "vec2 corrected0,corrected1,corrected2,corrected3,corrected4;",
+
+       " void main(void)",
+       " {  ",
+           " corrected0 = vec2(v_texcoord0.x,v_texcoord0.y);",
+           " corrected1 = vec2(v_texcoord1.x,v_texcoord1.y);",
+           " corrected2 = vec2(v_texcoord2.x,v_texcoord2.y);",
+           " corrected3 = vec2(v_texcoord3.x,v_texcoord2.y);",
+           " corrected4 = vec2(v_texcoord4.x,v_texcoord2.y);",
+
+          "  if ((corrected0.x>0. && corrected0.x<1. && corrected0.y>0. && corrected0.y<1.) && v_texcoord0.w>0.){",
+          "      color = texture2D(texture0,corrected0);",
+          "  }else",
+          "  if ((corrected1.x>0. && corrected1.x<1. && corrected1.y>0. && corrected1.y<1.) && v_texcoord1.w>0.){",
+          "      color = texture2D(texture1,corrected1);",
+          "  }else",
+          "  if ((corrected2.x>0. && corrected2.x<1. && corrected2.y>0. && corrected2.y<1.) && v_texcoord2.w>0.){",
+          "      color = texture2D(texture2,corrected2);",
+          "  }else",
+          "  if ((corrected3.x>0. && corrected3.x<1. && corrected3.y>0. && corrected3.y<1.) && v_texcoord3.w>0.){",
+          "      color = texture2D(texture3,corrected3);",
+          "  }else",
+          "  if ((corrected4.x>0. && corrected4.x<1. && corrected4.y>0. && corrected4.y<1.) && v_texcoord4.w>0.){",
+          "      color = texture2D(texture4,corrected4);",
+          "  }",
+          "  color.a = 1.0; ",
+          "  gl_FragColor = color; ",
+    "} "         
+        ],
+    
              
     shaderTextureProjective2VS : [
         

@@ -1,7 +1,7 @@
 
 
-    define (['GraphicEngine','jquery', 'Config', 'lib/three','Utils','ProjectiveTexturing2','Ori','TileTexture','Draw','CVML','Cartography'],
-        function(gfxEngine, $, Config, THREE, Utils,  ProjectiveTexturing2, Ori, TileTexture, Draw, CVML) {
+    define (['GraphicEngine','jquery', 'Config', 'lib/three','Utils','ProjectiveTexturing','Ori','TileTexture','Draw','CVML','Cartography'],
+        function(gfxEngine, $, Config, THREE, Utils,  ProjectiveTexturing, Ori, TileTexture, Draw, CVML) {
 
 
 
@@ -117,8 +117,8 @@
      
             _configStereo = 1; // New camera system 
             var name = this.panoInfo.filename;
-            if(name.substr(0, 6) == 'Paris_' || name.substr(0, 2) == 'Te')
-                _configStereo = 0;  // Old Stereopolis
+            //if(name.substr(0, 6) == 'Paris_' || name.substr(0, 2) == 'Te')
+            //    _configStereo = 0;  // Old Stereopolis
 
 
            },
@@ -495,9 +495,9 @@
                 _currentMeshForClickAndGo  = new THREE.Mesh(geometryClickToGo,mat);
 
                 // 5 cameras configuration
-                if(!ProjectiveTexturing2.isInitiated()){
+                if(!ProjectiveTexturing.isInitiated()){
                     
-                    console.log('ProjectiveTexturing2 init ');
+                    console.log('ProjectiveTexturing init ');
                     var mat = new THREE.MeshBasicMaterial({color:0xff00ff});
                     var mesh  = new THREE.Mesh(_geometry,mat);
                     mat.side = THREE.DoubleSide;
@@ -510,8 +510,8 @@
                                         this.panoInfo.pan_xml_roll_pp
                                     );
 
-                    ProjectiveTexturing2.init(matRotation);
-                    _projectiveMaterial = ProjectiveTexturing2.createShaderForImage(this.panoInfo.filename,50);
+                    ProjectiveTexturing.init();
+                    _projectiveMaterial = ProjectiveTexturing.createShaderMat();
                     mesh.material = _projectiveMaterial;
                     mesh.material.side = THREE.DoubleSide;  
                     mesh.material.transparent = false;
@@ -521,10 +521,10 @@
                 }else {
                     
                     //remove older rge in scene
-                    console.log('ProjectiveTexturing2  ');
+                    console.log('ProjectiveTexturing  ');
                     gfxEngine.removeFromScene(_currentObject);  console.log('remove old mesh');
                    // var mesh  = new THREE.Mesh(_geometry, _projectiveMaterial);
-                    var mesh  = new THREE.Mesh(_geometry, ProjectiveTexturing2.getShaderMat());
+                    var mesh  = new THREE.Mesh(_geometry, ProjectiveTexturing.getShaderMat());
                     mesh.material.side = THREE.DoubleSide;  
                     mesh.material.transparent = false;
                     mesh.name = "RGE";
@@ -589,7 +589,7 @@
                 _geometry.computeFaceNormals();  // WARNING : VERY IMPORTANT WHILE WORKING WITH RAY CASTING ON CUSTOM MESH
                
                
-                 if(!ProjectiveTexturing2.isInitiated()){
+                 if(!ProjectiveTexturing.isInitiated()){
 
                     var mat = new THREE.MeshBasicMaterial({color:0xff00ff});
                     var mesh  = new THREE.Mesh(_geometry,mat);
@@ -597,8 +597,8 @@
                     mesh.name = "RGE";
                     _currentObject = mesh;
 
-                    ProjectiveTexturing2.init(matRot);
-                    _projectiveMaterial = ProjectiveTexturing2.createShaderForImage(this.panoInfo.filename,50);
+                    ProjectiveTexturing.init();
+                    _projectiveMaterial = ProjectiveTexturing.createShaderMat(this.panoInfo.filename,50);
                     mesh.material = _projectiveMaterial;
                     mesh.material.side = THREE.DoubleSide;  // SEE IF BETTER TO HAVE ANOTHER MESH (CLONE) TO TEXTURE SIMPLE SIDE
                     mesh.material.transparent = true;
@@ -1108,15 +1108,15 @@
             
             tweenGeneralOpacityUp: function(){
                 console.log("tweenGeneralOpacityUp");
-                if(ProjectiveTexturing2.isInitiated()){
-                    ProjectiveTexturing2.setGeneralOpacity(0);
-                    ProjectiveTexturing2.tweenGeneralOpacityUp();
+                if(ProjectiveTexturing.isInitiated()){
+                    ProjectiveTexturing.setGeneralOpacity(0);
+                    ProjectiveTexturing.tweenGeneralOpacityUp();
                 }
             },
            
             setFogValue: function(v){
                
-                if(ProjectiveTexturing2.isInitiated()) ProjectiveTexturing2.setFogValue(v);
+                if(ProjectiveTexturing.isInitiated()) ProjectiveTexturing.setFogValue(v);
             },
            
             setRoadOn: function(b){

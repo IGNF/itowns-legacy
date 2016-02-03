@@ -1,5 +1,5 @@
-define (['lib/three', 'GraphicEngine', 'RequestManager', 'Config', 'Utils',  'Panoramic', 'PanoramicProvider', 'Dispatcher','ProjectiveTexturing2','MeshManager', 'Ori', 'Draw', 'Cartography3D', 'lib/when'],
-function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicProvider, Dispatcher, ProjectiveTexturing2, MeshManager,  Ori, Draw, Cartography3D, when)
+define (['lib/three', 'GraphicEngine', 'RequestManager', 'Config', 'Utils',  'Panoramic', 'PanoramicProvider', 'Dispatcher','ProjectiveTexturing','MeshManager', 'Ori', 'Draw', 'Cartography3D', 'lib/when'],
+function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicProvider, Dispatcher, ProjectiveTexturing, MeshManager,  Ori, Draw, Cartography3D, when)
 {
 
     //***************************** PRIVATE MEMBERS OF MODULE ************************************************/
@@ -126,7 +126,7 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
 
                 var panoWithDirName = this.getDirectoryFromPanoName(targetPanoInfo.filename);
                 
-                if(ProjectiveTexturing2.isInitiated()) ProjectiveTexturing2.changePanoTextureAfterloading(panoWithDirName,128,50,posWithPivot,matRotation,1);
+                if(ProjectiveTexturing.isInitiated()) ProjectiveTexturing.changePanoTextureAfterloading(panoWithDirName,128,50,posWithPivot,matRotation,1);
 
 
             /************************************************************************************************************/
@@ -181,7 +181,7 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
                                                        sinTeta,0,cosTeta,0,
                                                        0,0,0,1);
 
-                ProjectiveTexturing2.changePanoTextureAfterloading(targetPanoInfo.filename,128,50,posWithPivot,matRotation,0);
+                ProjectiveTexturing.changePanoTextureAfterloading(targetPanoInfo.filename,128,50,posWithPivot,matRotation,0);
              //   ProjectiveTexturing.changePanoTextureAfterloading(targetPanoInfo.filename,1024,75,posWithPivot,matRotation);
             /************************************************************************************************************/
 
@@ -250,7 +250,7 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
 
                 var panoWithDirName = this.getDirectoryFromPanoName(targetPanoInfo.filename);
                
-                if(ProjectiveTexturing2.isInitiated()) ProjectiveTexturing2.changePanoTextureAfterloading(panoWithDirName,128,50,posWithPivot,matRotation,1);
+                if(ProjectiveTexturing.isInitiated()) ProjectiveTexturing.changePanoTextureAfterloading(panoWithDirName,128,50,posWithPivot,matRotation,1);
 
 
                if(tab.length>0 && _lookNextPano){ // Then we look at the next pos
@@ -322,7 +322,7 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
 
                 var panoWithDirName = this.getDirectoryFromPanoName(targetPanoInfo.filename);
                
-               if(ProjectiveTexturing2.isInitiated()) ProjectiveTexturing2.changePanoTextureAfterloading(panoWithDirName,128,50,posWithPivot,matRotation,1);
+               if(ProjectiveTexturing.isInitiated()) ProjectiveTexturing.changePanoTextureAfterloading(panoWithDirName,128,50,posWithPivot,matRotation,1);
 
 
                if(tab.length>0 && _lookNextPano){ // Then we look at the next pos
