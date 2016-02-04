@@ -1,5 +1,5 @@
-define (['lib/three', 'GraphicEngine', 'RequestManager', 'Config', 'Utils',  'Panoramic', 'PanoramicProvider', 'Dispatcher','ProjectiveTexturing2','MeshManager', 'Ori', 'Draw', 'Cartography3D', 'lib/when'],
-function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicProvider, Dispatcher, ProjectiveTexturing2, MeshManager,  Ori, Draw, Cartography3D, when)
+define (['lib/three', 'GraphicEngine', 'RequestManager', 'Config', 'Utils',  'Panoramic', 'PanoramicProvider', 'Dispatcher','ProjectiveTexturing','MeshManager', 'Ori', 'Draw', 'Cartography3D', 'lib/when'],
+function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicProvider, Dispatcher, ProjectiveTexturing, MeshManager,  Ori, Draw, Cartography3D, when)
 {
 
     //***************************** PRIVATE MEMBERS OF MODULE ************************************************/
@@ -114,19 +114,15 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
                                         targetPanoInfo.pan_xml_roll_pp
                                     );
 
-                var cameraVersion = this.getCameraVersionFromPanoName(targetPanoInfo.filename);
-                if (cameraVersion == 2)
-                    _barycentre = Ori.getBarycentreV2();
-                else
-                    _barycentre = Ori.getBarycentreV1();  // For Paris.. and Terramob (old chantiers)
-
+                _barycentre = Ori.getPosition();
+                
                 _barycentre.applyProjection(matRotation);
 
                 gfxEngine.translateCameraSmoothly(posWithPivot.x + _barycentre.x, posWithPivot.y +_barycentre.y + altiOption, posWithPivot.z+ _barycentre.z);
 
                 var panoWithDirName = this.getDirectoryFromPanoName(targetPanoInfo.filename);
                 
-                if(ProjectiveTexturing2.isInitiated()) ProjectiveTexturing2.changePanoTextureAfterloading(panoWithDirName,128,50,posWithPivot,matRotation,1);
+                if(ProjectiveTexturing.isInitiated()) ProjectiveTexturing.changePanoTextureAfterloading(targetPanoInfo,posWithPivot,matRotation);
 
 
             /************************************************************************************************************/
@@ -181,7 +177,7 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
                                                        sinTeta,0,cosTeta,0,
                                                        0,0,0,1);
 
-                ProjectiveTexturing2.changePanoTextureAfterloading(targetPanoInfo.filename,128,50,posWithPivot,matRotation,0);
+                ProjectiveTexturing.changePanoTextureAfterloading(targetPanoInfo,posWithPivot,matRotation);
              //   ProjectiveTexturing.changePanoTextureAfterloading(targetPanoInfo.filename,1024,75,posWithPivot,matRotation);
             /************************************************************************************************************/
 
@@ -250,7 +246,7 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
 
                 var panoWithDirName = this.getDirectoryFromPanoName(targetPanoInfo.filename);
                
-                if(ProjectiveTexturing2.isInitiated()) ProjectiveTexturing2.changePanoTextureAfterloading(panoWithDirName,128,50,posWithPivot,matRotation,1);
+                if(ProjectiveTexturing.isInitiated()) ProjectiveTexturing.changePanoTextureAfterloading(targetPanoInfo,posWithPivot,matRotation);
 
 
                if(tab.length>0 && _lookNextPano){ // Then we look at the next pos
@@ -310,11 +306,7 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
                                     );
 
 
-                var cameraVersion = this.getCameraVersionFromPanoName(targetPanoInfo.filename);
-                if (cameraVersion == 2)
-                    _barycentre = Ori.getBarycentreV2();
-                else
-                    _barycentre = Ori.getBarycentreV1();  // For Paris.. and Terramob (old chantiers)
+                _barycentre = Ori.getPosition();  // For Paris.. and Terramob (old chantiers)
 
                 _barycentre.applyProjection(matRotation);
 
@@ -322,7 +314,7 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
 
                 var panoWithDirName = this.getDirectoryFromPanoName(targetPanoInfo.filename);
                
-               if(ProjectiveTexturing2.isInitiated()) ProjectiveTexturing2.changePanoTextureAfterloading(panoWithDirName,128,50,posWithPivot,matRotation,1);
+               if(ProjectiveTexturing.isInitiated()) ProjectiveTexturing.changePanoTextureAfterloading(targetPanoInfo,posWithPivot,matRotation);
 
 
                if(tab.length>0 && _lookNextPano){ // Then we look at the next pos
@@ -409,8 +401,8 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
 
             var version = 2;
             //if(name.charAt(0) == 'P' || (name.charAt(0) == 'T' && name.charAt(1) == 'e'))
-            if(name.substr(0, 6) == 'Paris_' || name.substr(0, 2) == 'Te')
-                version = 1;
+            //if(name.substr(0, 6) == 'Paris_' || name.substr(0, 2) == 'Te')
+            //    version = 1;
 
             return version;
         },
@@ -420,8 +412,8 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
         getDirectoryFromPanoName: function(name){
 
              var dirName = name;
-             var datee = name.substr(name.indexOf('-')+1,6);
-             dirName = datee + "/" + name;
+             //var datee = name.substr(name.indexOf('-')+1,6);
+             //dirName = datee + "/" + name;
 
              return dirName;
          },

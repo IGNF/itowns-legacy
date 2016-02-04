@@ -35,14 +35,6 @@ function (graphicEngine, THREE, Ori, Shader, PanoramicProvider) {
         // New cameras
         var _mv_current_300,_mv_current_301,_mv_current_302,_mv_current_303,_mv_current_304;        
 
-
-        var proj_cam = new THREE.Matrix4(  1129.284,	0,	0.,	0.,
-                                           0.,        1129.284,	0.,	0.,
-                                           1042.178,  1020.435,	0.,	1.,
-                                           0.,          0.,     0.,	0.);
-                                           
-
-
         var rot21 = new THREE.Matrix4(	1,0,0,0,
                                         0,1,0,0,
                                         0,0,1,0,
@@ -79,11 +71,11 @@ function (graphicEngine, THREE, Ori, Shader, PanoramicProvider) {
          initOrientationCameraMatrices: function(){
             
             // New cameras
-            _mv_current_300 = Ori.getMatCam(300);
-            _mv_current_301 = Ori.getMatCam(301);
-            _mv_current_302 = Ori.getMatCam(302);
-            _mv_current_303 = Ori.getMatCam(303);
-            _mv_current_304 = Ori.getMatCam(304);
+            _mv_current_300 = Ori.getMatCam(0);
+            _mv_current_301 = Ori.getMatCam(1);
+            _mv_current_302 = Ori.getMatCam(2);
+            _mv_current_303 = Ori.getMatCam(3);
+            _mv_current_304 = Ori.getMatCam(4);
 
          },
 
@@ -91,18 +83,24 @@ function (graphicEngine, THREE, Ori, Shader, PanoramicProvider) {
          // Initialize matrices using global rotation (21) and local for each cam
          initMatrices: function(){
              
-            mat300 = new THREE.Matrix4().multiplyMatrices(_mv_current_300,Ori.getProjCam(300));
-            mat301 = new THREE.Matrix4().multiplyMatrices(_mv_current_301,Ori.getProjCam(301));
-            mat302 = new THREE.Matrix4().multiplyMatrices(_mv_current_302,Ori.getProjCam(302));
-            mat303 = new THREE.Matrix4().multiplyMatrices(_mv_current_303,Ori.getProjCam(303));
-            mat304 = new THREE.Matrix4().multiplyMatrices(_mv_current_304,Ori.getProjCam(304));
-            console.log("mat300mat300",mat300);
+            mat300 = new THREE.Matrix4().multiplyMatrices(_mv_current_300,Ori.getProjCam(0));
+            mat301 = new THREE.Matrix4().multiplyMatrices(_mv_current_301,Ori.getProjCam(1));
+            mat302 = new THREE.Matrix4().multiplyMatrices(_mv_current_302,Ori.getProjCam(2));
+            mat303 = new THREE.Matrix4().multiplyMatrices(_mv_current_303,Ori.getProjCam(3));
+            mat304 = new THREE.Matrix4().multiplyMatrices(_mv_current_304,Ori.getProjCam(4));
+
             tabMatMVP.push(mat300);
             tabMatMVP.push(mat301);
             tabMatMVP.push(mat302);
             tabMatMVP.push(mat303);
             tabMatMVP.push(mat304);
-            
+
+            console.log(mat300)
+            console.log(mat301)
+            console.log(mat302)
+            console.log(mat303)
+            console.log(mat304)
+
             tabMatrices.push( (new THREE.Matrix4().multiplyMatrices( rot21.clone(),mat300.clone() )).transpose() );//0
             tabMatrices.push( (new THREE.Matrix4().multiplyMatrices( rot21.clone(),mat301.clone() )).transpose() );//1
             tabMatrices.push( (new THREE.Matrix4().multiplyMatrices( rot21.clone(),mat302.clone() )).transpose() );
@@ -115,17 +113,23 @@ function (graphicEngine, THREE, Ori, Shader, PanoramicProvider) {
             tabMatrices.push( (new THREE.Matrix4().multiplyMatrices( rot21.clone(),mat303.clone() )).transpose() );
             tabMatrices.push( (new THREE.Matrix4().multiplyMatrices( rot21.clone(),mat304.clone() )).transpose() );
 
+            console.log(rot21);
+            console.log(tabMatrices[0]);
+            console.log(tabMatrices[1]);
+            console.log(tabMatrices[2]);
+            console.log(tabMatrices[3]);
+            console.log(tabMatrices[4]);
          },
          
          
          // Init translation using cam pos in applanix ref and global rotation
          initTranslations: function(){
              
-             var translation300 = Ori.getSommet(300).clone().applyProjection( rot21.clone()); translation300.w = 1;
-             var translation301 = Ori.getSommet(301).clone().applyProjection( rot21.clone()); translation301.w = 1;
-             var translation302 = Ori.getSommet(302).clone().applyProjection( rot21.clone()); translation302.w = 1;
-             var translation303 = Ori.getSommet(303).clone().applyProjection( rot21.clone()); translation303.w = 1;
-             var translation304 = Ori.getSommet(304).clone().applyProjection( rot21.clone()); translation304.w = 1;
+             var translation300 = Ori.getSommet(0).clone().applyProjection( rot21.clone()); translation300.w = 1;
+             var translation301 = Ori.getSommet(1).clone().applyProjection( rot21.clone()); translation301.w = 1;
+             var translation302 = Ori.getSommet(2).clone().applyProjection( rot21.clone()); translation302.w = 1;
+             var translation303 = Ori.getSommet(3).clone().applyProjection( rot21.clone()); translation303.w = 1;
+             var translation304 = Ori.getSommet(4).clone().applyProjection( rot21.clone()); translation304.w = 1;
              
              tabTranslations.push(translation300);
              tabTranslations.push(translation301);
@@ -165,12 +169,17 @@ function (graphicEngine, THREE, Ori, Shader, PanoramicProvider) {
             var distw = 1.0/width;
             var disth = 1.0/height;
             
-            //var arrAllDistoandMax = Ori.getArrayDistortionAndR2AllCam();
-            var distoAndMax300 = Ori.getDistortionAndR2ForCamAsVec4(300);
-            var distoAndMax301 = Ori.getDistortionAndR2ForCamAsVec4(301);
-            var distoAndMax302 = Ori.getDistortionAndR2ForCamAsVec4(302);
-            var distoAndMax303 = Ori.getDistortionAndR2ForCamAsVec4(303);
-            var distoAndMax304 = Ori.getDistortionAndR2ForCamAsVec4(304);
+            var distoAndMax300 = Ori.getDistortion(0);
+            var distoAndMax301 = Ori.getDistortion(1);
+            var distoAndMax302 = Ori.getDistortion(2);
+            var distoAndMax303 = Ori.getDistortion(3);
+            var distoAndMax304 = Ori.getDistortion(4);
+            
+            var mask300 = Ori.getMask(0);
+            var mask301 = Ori.getMask(1);
+            var mask302 = Ori.getMask(2);
+            var mask303 = Ori.getMask(3);
+            var mask304 = Ori.getMask(4);
             
             var wid = _mobileVersion == 1 ? 512:1024;
             
@@ -178,8 +187,7 @@ function (graphicEngine, THREE, Ori, Shader, PanoramicProvider) {
             var suffixeImage = this.localImageFiles ? ".jpg" : ".jp2&WID="+wid/4+"&QLT="+qlt+"&CVT=JPEG";
             console.log("localImageFiles: ",this.localImageFiles);
             var uniforms5 = {
-                
-                
+                                
                     //disto_and_max_tab:{type: 'fv1', value: arrAllDistoandMax},
                     intrinsic300: {type:"v4",value:distoAndMax300},
                     intrinsic301: {type:"v4",value:distoAndMax301},
@@ -273,17 +281,30 @@ function (graphicEngine, THREE, Ori, Shader, PanoramicProvider) {
                             value: THREE.ImageUtils.loadTexture(urlImage+date+imgUrl.replace(pat,"-"+'304'+"-")+suffixeImage) 
                     },
                     
-                    textureFrontMask: {
+                    textureMask0: {
                             type: 't',
-                            value: THREE.ImageUtils.loadTexture("images/frontMask3.png")
+                            value: mask300
                     },
-                    textureBackMask: {
+                    textureMask1: {
                             type: 't',
-                            value: THREE.ImageUtils.loadTexture("images/backMask.png")
+                            value: mask301
+                    },
+                    textureMask2: {
+                            type: 't',
+                            value: mask302
+                    },
+                    textureMask3: {
+                            type: 't',
+                            value: mask303
+                    },
+                    textureMask4: {
+                            type: 't',
+                            value: mask304
                     }
-
             };
             
+
+
             var gl =  graphicEngine.getRenderer().getContext();
             var nbVaryingVec = gl.getParameter(gl.MAX_VARYING_VECTORS);
             console.log("Max Varying Vector on this machine:", nbVaryingVec);  
@@ -302,7 +323,7 @@ function (graphicEngine, THREE, Ori, Shader, PanoramicProvider) {
             this.tweenAllIndiceTimes();
             
             // Add TO update images resolution and center position of proj
-            var vecTrans = Ori.getBarycentreV2(); 
+            var vecTrans = Ori.getPosition(); 
             vecTrans.applyProjection(rot21);
             this.changePanoTextureAfterloading(date+imgUrl,128,50,new THREE.Vector4(0.,0.,0.,1.),rot21,1);
             graphicEngine.translateCameraSmoothly(vecTrans.x,vecTrans.y,vecTrans.z);
@@ -316,7 +337,7 @@ function (graphicEngine, THREE, Ori, Shader, PanoramicProvider) {
              this.imgName = imgName;
              this.nbL2Loaded = 0;
              //require("Cartography3D").tweenGeneralOpacity();
-                          
+
              this.chargeOneImageCam(imgName,'texture1',1,wid,qlt,translation,rotation,6,nbLevel);
              this.chargeOneImageCam(imgName,'texture2',2,wid,qlt,translation,rotation,7,nbLevel);
              this.chargeOneImageCam(imgName,'texture3',3,wid,qlt,translation,rotation,8,nbLevel);
@@ -345,10 +366,13 @@ function (graphicEngine, THREE, Ori, Shader, PanoramicProvider) {
                 _shaderMat.uniforms['mvpp_current_'+num].value = tabMatrices[numImg];
             }
 
-            var translationPlusSom = translation.clone().add((Ori.getSommet(300+num).clone().applyProjection( rotation.clone()))); translationPlusSom.w = 1;
+
+            var translationPlusSom = translation.clone().add((Ori.getSommet(num).clone().applyProjection( rotation.clone()))); translationPlusSom.w = 1;
             tabTranslations[numImg] = translationPlusSom; 		
             tabMatrices[numImg] = (new THREE.Matrix4().multiplyMatrices( rotation.clone(),tabMatMVP[numImg - 5].clone()) ).transpose();
               
+
+
             // Load the new image
             var img = new Image(); img.crossOrigin = 'anonymous';
             var that = this;
@@ -367,6 +391,11 @@ function (graphicEngine, THREE, Ori, Shader, PanoramicProvider) {
 
             var suffixeImage = this.localImageFiles ? ".jpg" : ".jp2&WID="+wid/4+"&QLT="+qlt+"&CVT=JPEG";
             img.src = PanoramicProvider.getUrlImageFile()+imgName.replace(pat,"-30"+num+"-")+ suffixeImage;
+
+            console.log(img.src);
+            console.log(translationPlusSom);
+            console.log(tabMatrices[numImg]);
+
         },
         
         

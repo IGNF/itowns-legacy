@@ -78,6 +78,150 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
              },
              
              
+
+    shaderTextureProjective5VS : [
+        
+        "#ifdef GL_ES",
+        "precision  highp float;",
+        "#endif",
+
+        // Those uniforms are 
+        // ModelView * Projection * rotation of the rigid sys (Stereopolis)
+
+        "uniform mat4 mvpp0;",
+        "uniform mat4 mvpp1;",
+        "uniform mat4 mvpp2;",
+        "uniform mat4 mvpp3;",
+        "uniform mat4 mvpp4;",
+
+        "uniform vec4 translation0;",
+        "uniform vec4 translation1;",
+        "uniform vec4 translation2;",
+        "uniform vec4 translation3;",
+        "uniform vec4 translation4;",
+
+        "varying vec4 v_texcoord0;",
+        "varying vec4 v_texcoord1;",
+        "varying vec4 v_texcoord2;",
+        "varying vec4 v_texcoord3;",
+        "varying vec4 v_texcoord4;",
+
+        "uniform mat4 mvpp0bis;",
+        "uniform mat4 mvpp1bis;",
+        "uniform mat4 mvpp2bis;",
+        "uniform mat4 mvpp3bis;",
+        "uniform mat4 mvpp4bis;",
+
+        "uniform vec4 translation0bis;",
+        "uniform vec4 translation1bis;",
+        "uniform vec4 translation2bis;",
+        "uniform vec4 translation3bis;",
+        "uniform vec4 translation4bis;",
+
+        "varying vec4 v_texcoord0bis;",
+        "varying vec4 v_texcoord1bis;",
+        "varying vec4 v_texcoord2bis;",
+        "varying vec4 v_texcoord3bis;",
+        "varying vec4 v_texcoord4bis;",
+
+        "vec4 pos;",
+
+        "void main() {",
+        "    pos =  vec4(position,1.);",
+        "        v_texcoord0 =  mvpp0 * (pos- translation0);",
+        "        v_texcoord1 =  mvpp1 * (pos- translation1);",
+        "        v_texcoord2 =  mvpp2 * (pos- translation2);",
+        "        v_texcoord3 =  mvpp3 * (pos- translation3);",
+        "        v_texcoord4 =  mvpp4 * (pos- translation4);",
+        "        v_texcoord0bis =  mvpp0bis * (pos- translation0bis);",
+        "        v_texcoord1bis =  mvpp1bis * (pos- translation1bis);",
+        "        v_texcoord2bis =  mvpp2bis * (pos- translation2bis);",
+        "        v_texcoord3bis =  mvpp3bis * (pos- translation3bis);",
+        "        v_texcoord4bis =  mvpp4bis * (pos- translation4bis);",
+        "    gl_Position  =  projectionMatrix *  modelViewMatrix * pos;",
+        "}"
+    ],
+    
+     shaderTextureProjective5FS : [
+         
+      
+        "#ifdef GL_ES",
+        "precision  highp float;",
+        "#endif",
+
+        "uniform sampler2D   texture0;",
+        "uniform sampler2D   texture1;",
+        "uniform sampler2D   texture2;",
+        "uniform sampler2D   texture3;",
+        "uniform sampler2D   texture4;",
+      
+        "varying vec4 v_texcoord0;",
+        "varying vec4 v_texcoord1;",
+        "varying vec4 v_texcoord2;",
+        "varying vec4 v_texcoord3;",
+        "varying vec4 v_texcoord4;",
+
+        "uniform sampler2D   texture0bis;",
+        "uniform sampler2D   texture1bis;",
+        "uniform sampler2D   texture2bis;",
+        "uniform sampler2D   texture3bis;",
+        "uniform sampler2D   texture4bis;",
+      
+        "varying vec4 v_texcoord0bis;",
+        "varying vec4 v_texcoord1bis;",
+        "varying vec4 v_texcoord2bis;",
+        "varying vec4 v_texcoord3bis;",
+        "varying vec4 v_texcoord4bis;",
+  
+        "vec4 color = vec4(0.,0.,0.,0.);",
+        "vec2 corrected0,corrected1,corrected2,corrected3,corrected4;",
+        "vec2 corrected0bis,corrected1bis,corrected2bis,corrected3bis,corrected4bis;",
+        "float width = 2048.0;",
+        "float height = 2048.0;",
+        //"float cpps = 1042.178;",
+        //"float lpps = 1020.435;",
+        //"vec2 pps = vec2(cpps,lpps);",
+
+      // Function to correct coordinate using 3rd degree polynome and max
+      " vec2 correctDistortionAndCoord(vec4 v_texcoord){",     
+      "      vec2 normCoord = v_texcoord.xy/(v_texcoord.w);",
+      "      return vec2(normCoord.x/width , 1. - normCoord.y/height); ",
+      "  }",
+       " void main(void)",
+       " {  ",
+           " corrected0 = correctDistortionAndCoord(v_texcoord0);",
+           " corrected1 = correctDistortionAndCoord(v_texcoord1);",
+           " corrected2 = correctDistortionAndCoord(v_texcoord2);",
+           " corrected3 = correctDistortionAndCoord(v_texcoord3);",
+           " corrected4 = correctDistortionAndCoord(v_texcoord4);",
+
+           " corrected0bis = correctDistortionAndCoord(v_texcoord0bis);",
+           " corrected1bis = correctDistortionAndCoord(v_texcoord1bis);",
+           " corrected2bis = correctDistortionAndCoord(v_texcoord2bis);",
+           " corrected3bis = correctDistortionAndCoord(v_texcoord3bis);",
+           " corrected4bis = correctDistortionAndCoord(v_texcoord4bis);",
+
+
+          "  if ((corrected0.x>0. && corrected0.x<1. && corrected0.y>0. && corrected0.y<1.) && v_texcoord0.w>0.){",
+          "      color = texture2D(texture0,corrected0);",
+          "  }else",
+          "  if ((corrected1.x>0. && corrected1.x<1. && corrected1.y>0. && corrected1.y<1.) && v_texcoord1.w>0.){",
+          "      color = texture2D(texture1,corrected1);",
+          "  }else",
+          "  if ((corrected2.x>0. && corrected2.x<1. && corrected2.y>0. && corrected2.y<1.) && v_texcoord2.w>0.){",
+          "      color = texture2D(texture2,corrected2);",
+          "  }else",
+          "  if ((corrected3.x>0. && corrected3.x<1. && corrected3.y>0. && corrected3.y<1.) && v_texcoord3.w>0.){",
+          "      color = texture2D(texture3,corrected3);",
+          "  }else",
+          "  if ((corrected4.x>0. && corrected4.x<1. && corrected4.y>0. && corrected4.y<1.) && v_texcoord4.w>0.){",
+          "      color = texture2D(texture4,corrected4);",
+          "  }",
+          "  color.a = 1.0; ",
+          "  gl_FragColor = color; ",
+    "} "         
+        ],
+    
              
     shaderTextureProjective2VS : [
         
@@ -88,29 +232,27 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
         // Those uniforms are 
         // ModelView * Projection * rotation of the rigid sys (Stereopolis)
 
-        "uniform mat4 mvpp_current_0;",
-        "uniform mat4 mvpp_current_1;",
-        "uniform mat4 mvpp_current_2;",
-        "uniform mat4 mvpp_current_3;",
-        "uniform mat4 mvpp_current_4;",
-        "uniform mat4 mvpp_current_0bis;",
-        "uniform mat4 mvpp_current_1bis;",
-        "uniform mat4 mvpp_current_2bis;",
-        "uniform mat4 mvpp_current_3bis;",
-        "uniform mat4 mvpp_current_4bis;",
+        "uniform mat4 mvpp0;",
+        "uniform mat4 mvpp1;",
+        "uniform mat4 mvpp2;",
+        "uniform mat4 mvpp3;",
+        "uniform mat4 mvpp4;",
+        "uniform mat4 mvpp0bis;",
+        "uniform mat4 mvpp1bis;",
+        "uniform mat4 mvpp2bis;",
+        "uniform mat4 mvpp3bis;",
+        "uniform mat4 mvpp4bis;",
 
-        "uniform vec4 factorTranslation0;",
-        "uniform vec4 factorTranslation1;",
-        "uniform vec4 factorTranslation2;",
-        "uniform vec4 factorTranslation3;",
-        "uniform vec4 factorTranslation4;",
-        "uniform vec4 factorTranslation0bis;",
-        "uniform vec4 factorTranslation1bis;",
-        "uniform vec4 factorTranslation2bis;",
-        "uniform vec4 factorTranslation3bis;",
-        "uniform vec4 factorTranslation4bis;",
-
-        "uniform int mobileOn;",
+        "uniform vec4 translation0;",
+        "uniform vec4 translation1;",
+        "uniform vec4 translation2;",
+        "uniform vec4 translation3;",
+        "uniform vec4 translation4;",
+        "uniform vec4 translation0bis;",
+        "uniform vec4 translation1bis;",
+        "uniform vec4 translation2bis;",
+        "uniform vec4 translation3bis;",
+        "uniform vec4 translation4bis;",
 
         "varying vec4 v_texcoord0;",
         "varying vec4 v_texcoord1;",
@@ -125,25 +267,19 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
 
         "vec4 pos;",
 
-
-
         "void main() {",
 
         "    pos =  vec4(position,1.);",
-
-        "    if(mobileOn==0){",
-        "        v_texcoord0 =  mvpp_current_0 * (pos- factorTranslation0);",
-        "        v_texcoord1 =  mvpp_current_1 * (pos- factorTranslation1);",
-        "        v_texcoord2 =  mvpp_current_2 * (pos- factorTranslation2);",
-        "        v_texcoord3 =  mvpp_current_3 * (pos- factorTranslation3);",
-        "        v_texcoord4 =  mvpp_current_4 * (pos- factorTranslation4);",
-        "    }",
-
-        "    v_texcoord0bis =  mvpp_current_0bis * (pos- factorTranslation0bis);",
-        "    v_texcoord1bis =  mvpp_current_1bis * (pos- factorTranslation1bis);",
-        "    v_texcoord2bis =  mvpp_current_2bis * (pos- factorTranslation2bis);",
-        "    v_texcoord3bis =  mvpp_current_3bis * (pos- factorTranslation3bis);",
-        "    v_texcoord4bis =  mvpp_current_4bis * (pos- factorTranslation4bis);",
+        "    v_texcoord0 =  mvpp0 * (pos- translation0);",
+        "    v_texcoord1 =  mvpp1 * (pos- translation1);",
+        "    v_texcoord2 =  mvpp2 * (pos- translation2);",
+        "    v_texcoord3 =  mvpp3 * (pos- translation3);",
+        "    v_texcoord4 =  mvpp4 * (pos- translation4);",
+        "    v_texcoord0bis =  mvpp0bis * (pos- translation0bis);",
+        "    v_texcoord1bis =  mvpp1bis * (pos- translation1bis);",
+        "    v_texcoord2bis =  mvpp2bis * (pos- translation2bis);",
+        "    v_texcoord3bis =  mvpp3bis * (pos- translation3bis);",
+        "    v_texcoord4bis =  mvpp4bis * (pos- translation4bis);",
 
         "    gl_Position  =  projectionMatrix *  modelViewMatrix * pos;",
 
@@ -152,23 +288,20 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
     
      shaderTextureProjective2FS : [
          
-      
         "#ifdef GL_ES",
         "precision  highp float;",
         "#endif",
 
-        "uniform float alpha;",
-
-        "uniform mat4 mvpp_current_0;",
-        "uniform mat4 mvpp_current_1;",
-        "uniform mat4 mvpp_current_2;",
-        "uniform mat4 mvpp_current_3;",
-        "uniform mat4 mvpp_current_4;",
-        "uniform mat4 mvpp_current_0bis;",
-        "uniform mat4 mvpp_current_1bis;",
-        "uniform mat4 mvpp_current_2bis;",
-        "uniform mat4 mvpp_current_3bis;",
-        "uniform mat4 mvpp_current_4bis;",
+        "uniform mat4 mvpp0;",
+        "uniform mat4 mvpp1;",
+        "uniform mat4 mvpp2;",
+        "uniform mat4 mvpp3;",
+        "uniform mat4 mvpp4;",
+        "uniform mat4 mvpp0bis;",
+        "uniform mat4 mvpp1bis;",
+        "uniform mat4 mvpp2bis;",
+        "uniform mat4 mvpp3bis;",
+        "uniform mat4 mvpp4bis;",
 
         "uniform sampler2D   texture0;",
         "uniform sampler2D   texture1;",
@@ -180,11 +313,15 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
         "uniform sampler2D   texture2bis;",
         "uniform sampler2D   texture3bis;",
         "uniform sampler2D   texture4bis;",
-        "uniform sampler2D   textureFrontMask;",
-        "uniform sampler2D   textureBackMask;",
 
-        "uniform vec4 factorTranslation;",	
-        "uniform vec4 factorTranslationbis;",
+        "uniform sampler2D   textureMask0;",
+        "uniform sampler2D   textureMask1;",
+        "uniform sampler2D   textureMask2;",
+        "uniform sampler2D   textureMask3;",
+        "uniform sampler2D   textureMask4;",
+
+        "uniform vec4 translation;",	
+        "uniform vec4 translationbis;",
 
         "varying vec4 v_texcoord0;",
         "varying vec4 v_texcoord1;",
@@ -204,231 +341,61 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
         "uniform float indice_time3;",
         "uniform float indice_time4;",
 
-        "uniform vec4 intrinsic300;",
-        "uniform vec4 intrinsic301;",
-        "uniform vec4 intrinsic302;",
-        "uniform vec4 intrinsic303;",
-        "uniform vec4 intrinsic304;",
+        "uniform vec4 distortion0;",
+        "uniform vec4 distortion1;",
+        "uniform vec4 distortion2;",
+        "uniform vec4 distortion3;",
+        "uniform vec4 distortion4;",
         
+        "vec2 size = vec2(2048.0,2048.0);",
+        "vec2 pps = vec2(1042.178,1020.435);",
 
-        "uniform int blendingOn;",
-        "uniform int mobileOn;",
-        "uniform int fog;",
-
-        "float width = 2048.0;",
-        "float height = 2048.0;",
-        "float dist;",
-
-
-        // Distortion
-        "float cpps = 1042.178;",
-        "float lpps = 1020.435;",
-        "vec2 pps = vec2(cpps,lpps);",
-
-        "vec4 color = vec4(0.,0.,0.,0.);",
-        "vec4 colorbis = vec4(0.,0.,0.,0.);",
-        "vec4 saveColor = vec4(0.,0.,0.,0.);",
-
-        "vec2 corrected0, corrected1,corrected2,corrected3,corrected4;",
-        "vec2 corrected0bis, corrected1bis,corrected2bis,corrected3bis,corrected4bis;",
-
-
-
-        // Function to correct coordinate using 3rd degree polynome and max
-      " vec2 correctDistortionAndCoord(vec4 dist, vec4 v_texcoord){",
-            
-      "      vec2 v = v_texcoord.xy/v_texcoord.w - pps;",
+      " vec2 correctDistortionAndCoord(vec4 dist, vec4 texcoord){",
+      "      vec2 p = texcoord.xy/texcoord.w;",
+      "      vec2 v = p - pps;",
       "      float v2 = dot(v,v);",
-      "      if(v2>dist.w) return vec2(-2.,-2.); // false;",
+      "      if(v2>dist.w || texcoord.w < 0.) return vec2(-1.);",
       "      float r = v2*(dist.x+v2*(dist.y+v2*dist.z));",
-      "      vec2 normCoord = v_texcoord.xy/(v_texcoord.w) + r*v;",
-                //float r = v2*(dist.x+v2*(dist.y+v2*dist.z));
-                //vec2 normCoord = v_texcoord.xy + r*v*v_texcoord.w;
-
-      "      return vec2(normCoord.x/width , 1. - normCoord.y/height); ",
-
+      "      return p+r*v; ",
       "  }",
 
+      "vec4 getColor(sampler2D texture, sampler2D mask, vec2 p)",
+      " {  ",
+      "   vec2 d2 = min(p.xy,size-p.xy);",
+      "   float d = min(d2.x,d2.y);",
+      "   if (d<0.) return vec4(0.);",
+      "   p /= size;",
+      "   p.y = 1. - p.y; ",
+      "   vec4 c = texture2D(texture,p);",
+      "   float m = min(d*0.1,1.)*(1.-texture2D(mask,p).r);",
+      "   return c*m;",
+      " }",
 
+      "vec4 getColor(sampler2D texture, sampler2D mask, vec4 dist, vec4 coord)",
+      " {  ",
+      "   return getColor(texture,mask,correctDistortionAndCoord(dist,coord));",
+      " }",
 
        " void main(void)",
-       " {	",
-       "     bool blending = (blendingOn == 1) && (mobileOn==0);",
+       " {  ",
 
-            // FIRSTLY the previous position for nice transition
-
-        "    if(mobileOn==0){    // If not on light config we compute the rendering for previous pano ",
-
-          "          corrected0 = correctDistortionAndCoord(intrinsic300, v_texcoord0);",
-
-   "                 if ((corrected0.x>=0. && corrected0.x<=1. && corrected0.y>=0. && corrected0.y<=1.) && v_texcoord0.w>0.)",
-        "                 color = texture2D(texture0,corrected0); ",
-        "            else{",
-
-                       " corrected1 = correctDistortionAndCoord(intrinsic301, v_texcoord1);",
-
-                      "  if ((corrected1.x>=0. && corrected1.x<=1. && corrected1.y>=0. && corrected1.y<=1.) && v_texcoord1.w>0.){",
-                      "   color = texture2D(texture1,corrected1); ",
-                      "   color.a = 1. - texture2D(textureFrontMask,corrected1).a;",
-                      "  }",
-                     "   else{",
-
-                       "     corrected2 = correctDistortionAndCoord(intrinsic302, v_texcoord2);",
-
-                        "    if ((corrected2.x>=0. && corrected2.x<=1. && corrected2.y>=0. && corrected2.y<=1.) && v_texcoord2.w>0.)",
-                       "        color = texture2D(texture2,corrected2); ",
-                      "       else{",
+        "  vec4 c0 = indice_time0*getColor(texture0,textureMask0,distortion0,v_texcoord0);",
+        "  vec4 c1 = indice_time1*getColor(texture1,textureMask1,distortion1,v_texcoord1);",
+        "  vec4 c2 = indice_time2*getColor(texture2,textureMask2,distortion2,v_texcoord2);",
+        "  vec4 c3 = indice_time3*getColor(texture3,textureMask3,distortion3,v_texcoord3);",
+        "  vec4 c4 = indice_time4*getColor(texture4,textureMask4,distortion4,v_texcoord4);",
+//        "  vec4 color = c0+c1+c2+c3+c4;",
 
 
+        "  vec4 c5 = (1.-indice_time0)*getColor(texture0bis,textureMask0,distortion0,v_texcoord0bis);",
+        "  vec4 c6 = (1.-indice_time1)*getColor(texture1bis,textureMask1,distortion1,v_texcoord1bis);",
+        "  vec4 c7 = (1.-indice_time2)*getColor(texture2bis,textureMask2,distortion2,v_texcoord2bis);",
+        "  vec4 c8 = (1.-indice_time3)*getColor(texture3bis,textureMask3,distortion3,v_texcoord3bis);",
+        "  vec4 c9 = (1.-indice_time4)*getColor(texture4bis,textureMask4,distortion4,v_texcoord4bis);",
+        "  vec4 color = c0+c1+c2+c3+c4+c5+c6+c7+c8+c9;",
 
-                              "  corrected3 = correctDistortionAndCoord(intrinsic303, v_texcoord3);",
-
-
-                            "    if ((corrected3.x>=0. && corrected3.x<=1. && corrected3.y>=0. && corrected3.y<=1.) && v_texcoord3.w>0.){",
-                           "             color = texture2D(texture3,corrected3); ",
-                           "             color.a = 1. - texture2D(textureBackMask,corrected3).a;",
-                           "     }",
-                          "      else{",
-
-                             "       corrected4 = correctDistortionAndCoord(intrinsic304, v_texcoord4);",
-
-                             "       if ((corrected4.x>=0. && corrected4.x<=1. && corrected4.y>=0. && corrected4.y<=1.) && v_texcoord4.w>0.)",
-                            "                        color = texture2D(texture4,corrected4); ",
-                             "   }",
-                        "    }",
-                       " }",
-                  "  }",
-           " }",
-           " saveColor = color;",
-
-
-// SECONDLY 
-        
-   
-           " corrected0bis = correctDistortionAndCoord(intrinsic300, v_texcoord0bis);",
-           " corrected1bis = correctDistortionAndCoord(intrinsic301, v_texcoord1bis);",
-           " corrected2bis = correctDistortionAndCoord(intrinsic302, v_texcoord2bis);",
-          "  corrected3bis = correctDistortionAndCoord(intrinsic303, v_texcoord3bis);",
-          "  corrected4bis = correctDistortionAndCoord(intrinsic304, v_texcoord4bis);",
-
-
-// CAM 0,300
-
-          "  if ((corrected0bis.x>0. && corrected0bis.x<1. && corrected0bis.y>0. && corrected0bis.y<1.) && v_texcoord0bis.w>0.){",
-
-          "      colorbis = texture2D(texture0bis,corrected0bis);",
-                
-         "       if(blending){   ",
-                    // Blending cam0/cam1
-            "        if (((corrected1bis.x>=0. && corrected1bis.x<=1. && corrected1bis.y>=0. && corrected1bis.y<=1.) && v_texcoord1bis.w>0.)&& corrected0bis.x < 0.03){ ",
-           "             colorbis = colorbis * (corrected0bis.x/ 0.03) +   texture2D(texture1bis,corrected1bis) * (1.- (corrected0bis.x)/ 0.03);",
-                    "}",
-                    // Blending cam0/cam2
-               "     if (((corrected2bis.x>=0. && corrected2bis.x<=1. && corrected2bis.y>=0. && corrected2bis.y<=1.) && v_texcoord2bis.w>0.)&& corrected0bis.y >0.97){ ",
-                "        colorbis = colorbis *  (1. - (corrected0bis.y-0.97)/0.03)  +   texture2D(texture2bis,corrected2bis) * ((corrected0bis.y-0.97)/0.03);",
-                "    }",
-                    // Blending cam0/cam3",
-                "     if (((corrected3bis.x>0. && corrected3bis.x<1. && corrected3bis.y>0. && corrected3bis.y<1.) && v_texcoord3bis.w>0.)&& corrected0bis.x > 0.97){ ",
-                 "       colorbis = colorbis *  (1. - (corrected0bis.x-0.97)/0.03)   +   texture2D(texture3bis,corrected3bis) * ((corrected0bis.x-0.97)/0.03);",
-                    "}",
-                    // Blending cam0/cam4
-                 "    if (((corrected4bis.x>=0. && corrected4bis.x<=1. && corrected4bis.y>=0. && corrected4bis.y<=1.) && v_texcoord4bis.w>0.)&& corrected0bis.y < 0.03){ ",
-                   "     colorbis = colorbis *  (corrected0bis.y/0.03)  +   texture2D(texture4bis,corrected4bis) * ( 1. - corrected0bis.y/0.03);",
-                  "  }",
-                  "    if (((corrected1bis.x>=0. && corrected1bis.x<=1. && corrected1bis.y>=0. && corrected1bis.y<=1.) && v_texcoord1bis.w>0.)&& corrected0bis.x < 0.03){ ",
-                   "     colorbis = colorbis * (corrected0bis.x/ 0.03) +   texture2D(texture1bis,corrected1bis) * (1.- (corrected0bis.x)/ 0.03);         ",
-                   " }",
-                "}",
-                                 
-                //color = indice_time0 * saveColor + (1. - indice_time0) * colorbis; //indice_time21
-                "color = indice_time0 * (saveColor - colorbis) + colorbis;",
-           " }else",
-
-
-// CAM 1,301
-
-           "  if ((corrected1bis.x>0. && corrected1bis.x<1. && corrected1bis.y>0. && corrected1bis.y<1.) && v_texcoord1bis.w>0.){ ",
-
-           "            colorbis =  texture2D(texture1bis,corrected1bis); ",
-          "             colorbis.a = 1.- texture2D(textureFrontMask,corrected1bis).a; ",
-
-             "          if(blending){ ",
-                           // Blending cam1/cam2
-             "              if (((corrected2bis.x>=0. && corrected2bis.x<=1. && corrected2bis.y>=0. && corrected2bis.y<=1.) && v_texcoord2bis.w>0.)&& corrected1bis.x> .97){  ",
-              "                 colorbis = colorbis * (1. - (corrected1bis.x-0.97)/0.03)  +   texture2D(texture2bis,corrected2bis) * ((corrected1bis.x-0.97)/0.03); ",
-               "            } ",
-                           // Blending cam1/cam4
-              "             if (((corrected4bis.x>=0. && corrected4bis.x<=1. && corrected4bis.y>=0. && corrected4bis.y<=1.) && v_texcoord4bis.w>0.)&& corrected1bis.x< 0.03){  ",
-               "                colorbis = colorbis * (corrected1bis.x/0.03)  +   texture2D(texture4bis,corrected4bis) * (1.- (corrected1bis.x)/0.03); ",
-              "             } ",
-              "         } ",
-
-              "         color = (1. - colorbis.a) * saveColor + colorbis.a * colorbis; ",
-               "        color.a = colorbis.a + saveColor.a; ",
-                       //color = indice_time1 * saveColor + (1. - indice_time1) * color;
-              "         color = indice_time1 * (saveColor - color) + color; ",
-
-         "   }else ",
-
-
-
-// CAM 2,302
-
-        "    if ((corrected2bis.x>0. && corrected2bis.x<1. && corrected2bis.y>0. && corrected2bis.y<1.) && v_texcoord2bis.w>0.){ ",
-               
-          "         colorbis = texture2D(texture2bis,corrected2bis); ",
-          "      if(blending){ ",
-                     // Blending cam2/cam3
-            "         if (((corrected3bis.x>=0. && corrected3bis.x<=1. && corrected3bis.y>=0. && corrected3bis.y<=1.) && v_texcoord3bis.w>0.)&& corrected2bis.x>0.97){  ",
-           "              colorbis = colorbis * (1. - (corrected2bis.x-0.97)/0.03)  +   texture2D(texture3bis,corrected3bis) * ((corrected2bis.x-0.97)/0.03); ",
-            "         } ",
-           "     } ",
-
-                //  BLEND with ground
-         "       if(corrected2bis.y>0.97) colorbis = colorbis * (1. - (corrected2bis.y-0.97)/0.03) + saveColor * ((corrected2bis.y-0.97)/0.03); ",
-
-                //color = indice_time2 * saveColor + (1. - indice_time2) * colorbis; 	
-         "         color = indice_time2 * (saveColor - colorbis) + colorbis; ",
-                    
-         "   }else ",
-
-// CAM 3,303
-
-       "     if ((corrected3bis.x>0.01 && corrected3bis.x<0.99 && corrected3bis.y>0. && corrected3bis.y<1.) && v_texcoord3bis.w>0.){ ",
-             
-        "           colorbis = texture2D(texture3bis,corrected3bis); ",
-        "           colorbis.a = 1.- texture2D(textureBackMask,corrected3bis).a; ",
-
-                    // Blending cam3/cam4
-         "           if(blending){ ",
-         "               if (((corrected4bis.x>=0. && corrected4bis.x<=1. && corrected4bis.y>=0. && corrected4bis.y<=1.) && v_texcoord4bis.w>0.)&& corrected3bis.x>0.97){  ",
-          "                  colorbis = colorbis * (1. - (corrected3bis.x-0.97)/0.03)   +   texture2D(texture4bis,corrected4bis) * ((corrected3bis.x-0.97)/0.03); ",
-          "              } ",
-          "          } ",
-                    
-         "           color = (1. - colorbis.a) * saveColor + colorbis.a * colorbis; ",
-         "           color.a = colorbis.a + saveColor.a; ",
-                    //color = indice_time3 * saveColor + (1. - indice_time3) * color;
-         "           color = indice_time3 * (saveColor - color) + color; ",
-
-         "       }else ",
-
-// CAM 4,304
-
-        "    if ((corrected4bis.x>0. && corrected4bis.x<1. && corrected4bis.y>0. && corrected4bis.y<1.) && v_texcoord4bis.w>0.){ ",
-
-         "       colorbis = texture2D(texture4bis,corrected4bis);	 ",
-
-                //  BLEND with ground
-        "        if(corrected4bis.y>0.97) colorbis = colorbis * (1. - (corrected4bis.y-0.97)/0.03) + saveColor * ((corrected4bis.y-0.97)/0.03); ",
-
-                //color = indice_time4 * saveColor + (1. - indice_time4) * colorbis; 
-          "        color = indice_time4 * (saveColor - colorbis) + colorbis; ",
-          "  } ",
-
-         "   color.a = alpha; ",
-        "    gl_FragColor = color; ",
-
+        "  if(color.a>1.) color /= color.a;",
+        "  gl_FragColor = color; ",
     "} "         
      
         ],
@@ -443,16 +410,16 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
 
         "uniform float alpha;",
 
-        "uniform mat4 mvpp_current_0;",
-        "uniform mat4 mvpp_current_1;",
-        "uniform mat4 mvpp_current_2;",
-        "uniform mat4 mvpp_current_3;",
-        "uniform mat4 mvpp_current_4;",
-        "uniform mat4 mvpp_current_0bis;",
-        "uniform mat4 mvpp_current_1bis;",
-        "uniform mat4 mvpp_current_2bis;",
-        "uniform mat4 mvpp_current_3bis;",
-        "uniform mat4 mvpp_current_4bis;",
+        "uniform mat4 mvpp0;",
+        "uniform mat4 mvpp1;",
+        "uniform mat4 mvpp2;",
+        "uniform mat4 mvpp3;",
+        "uniform mat4 mvpp4;",
+        "uniform mat4 mvpp0bis;",
+        "uniform mat4 mvpp1bis;",
+        "uniform mat4 mvpp2bis;",
+        "uniform mat4 mvpp3bis;",
+        "uniform mat4 mvpp4bis;",
 
         "uniform sampler2D   texture0;",
         "uniform sampler2D   texture1;",
@@ -464,11 +431,14 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
         "uniform sampler2D   texture2bis;",
         "uniform sampler2D   texture3bis;",
         "uniform sampler2D   texture4bis;",
-        "uniform sampler2D   textureFrontMask;",
-        "uniform sampler2D   textureBackMask;",
+        "uniform sampler2D   textureMask0;",
+        "uniform sampler2D   textureMask1;",
+        "uniform sampler2D   textureMask2;",
+        "uniform sampler2D   textureMask3;",
+        "uniform sampler2D   textureMask4;",
 
-        "uniform vec4 factorTranslation;	",
-        "uniform vec4 factorTranslationbis;",
+        "uniform vec4 translation;	",
+        "uniform vec4 translationbis;",
 
         "varying vec4 v_texcoord0;",
         "varying vec4 v_texcoord1;",
@@ -590,7 +560,7 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
         "     if ((corrected1bis.x>0. && corrected1bis.x<1. && corrected1bis.y>0. && corrected1bis.y<1.) && v_texcoord1bis.w>0.){",
 
         "               colorbis =  texture2D(texture1bis,corrected1bis);",
-         "              colorbis.a = 1.- texture2D(textureFrontMask,corrected1bis).a;",
+         "              colorbis.a = 1.- texture2D(textureMask1,corrected1bis).a;",
 
           "             if(blending){",
                            // Blending cam1/cam2
@@ -637,7 +607,7 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
         "    if ((corrected3bis.x>0.01 && corrected3bis.x<0.99 && corrected3bis.y>0. && corrected3bis.y<1.) && v_texcoord3bis.w>0.){",
              
         "           colorbis = texture2D(texture3bis,corrected3bis);",
-        "           colorbis.a = 1.- texture2D(textureBackMask,corrected3bis).a;",
+        "           colorbis.a = 1.- texture2D(textureMask3,corrected3bis).a;",
 
                     // Blending cam3/cam4
          "           if(blending){",
