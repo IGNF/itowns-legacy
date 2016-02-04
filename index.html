@@ -9,7 +9,7 @@
         
       <div id="containerITOWNS" tabindex="1" ></div>
 
-      <script data-main="src/app.js" src="http://requirejs.org/docs/release/2.1.15/minified/require.js"></script>   <!-- build/itowns.js -->
+      <script data-main="src/app.js" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.15/require.min.js"></script>   <!-- build/itowns.js -->
       <script>
            
           var itowns;
@@ -22,13 +22,13 @@
                         
                         // Optional (Default values in Config.js) 
                         dataURL: {
-                            urlMetaDataProviderPos  : "data/panoramicsMetaData.json",
-                            urlImageFile            : "data/images/",
-                            urlMetaProviderSensor   : "data/cameraCalibration.json",
-                            urlBuildingFootprint    : "data/buildingFootprint.json",
-                            urlDTM                  : "data/dtm.json",
-                            urlPointCloud           : "data/pointclouds/",
-                            url3DBuilding           : "data/Buildings3D/"  
+                            urlMetaDataProviderPos  : "../itowns-sample-data/panoramicsMetaData.json",
+                            urlImageFile            : "../itowns-sample-data/images/",
+                            urlMetaProviderSensor   : "../itowns-sample-data/cameraCalibration.json",
+                            urlBuildingFootprint    : "../itowns-sample-data/buildingFootprint.json",
+                            urlDTM                  : "../itowns-sample-data/dtm.json",
+                            urlPointCloud           : "../itowns-sample-data/pointclouds/",
+                            url3DBuilding           : "../itowns-sample-data/Buildings3D/"  
                         },
                         
                         usingLaserCloud  : true,

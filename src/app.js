@@ -1,8 +1,8 @@
 requirejs.config({
     baseUrl: 'src/',
     paths : {
-        'geoportail' : "http://api.ign.fr/geoportail/api/js/2.0.3/Geoportal",
-        'jquery' : "//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min"      
+        'geoportail' : "https://api.ign.fr/geoportail/api/js/2.0.3/Geoportal",
+        'jquery' : "https://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min"      
     },
 
     waitSeconds : 0
