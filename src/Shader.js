@@ -106,6 +106,24 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
         "varying vec4 v_texcoord3;",
         "varying vec4 v_texcoord4;",
 
+        "uniform mat4 mvpp0bis;",
+        "uniform mat4 mvpp1bis;",
+        "uniform mat4 mvpp2bis;",
+        "uniform mat4 mvpp3bis;",
+        "uniform mat4 mvpp4bis;",
+
+        "uniform vec4 translation0bis;",
+        "uniform vec4 translation1bis;",
+        "uniform vec4 translation2bis;",
+        "uniform vec4 translation3bis;",
+        "uniform vec4 translation4bis;",
+
+        "varying vec4 v_texcoord0bis;",
+        "varying vec4 v_texcoord1bis;",
+        "varying vec4 v_texcoord2bis;",
+        "varying vec4 v_texcoord3bis;",
+        "varying vec4 v_texcoord4bis;",
+
         "vec4 pos;",
 
         "void main() {",
@@ -115,6 +133,11 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
         "        v_texcoord2 =  mvpp2 * (pos- translation2);",
         "        v_texcoord3 =  mvpp3 * (pos- translation3);",
         "        v_texcoord4 =  mvpp4 * (pos- translation4);",
+        "        v_texcoord0bis =  mvpp0bis * (pos- translation0bis);",
+        "        v_texcoord1bis =  mvpp1bis * (pos- translation1bis);",
+        "        v_texcoord2bis =  mvpp2bis * (pos- translation2bis);",
+        "        v_texcoord3bis =  mvpp3bis * (pos- translation3bis);",
+        "        v_texcoord4bis =  mvpp4bis * (pos- translation4bis);",
         "    gl_Position  =  projectionMatrix *  modelViewMatrix * pos;",
         "}"
     ],
@@ -137,9 +160,22 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
         "varying vec4 v_texcoord2;",
         "varying vec4 v_texcoord3;",
         "varying vec4 v_texcoord4;",
+
+        "uniform sampler2D   texture0bis;",
+        "uniform sampler2D   texture1bis;",
+        "uniform sampler2D   texture2bis;",
+        "uniform sampler2D   texture3bis;",
+        "uniform sampler2D   texture4bis;",
+      
+        "varying vec4 v_texcoord0bis;",
+        "varying vec4 v_texcoord1bis;",
+        "varying vec4 v_texcoord2bis;",
+        "varying vec4 v_texcoord3bis;",
+        "varying vec4 v_texcoord4bis;",
   
         "vec4 color = vec4(0.,0.,0.,0.);",
         "vec2 corrected0,corrected1,corrected2,corrected3,corrected4;",
+        "vec2 corrected0bis,corrected1bis,corrected2bis,corrected3bis,corrected4bis;",
         "float width = 2048.0;",
         "float height = 2048.0;",
         //"float cpps = 1042.178;",
@@ -158,6 +194,13 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
            " corrected2 = correctDistortionAndCoord(v_texcoord2);",
            " corrected3 = correctDistortionAndCoord(v_texcoord3);",
            " corrected4 = correctDistortionAndCoord(v_texcoord4);",
+
+           " corrected0bis = correctDistortionAndCoord(v_texcoord0bis);",
+           " corrected1bis = correctDistortionAndCoord(v_texcoord1bis);",
+           " corrected2bis = correctDistortionAndCoord(v_texcoord2bis);",
+           " corrected3bis = correctDistortionAndCoord(v_texcoord3bis);",
+           " corrected4bis = correctDistortionAndCoord(v_texcoord4bis);",
+
 
           "  if ((corrected0.x>0. && corrected0.x<1. && corrected0.y>0. && corrected0.y<1.) && v_texcoord0.w>0.){",
           "      color = texture2D(texture0,corrected0);",
@@ -336,20 +379,19 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
        " void main(void)",
        " {  ",
 
-/*
-        "  vec4 c0 = getColor(texture0,textureMask0,distortion0,v_texcoord0);",
-        "  vec4 c1 = getColor(texture1,textureMask1,distortion1,v_texcoord1);",
-        "  vec4 c2 = getColor(texture2,textureMask2,distortion2,v_texcoord2);",
-        "  vec4 c3 = getColor(texture3,textureMask3,distortion3,v_texcoord3);",
-        "  vec4 c4 = getColor(texture4,textureMask4,distortion4,v_texcoord4);",
-        "  vec4 color = c0+c1+c2+c3+c4;",
-*/
+        "  vec4 c0 = indice_time0*getColor(texture0,textureMask0,distortion0,v_texcoord0);",
+        "  vec4 c1 = indice_time1*getColor(texture1,textureMask1,distortion1,v_texcoord1);",
+        "  vec4 c2 = indice_time2*getColor(texture2,textureMask2,distortion2,v_texcoord2);",
+        "  vec4 c3 = indice_time3*getColor(texture3,textureMask3,distortion3,v_texcoord3);",
+        "  vec4 c4 = indice_time4*getColor(texture4,textureMask4,distortion4,v_texcoord4);",
+//        "  vec4 color = c0+c1+c2+c3+c4;",
 
-        "  vec4 c5 = getColor(texture0bis,textureMask0,distortion0,v_texcoord0bis);",
-        "  vec4 c6 = getColor(texture1bis,textureMask1,distortion1,v_texcoord1bis);",
-        "  vec4 c7 = getColor(texture2bis,textureMask2,distortion2,v_texcoord2bis);",
-        "  vec4 c8 = getColor(texture3bis,textureMask3,distortion3,v_texcoord3bis);",
-        "  vec4 c9 = getColor(texture4bis,textureMask4,distortion4,v_texcoord4bis);",
+
+        "  vec4 c5 = (1.-indice_time0)*getColor(texture0bis,textureMask0,distortion0,v_texcoord0bis);",
+        "  vec4 c6 = (1.-indice_time1)*getColor(texture1bis,textureMask1,distortion1,v_texcoord1bis);",
+        "  vec4 c7 = (1.-indice_time2)*getColor(texture2bis,textureMask2,distortion2,v_texcoord2bis);",
+        "  vec4 c8 = (1.-indice_time3)*getColor(texture3bis,textureMask3,distortion3,v_texcoord3bis);",
+        "  vec4 c9 = (1.-indice_time4)*getColor(texture4bis,textureMask4,distortion4,v_texcoord4bis);",
         "  vec4 color = c0+c1+c2+c3+c4+c5+c6+c7+c8+c9;",
 
         "  if(color.a>1.) color /= color.a;",
