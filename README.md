@@ -19,7 +19,7 @@ See [http://itowns.github.io/] for more informations.
 - Point Clouds
 - 3D textured models
 - WFS Vector
-    
+
 ![iTowns screenshot](http://www.itowns.fr/videos/screenshotGIT.jpg)
 
 The V1 of iTowns Open Source is the core of the original iTowns from IGN Matis lab. As such, it contains a subset of the original application features.
@@ -50,21 +50,20 @@ It includes :
 
 ### Getting started
 
-You have to clone the iTowns and sample data repositories, start a webserver, and you have a running demo.
-
-Open a command line and run :
+To get a quick idea of what iTowns is, just type in what follows in the
+command line :
 
 ```
 git clone https://github.com/iTowns/itowns.git
 git clone https://github.com/iTowns/itowns-sample-data.git
-python -m SimpleHTTPServer
+python -m SimpleHTTPServer 8000
 ```
 
-Now open [http://localhost:8000/itowns/](http://localhost:8000/itowns/) and enjoy !
+The first command just clones this repository. The second one clones the sample
+data repository and the third lauch a simple HTTP serveur on your machine on
+port 8000 (choose another available port if 8000 is already in use).
 
-### Notes
-
-The application should be able to work without the need of a local database or PHP scripts. But you will still need to have a local server running like apache.
+Then just point your web browser at [http://localhost:8000/itowns/](http://localhost:8000/itowns/) and enjoy !
 
 ### Roadmap items
 
