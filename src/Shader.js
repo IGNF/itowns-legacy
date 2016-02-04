@@ -79,7 +79,7 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
              
              
 
-    shaderTextureProjectiveVS : [
+    shaderTextureProjective5VS : [
         
         "#ifdef GL_ES",
         "precision  highp float;",
@@ -119,7 +119,7 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
         "}"
     ],
     
-     shaderTextureProjectiveFS : [
+     shaderTextureProjective5FS : [
          
       
         "#ifdef GL_ES",
@@ -142,23 +142,22 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
         "vec2 corrected0,corrected1,corrected2,corrected3,corrected4;",
         "float width = 2048.0;",
         "float height = 2048.0;",
-        "float cpps = 1042.178;",
-        "float lpps = 1020.435;",
-        "vec2 pps = vec2(cpps,lpps);",
+        //"float cpps = 1042.178;",
+        //"float lpps = 1020.435;",
+        //"vec2 pps = vec2(cpps,lpps);",
+
       // Function to correct coordinate using 3rd degree polynome and max
-      " vec2 correctDistortionAndCoord(vec4 dist, vec4 v_texcoord){",     
-      "      vec2 v = v_texcoord.xy/v_texcoord.w - pps;",
+      " vec2 correctDistortionAndCoord(vec4 v_texcoord){",     
       "      vec2 normCoord = v_texcoord.xy/(v_texcoord.w);",
       "      return vec2(normCoord.x/width , 1. - normCoord.y/height); ",
-
       "  }",
        " void main(void)",
        " {  ",
-           " corrected0 = vec2(v_texcoord0.x,v_texcoord0.y);",
-           " corrected1 = vec2(v_texcoord1.x,v_texcoord1.y);",
-           " corrected2 = vec2(v_texcoord2.x,v_texcoord2.y);",
-           " corrected3 = vec2(v_texcoord3.x,v_texcoord2.y);",
-           " corrected4 = vec2(v_texcoord4.x,v_texcoord2.y);",
+           " corrected0 = correctDistortionAndCoord(v_texcoord0);",
+           " corrected1 = correctDistortionAndCoord(v_texcoord1);",
+           " corrected2 = correctDistortionAndCoord(v_texcoord2);",
+           " corrected3 = correctDistortionAndCoord(v_texcoord3);",
+           " corrected4 = correctDistortionAndCoord(v_texcoord4);",
 
           "  if ((corrected0.x>0. && corrected0.x<1. && corrected0.y>0. && corrected0.y<1.) && v_texcoord0.w>0.){",
           "      color = texture2D(texture0,corrected0);",

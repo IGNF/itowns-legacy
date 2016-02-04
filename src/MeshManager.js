@@ -510,12 +510,13 @@
                                         this.panoInfo.pan_xml_roll_pp
                                     );
 
-                    ProjectiveTexturing.init();
-                    _projectiveMaterial = ProjectiveTexturing.createShaderMat();
+                    ProjectiveTexturing.init(matRotation);
+                    _projectiveMaterial = ProjectiveTexturing.createShaderMat(this.panoInfo);
                     mesh.material = _projectiveMaterial;
                     mesh.material.side = THREE.DoubleSide;  
                     mesh.material.transparent = false;
                     mesh.visible = _visibility;  
+                    //ProjectiveTexturing.changePanoTextureAfterloading(this.panoInfo,posWithPivot,matRotation);
                     // ProjectiveTexturing2.changePanoTextureAfterloading(this.panoInfo.filename,128,50,posWithPivot,matRotation,1);
 
                 }else {
