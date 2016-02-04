@@ -12,25 +12,16 @@
 				var _shaderMat = null;
 				var _initiated = false;
 
-				var rot21 = new THREE.Matrix4(	1,0,0,0,
-					0,1,0,0,
-					0,0,1,0,
-					0,0,0,1);
-
 				var ProjectiveTexturing = {
 
-					init: function(matRot){
+					init: function(){
 						_localImageFiles = PanoramicProvider.getImageLocal();
-						this.setRotationHeading(matRot);
 						_initiated = true;
-					},
-					setRotationHeading: function(rot){
-						rot21 = rot;
 					},
 					isInitiated: function(){
 						return _initiated;
 					},
-					createShaderMat: function(panoInfo){
+					createShaderMat: function(panoInfo,rot){
 						var tabUrl=[];
 						var tabMat=[];
 						var tabTrans=[];
@@ -38,8 +29,8 @@
 						for (var i=0; i< Ori.sensors.length; ++i){    
 							tabUrl.push(panoInfo.url_format.replace("{cam_id_pos}",Ori.sensors[i].infos.cam_id_pos));
 							var mat = new THREE.Matrix4().multiplyMatrices(Ori.getMatCam(i),Ori.getProjCam(i));
-							tabMat.push((new THREE.Matrix4().multiplyMatrices( rot21,mat.clone() )).transpose());
-							var trans = Ori.getSommet(i).clone().applyProjection( rot21); trans.w = 1;
+							tabMat.push((new THREE.Matrix4().multiplyMatrices( rot,mat.clone() )).transpose());
+							var trans = Ori.getSommet(i).clone().applyProjection( rot); trans.w = 1;
 							tabTrans.push(trans);
 							tabIntr.push(Ori.getDistortion(i));
 						}
