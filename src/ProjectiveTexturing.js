@@ -37,11 +37,11 @@
 						switch(Ori.sensors.length){
 							case 5:
 							var uniforms5 = {
-								intrinsic0: {type:"v4",value:tabIntr[0]},
-								intrinsic1: {type:"v4",value:tabIntr[1]},
-								intrinsic2: {type:"v4",value:tabIntr[2]},
-								intrinsic3: {type:"v4",value:tabIntr[3]},
-								intrinsic4: {type:"v4",value:tabIntr[4]},
+								distortion0: {type:"v4",value:tabIntr[0]},
+								distortion1: {type:"v4",value:tabIntr[1]},
+								distortion2: {type:"v4",value:tabIntr[2]},
+								distortion3: {type:"v4",value:tabIntr[3]},
+								distortion4: {type:"v4",value:tabIntr[4]},
 								mvpp0:{type: 'm4',value: tabMat[0]},
 								mvpp1:{type: 'm4',value: tabMat[1]},
 								mvpp2:{type: 'm4',value: tabMat[2]},
@@ -57,12 +57,17 @@
 								texture2: {type: 't',value: THREE.ImageUtils.loadTexture(tabUrl[2])},
 								texture3: {type: 't',value: THREE.ImageUtils.loadTexture(tabUrl[3])},
 								texture4: {type: 't',value: THREE.ImageUtils.loadTexture(tabUrl[4])},
+								textureMask0: {type: 't',value: Ori.getMask(0) },
+								textureMask1: {type: 't',value: Ori.getMask(1)},
+								textureMask2: {type: 't',value: Ori.getMask(2)},
+								textureMask3: {type: 't',value: Ori.getMask(3)},
+								textureMask4: {type: 't',value: Ori.getMask(4)}
 							};
             				// create the shader material for Three
             				_shaderMat = new THREE.ShaderMaterial({
             					uniforms:     	uniforms5,
-            					vertexShader:   Shader.shaderTextureProjective5VS.join("\n"),
-            					fragmentShader: Shader.shaderTextureProjective5FS.join("\n"),
+            					vertexShader:   Shader.shaderTextureProjective2VS.join("\n"),
+            					fragmentShader: Shader.shaderTextureProjective2FS.join("\n"),
             					side: THREE.BackSide,   
             					transparent:true
             				});
