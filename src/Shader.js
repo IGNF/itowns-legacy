@@ -281,8 +281,12 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
         "uniform sampler2D   texture2bis;",
         "uniform sampler2D   texture3bis;",
         "uniform sampler2D   texture4bis;",
-        "uniform sampler2D   textureFrontMask;",
-        "uniform sampler2D   textureBackMask;",
+
+        "uniform sampler2D   textureMask0;",
+        "uniform sampler2D   textureMask1;",
+        "uniform sampler2D   textureMask2;",
+        "uniform sampler2D   textureMask3;",
+        "uniform sampler2D   textureMask4;",
 
         "uniform vec4 factorTranslation;",	
         "uniform vec4 factorTranslationbis;",
@@ -322,9 +326,7 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
 
 
         // Distortion
-        "float cpps = 1042.178;",
-        "float lpps = 1020.435;",
-        "vec2 pps = vec2(cpps,lpps);",
+        "vec2 pps = vec2(1042.178,1020.435);",
 
         "vec4 color = vec4(0.,0.,0.,0.);",
         "vec4 colorbis = vec4(0.,0.,0.,0.);",
@@ -336,21 +338,29 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
 
 
         // Function to correct coordinate using 3rd degree polynome and max
-      " vec2 correctDistortionAndCoord(vec4 dist, vec4 v_texcoord){",
+      " vec3 correctDistortionAndCoord(vec4 dist, vec4 v_texcoord){",
             
       "      vec2 v = v_texcoord.xy/v_texcoord.w - pps;",
       "      float v2 = dot(v,v);",
-      "      if(v2>dist.w) return vec2(-2.,-2.); // false;",
+      "      if(v2>dist.w) return vec3(-1.); // false;",
       "      float r = v2*(dist.x+v2*(dist.y+v2*dist.z));",
       "      vec2 normCoord = v_texcoord.xy/(v_texcoord.w) + r*v;",
                 //float r = v2*(dist.x+v2*(dist.y+v2*dist.z));
                 //vec2 normCoord = v_texcoord.xy + r*v*v_texcoord.w;
 
-      "      return vec2(normCoord.x/width , 1. - normCoord.y/height); ",
+      "      return vec3(normCoord.x/width , 1. - normCoord.y/height, v_texcoord.w); ",
 
       "  }",
 
-
+      "vec4 getColor(sampler2D texture, sampler2D mask, vec3 p)",
+      " {  ",
+      "   vec2 d2 = min(p.xy,vec2(1.)-p.xy);",
+      "   float d = min(d2.x*width,d2.y*height);",
+      "   if (d<0. || p.z<0.) return vec4(0.);",
+      "   vec4 c = texture2D(texture,p.xy);",
+      "   float m = min(d*0.1,1.)*(1.-texture2D(mask,p.xy).r);",
+      "   return c*m;",
+      " }",
 
        " void main(void)",
        " {	",
@@ -358,51 +368,20 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
 
             // FIRSTLY the previous position for nice transition
 
-        "    if(mobileOn==0){    // If not on light config we compute the rendering for previous pano ",
+        "  vec3 p0 = correctDistortionAndCoord(intrinsic300, v_texcoord0);",
+        "  vec4 c0 = getColor(texture0,textureMask0,p0);",
+        "  vec3 p1 = correctDistortionAndCoord(intrinsic301, v_texcoord1);",
+        "  vec4 c1 = getColor(texture1,textureMask1,p1);",
+        "  vec3 p2 = correctDistortionAndCoord(intrinsic302, v_texcoord2);",
+        "  vec4 c2 = getColor(texture2,textureMask2,p2);",
+        "  vec3 p3 = correctDistortionAndCoord(intrinsic303, v_texcoord3);",
+        "  vec4 c3 = getColor(texture3,textureMask3,p3);",
+        "  vec3 p4 = correctDistortionAndCoord(intrinsic304, v_texcoord4);",
+        "  vec4 c4 = getColor(texture4,textureMask4,p4);",
 
-          "          corrected0 = correctDistortionAndCoord(intrinsic300, v_texcoord0);",
-
-   "                 if ((corrected0.x>=0. && corrected0.x<=1. && corrected0.y>=0. && corrected0.y<=1.) && v_texcoord0.w>0.)",
-        "                 color = texture2D(texture0,corrected0); ",
-        "            else{",
-
-                       " corrected1 = correctDistortionAndCoord(intrinsic301, v_texcoord1);",
-
-                      "  if ((corrected1.x>=0. && corrected1.x<=1. && corrected1.y>=0. && corrected1.y<=1.) && v_texcoord1.w>0.){",
-                      "   color = texture2D(texture1,corrected1); ",
-                      "   color.a = 1. - texture2D(textureFrontMask,corrected1).a;",
-                      "  }",
-                     "   else{",
-
-                       "     corrected2 = correctDistortionAndCoord(intrinsic302, v_texcoord2);",
-
-                        "    if ((corrected2.x>=0. && corrected2.x<=1. && corrected2.y>=0. && corrected2.y<=1.) && v_texcoord2.w>0.)",
-                       "        color = texture2D(texture2,corrected2); ",
-                      "       else{",
-
-
-
-                              "  corrected3 = correctDistortionAndCoord(intrinsic303, v_texcoord3);",
-
-
-                            "    if ((corrected3.x>=0. && corrected3.x<=1. && corrected3.y>=0. && corrected3.y<=1.) && v_texcoord3.w>0.){",
-                           "             color = texture2D(texture3,corrected3); ",
-                           "             color.a = 1. - texture2D(textureBackMask,corrected3).a;",
-                           "     }",
-                          "      else{",
-
-                             "       corrected4 = correctDistortionAndCoord(intrinsic304, v_texcoord4);",
-
-                             "       if ((corrected4.x>=0. && corrected4.x<=1. && corrected4.y>=0. && corrected4.y<=1.) && v_texcoord4.w>0.)",
-                            "                        color = texture2D(texture4,corrected4); ",
-                             "   }",
-                        "    }",
-                       " }",
-                  "  }",
-           " }",
-           " saveColor = color;",
-
-
+        "  vec4 color = c0+c1+c2+c3+c4;",
+        "  if(color.a>1.) color /= color.a;",
+/*
 // SECONDLY 
         
    
@@ -423,6 +402,7 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
                     // Blending cam0/cam1
             "        if (((corrected1bis.x>=0. && corrected1bis.x<=1. && corrected1bis.y>=0. && corrected1bis.y<=1.) && v_texcoord1bis.w>0.)&& corrected0bis.x < 0.03){ ",
            "             colorbis = colorbis * (corrected0bis.x/ 0.03) +   texture2D(texture1bis,corrected1bis) * (1.- (corrected0bis.x)/ 0.03);",
+                      "   color.xyz *= 1. - texture2D(textureMask1,corrected1).a;",
                     "}",
                     // Blending cam0/cam2
                "     if (((corrected2bis.x>=0. && corrected2bis.x<=1. && corrected2bis.y>=0. && corrected2bis.y<=1.) && v_texcoord2bis.w>0.)&& corrected0bis.y >0.97){ ",
@@ -451,7 +431,7 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
            "  if ((corrected1bis.x>0. && corrected1bis.x<1. && corrected1bis.y>0. && corrected1bis.y<1.) && v_texcoord1bis.w>0.){ ",
 
            "            colorbis =  texture2D(texture1bis,corrected1bis); ",
-          "             colorbis.a = 1.- texture2D(textureFrontMask,corrected1bis).a; ",
+          "             colorbis.a = 1.- texture2D(textureMask1,corrected1bis).a; ",
 
              "          if(blending){ ",
                            // Blending cam1/cam2
@@ -498,7 +478,7 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
        "     if ((corrected3bis.x>0.01 && corrected3bis.x<0.99 && corrected3bis.y>0. && corrected3bis.y<1.) && v_texcoord3bis.w>0.){ ",
              
         "           colorbis = texture2D(texture3bis,corrected3bis); ",
-        "           colorbis.a = 1.- texture2D(textureBackMask,corrected3bis).a; ",
+        "           colorbis.a = 1.- texture2D(textureMask3,corrected1bis).a; ",
 
                     // Blending cam3/cam4
          "           if(blending){ ",
@@ -527,7 +507,8 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
           "        color = indice_time4 * (saveColor - colorbis) + colorbis; ",
           "  } ",
 
-         "   color.a = alpha; ",
+  */
+        "   color.a *= alpha; ",
         "    gl_FragColor = color; ",
 
     "} "         
@@ -565,8 +546,11 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
         "uniform sampler2D   texture2bis;",
         "uniform sampler2D   texture3bis;",
         "uniform sampler2D   texture4bis;",
-        "uniform sampler2D   textureFrontMask;",
-        "uniform sampler2D   textureBackMask;",
+        "uniform sampler2D   textureMask0;",
+        "uniform sampler2D   textureMask1;",
+        "uniform sampler2D   textureMask2;",
+        "uniform sampler2D   textureMask3;",
+        "uniform sampler2D   textureMask4;",
 
         "uniform vec4 factorTranslation;	",
         "uniform vec4 factorTranslationbis;",
@@ -691,7 +675,7 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
         "     if ((corrected1bis.x>0. && corrected1bis.x<1. && corrected1bis.y>0. && corrected1bis.y<1.) && v_texcoord1bis.w>0.){",
 
         "               colorbis =  texture2D(texture1bis,corrected1bis);",
-         "              colorbis.a = 1.- texture2D(textureFrontMask,corrected1bis).a;",
+         "              colorbis.a = 1.- texture2D(textureMask1,corrected1bis).a;",
 
           "             if(blending){",
                            // Blending cam1/cam2
@@ -738,7 +722,7 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
         "    if ((corrected3bis.x>0.01 && corrected3bis.x<0.99 && corrected3bis.y>0. && corrected3bis.y<1.) && v_texcoord3bis.w>0.){",
              
         "           colorbis = texture2D(texture3bis,corrected3bis);",
-        "           colorbis.a = 1.- texture2D(textureBackMask,corrected3bis).a;",
+        "           colorbis.a = 1.- texture2D(textureMask3,corrected3bis).a;",
 
                     // Blending cam3/cam4
          "           if(blending){",
