@@ -10,6 +10,8 @@
 iTowns is a web framework written in Javascript/WebGL for visualisation of 3D geographic data allowing precise measurements in 3D.
 Its first purpose was the visualisation of street view images and terrestrial lidar point cloud. It has then been extended to handle more data types.
 
+See [http://itowns.github.io/](url){:target="_blank"} for more informations.
+
 ### Supported data types
 
 - Oriented images
