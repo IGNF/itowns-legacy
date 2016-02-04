@@ -114,32 +114,40 @@
 
       <script data-main="src/app.js" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.15/require.min.js"></script>   <!-- build/itowns.js -->
       <script>
-           
+
           var itowns;
-                  
+
           function initialize() {
             if (typeof allInitialized != 'undefined' && allInitialized) {   // Check that everything is loaded 
-               
-                 
+
                  itowns = new API({
-                        
                         // Optional (Default values in Config.js) 
                         dataURL: {
+                        
                             urlMetaDataProviderPos  : "../itowns-sample-data/panoramicsMetaData.json",
                             urlImageFile            : "../itowns-sample-data/images/",
                             urlMetaProviderSensor   : "../itowns-sample-data/cameraCalibration.json",
                             urlBuildingFootprint    : "../itowns-sample-data/buildingFootprint.json",
                             urlDTM                  : "../itowns-sample-data/dtm.json",
                             urlPointCloud           : "../itowns-sample-data/pointclouds/",
-                            url3DBuilding           : "../itowns-sample-data/Buildings3D/"  
+                            url3DBuilding           : "../itowns-sample-data/Buildings3D/"
+                        
+                        /*
+                            urlMetaDataProviderPos  : "../itowns-sample-data-small/panoramicsMetaData.json",
+                            urlImageFile            : "../itowns-sample-data-small/images/",
+                            urlMetaProviderSensor   : "../itowns-sample-data-small/cameraCalibration.json",
+                            urlBuildingFootprint    : "",
+                            urlDTM                  : "../itowns-sample-data-small/dtm.json",
+                            urlPointCloud           : "../itowns-sample-data/pointclouds/",
+                            url3DBuilding           : ""
+                        */
                         },
 
                         usingLaserCloud  : false,
-                        usingStreetView : true,
+                        usingStreetView  : false,
                         usingBati3D      : false,
                         positionInit     : {x:651182.91,y:39.6,z:6861343.03}
                  });
-                //itowns.addLayer("pointCloud");
             }
             else {
                   console.log("checking");
