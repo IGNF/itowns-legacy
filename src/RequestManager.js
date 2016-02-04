@@ -7,7 +7,7 @@ define(['jquery', 'Config'],function($, Config) {
     //*************************************
    
     //var GEOPORTAL_CLASSES = ['OpenLayers','Geoportal'],
-    DEBUG = true;
+    var DEBUG = true;
   
     //Web processing service
     var _capabilitiesWPS     = null;
