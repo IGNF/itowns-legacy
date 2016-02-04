@@ -41,7 +41,7 @@
 							tabMat.push((new THREE.Matrix4().multiplyMatrices( rot21,mat.clone() )).transpose());
 							var trans = Ori.getSommet(i).clone().applyProjection( rot21); trans.w = 1;
 							tabTrans.push(trans);
-							tabIntr.push(Ori.getDistortionAndR2ForCamAsVec4(i));
+							tabIntr.push(Ori.getDistortion(i));
 						}
 						switch(Ori.sensors.length){
 							case 5:
