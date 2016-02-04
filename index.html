@@ -3,6 +3,109 @@
     <head>
         <title>iTowns TEST</title>
         <meta charset="UTF-8">
+        <style>
+            .controls {
+                border-radius: 5px;
+                position: absolute; 
+                top: 10px; 
+                left: 10px; 
+                background: rgba(200,200,200,0.5); 
+                font-family: Arial; 
+                padding: 10px;
+                color: white;
+            }
+
+            .row {
+            display: table-row;
+            }
+
+            .row .labelswitch,
+            .row .switch {
+            display: table-cell;
+            vertical-align: middle;
+            padding: 2px;
+            }
+
+            *,
+            *:before,
+            *:after {
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+            }
+
+            .cmn-toggle {
+            position: absolute;
+            margin-left: -9999px;
+            visibility: hidden;
+            }
+            .cmn-toggle + label {
+            display: block;
+            position: relative;
+            cursor: pointer;
+            outline: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            }
+
+            input.cmn-toggle-round + label {
+            padding: 2px;
+            width: 40px;
+            height: 20px;
+            background-color: #dddddd;
+            -webkit-border-radius: 20px;
+            -moz-border-radius: 20px;
+            -ms-border-radius: 20px;
+            -o-border-radius: 20px;
+            border-radius: 20px;
+            }
+            input.cmn-toggle-round + label:before, input.cmn-toggle-round + label:after {
+            display: block;
+            position: absolute;
+            top: 1px;
+            left: 1px;
+            bottom: 1px;
+            content: "";
+            }
+            input.cmn-toggle-round + label:before {
+            right: 1px;
+            background-color: #f1f1f1;
+            -webkit-border-radius: 20px;
+            -moz-border-radius: 20px;
+            -ms-border-radius: 20px;
+            -o-border-radius: 20px;
+            border-radius: 20px;
+            -webkit-transition: background 0.4s;
+            -moz-transition: background 0.4s;
+            -o-transition: background 0.4s;
+            transition: background 0.4s;
+            }
+            input.cmn-toggle-round + label:after {
+            width: 18px;
+            background-color: #fff;
+            -webkit-border-radius: 100%;
+            -moz-border-radius: 100%;
+            -ms-border-radius: 100%;
+            -o-border-radius: 100%;
+            border-radius: 100%;
+            -webkit-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            -moz-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            -webkit-transition: margin 0.4s;
+            -moz-transition: margin 0.4s;
+            -o-transition: margin 0.4s;
+            transition: margin 0.4s;
+            }
+            input.cmn-toggle-round:checked + label:before {
+            background-color: #8ce196;
+            }
+            input.cmn-toggle-round:checked + label:after {
+            margin-left: 20px;
+            }
+
+        </style>
     </head>
     <body style="height: 100%;overflow: hidden;margin:0;padding:0" >
    
@@ -30,25 +133,42 @@
                             urlPointCloud           : "../itowns-sample-data/pointclouds/",
                             url3DBuilding           : "../itowns-sample-data/Buildings3D/"  
                         },
-                        
-                        usingLaserCloud  : true,
-                        //usingStreetView : true,
-                       // usingBati3D      : true,
+
+                        usingLaserCloud  : false,
+                        usingStreetView : true,
+                        usingBati3D      : false,
                         positionInit     : {x:651182.91,y:39.6,z:6861343.03}
                  });
-                 
-                // itowns.addLayer("pointCloud");
- 
+                //itowns.addLayer("pointCloud");
             }
             else {
                   console.log("checking");
                   setTimeout(initialize, 150);
             }
          }
-        
+
        initialize();
 
        </script>
-        
+
+        <div id="controls" class="controls">
+            <div class="row">
+                <div class="labelswitch">Laser cloud</div>
+                <div class="switch">
+                    <input id="checkboxLaserCloud" class="cmn-toggle cmn-toggle-round" type="checkbox">
+                    <label for="checkboxLaserCloud" onclick="laserPointMeasureEnable()"></label>
+                </div>
+            </div>
+
+            <div class="help">
+                Use mouse to <strong>rotate</strong> the camera.<br />
+                Use mouse wheel to <strong>zoom in or out</strong>.<br />
+                Use mouse left click to <strong>move forward</strong>.<br />
+                Use mouse right click to <strong>place a point</strong>.<br />
+                Use keyboard arrows to <strong>move up and down</strong>.<br />
+            </div>
+
+        </div>
+
     </body>
 </html>
