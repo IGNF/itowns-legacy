@@ -1,5 +1,5 @@
 requirejs.config({
-    baseUrl: 'src/',
+    baseUrl: '../itowns/src/',
     paths : {
         'geoportail' : "http://api.ign.fr/geoportail/api/js/2.0.3/Geoportal",
         'jquery' : "//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min"      

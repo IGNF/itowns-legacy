@@ -193,7 +193,8 @@ define (['lib/three', 'Ori','MeshManager', 'PanoramicProvider', 'lib/when', 'Nav
         
         // ex: Toulouse-131010_0729-00-00002_0000501
         getPanoName: function(){
-            return _panoInfo.filename;
+            var base = _panoInfo.url_format.substring(_panoInfo.url_format.lastIndexOf('/') + 1);
+            return base.replace("{cam_id_pos}","00");
         },
         
         // Toulouse-131010_0729-00-00002_0000501
@@ -219,7 +220,7 @@ define (['lib/three', 'Ori','MeshManager', 'PanoramicProvider', 'lib/when', 'Nav
         
         // get date frome name (not db pan_date)
         getPanoDate: function(){
-            var datee = _panoInfo.filename.substr(_panoInfo.filename.indexOf('-')+1,6);  // ex:080422
+            var datee = _panoInfo.url_format.substr(_panoInfo.url_format.indexOf('-')+1,6);  // ex:080422
             var dateNewFormat = "20"+ datee.substr(0,2)+ "_"+ datee.substr(2,2) + "_"+ datee.substr(4,2);
             //ex: 2008_04_22
             return dateNewFormat;

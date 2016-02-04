@@ -134,17 +134,17 @@
 	            		img.onload = function () { 	
 	            			var mat = new THREE.Matrix4().multiplyMatrices(Ori.getMatCam(i),Ori.getProjCam(i));
 	            			var trans = Ori.getSommet(i).clone().applyProjection( rotation); trans.w = 1;	
-                		_shaderMat.uniforms['mvpp'+Number(i)].value = _shaderMat.uniforms['mvpp'+Number(i)+'bis'].value;
-                		_shaderMat.uniforms['translation'+Number(i)].value = _shaderMat.uniforms['translation'+Number(i)+'bis'].value;
-                		_shaderMat.uniforms['texture'+Number(i)].value =_shaderMat.uniforms['texture'+Number(i)+'bis'].value;
+                		_shaderMat.uniforms['mvpp'+i].value = _shaderMat.uniforms['mvpp'+i+'bis'].value;
+                		_shaderMat.uniforms['translation'+i].value = _shaderMat.uniforms['translation'+i+'bis'].value;
+                		_shaderMat.uniforms['texture'+i].value =_shaderMat.uniforms['texture'+i+'bis'].value;
 
-	            			_shaderMat.uniforms['mvpp'+Number(i)+'bis'].value = (new THREE.Matrix4().multiplyMatrices( rotation,mat.clone() )).transpose();
-	            			_shaderMat.uniforms['translation'+Number(i)+'bis'].value = translation.clone().add(trans);
-	            			_shaderMat.uniforms['texture'+Number(i)+'bis'].value = new THREE.Texture(this,THREE.UVMapping, 
+	            			_shaderMat.uniforms['mvpp'+i+'bis'].value = (new THREE.Matrix4().multiplyMatrices( rotation,mat.clone() )).transpose();
+	            			_shaderMat.uniforms['translation'+i+'bis'].value = translation.clone().add(trans);
+	            			_shaderMat.uniforms['texture'+i+'bis'].value = new THREE.Texture(this,THREE.UVMapping, 
 	            				THREE.RepeatWrapping, THREE.RepeatWrapping, THREE.LinearFilter,THREE.LinearFilter,THREE.RGBFormat);
-	            			_shaderMat.uniforms['texture'+Number(i)+'bis'].value.needsUpdate = true;
+	            			_shaderMat.uniforms['texture'+i+'bis'].value.needsUpdate = true;
 
-	            			_shaderMat.uniforms['indice_time'+Number(i)].value = 1;			
+	            			_shaderMat.uniforms['indice_time'+i].value = 1;			
             				that.tweenIndiceTime(i);
             		}; 
 	            		img.src = url; 
