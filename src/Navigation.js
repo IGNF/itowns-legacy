@@ -114,12 +114,8 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
                                         targetPanoInfo.pan_xml_roll_pp
                                     );
 
-                var cameraVersion = this.getCameraVersionFromPanoName(targetPanoInfo.filename);
-                if (cameraVersion == 2)
-                    _barycentre = Ori.getBarycentreV2();
-                else
-                    _barycentre = Ori.getBarycentreV1();  // For Paris.. and Terramob (old chantiers)
-
+                _barycentre = Ori.getPosition();
+                
                 _barycentre.applyProjection(matRotation);
 
                 gfxEngine.translateCameraSmoothly(posWithPivot.x + _barycentre.x, posWithPivot.y +_barycentre.y + altiOption, posWithPivot.z+ _barycentre.z);
@@ -310,11 +306,7 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
                                     );
 
 
-                var cameraVersion = this.getCameraVersionFromPanoName(targetPanoInfo.filename);
-                if (cameraVersion == 2)
-                    _barycentre = Ori.getBarycentreV2();
-                else
-                    _barycentre = Ori.getBarycentreV1();  // For Paris.. and Terramob (old chantiers)
+                _barycentre = Ori.getPosition();  // For Paris.. and Terramob (old chantiers)
 
                 _barycentre.applyProjection(matRotation);
 

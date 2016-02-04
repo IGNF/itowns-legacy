@@ -17,6 +17,7 @@ define ('Sensor',['lib/three','Utils'], function (THREE,Utils) {
         var disto = new THREE.Vector3().fromArray(infos.distortion.poly357);
         var r2max = this.getDistortion_r2max(disto);
         this.distortion = new THREE.Vector4(disto.x,disto.y,disto.z,r2max);
+        this.mask = (infos.mask) ? THREE.ImageUtils.loadTexture(infos.mask) : undefined;
 
         // change conventions
         this.orientation = infos.orientation;
