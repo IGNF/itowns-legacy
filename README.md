@@ -120,10 +120,6 @@ To change the port the server listens on, pass additional `-- --port PORT` argum
 npm start -- --port 8000
 ```
 
-### Notes
-
-The application should be able to work without the need of a local database or PHP scripts. But you will still need to have a local server running like apache.
-
 ### Roadmap items
 
 The following tasks are currently worked on :
