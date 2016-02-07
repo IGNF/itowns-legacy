@@ -14,7 +14,12 @@ define ('Sensor',['lib/three','Utils'], function (THREE,Utils) {
         this.rotation = new THREE.Matrix4().fromArray( infos.rotation ).transpose();
         this.projection = new THREE.Matrix4().fromArray( infos.projection ).transpose();
         this.pps = new THREE.Vector2().fromArray(infos.distortion.pps);
-        var disto = new THREE.Vector3().fromArray(infos.distortion.poly357);
+        // set a default size for backward compatibility because the size is not defined in older sensor files
+	if (infos.size)
+		this.size = new THREE.Vector2().fromArray(infos.size);
+	else
+		this.size = new THREE.Vector2(2048.,2048.);
+	var disto = new THREE.Vector3().fromArray(infos.distortion.poly357);
         var r2max = this.getDistortion_r2max(disto);
         this.distortion = new THREE.Vector4(disto.x,disto.y,disto.z,r2max);
         this.mask = (infos.mask) ? THREE.ImageUtils.loadTexture(infos.mask) : undefined;
