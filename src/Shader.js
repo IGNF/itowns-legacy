@@ -223,182 +223,143 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
         ],
     
              
-    shaderTextureProjective2VS : [
-        
-        "#ifdef GL_ES",
-        "precision  highp float;",
-        "#endif",
+	// without_two_pano: set true to create a lightened shader (for mobile) 
+    createSimpleProjectiveVS : function(nbImages,without_two_pano)
+    {
+      var shader = [];
+      shader.push("#ifdef GL_ES");
+      shader.push("precision  highp float;");
+      shader.push("#endif");
+      for (var i=0; i< nbImages; ++i){    
+        if (!without_two_pano)
+        {
+          shader.push("uniform mat4 mvpp"+i+";");
+          shader.push("uniform vec4 translation"+i+";");
+          shader.push("varying vec4 v_texcoord"+i+";");
+        }
+        shader.push("uniform mat4 mvpp"+i+"bis;");
+        shader.push("uniform vec4 translation"+i+"bis;");
+        shader.push("varying vec4 v_texcoord"+i+"bis;");
+      }
+      shader.push("vec4 pos;");
+      shader.push("void main() {");
+      shader.push("    pos =  vec4(position,1.);");
+      for (var i=0; i< nbImages; ++i){
+        if (!without_two_pano)
+          shader.push("        v_texcoord"+i+" =  mvpp"+i+" * (pos- translation"+i+");");
+        shader.push("        v_texcoord"+i+"bis =  mvpp"+i+"bis * (pos- translation"+i+"bis);");
+      }
+      shader.push("    gl_Position  =  projectionMatrix *  modelViewMatrix * pos;");
+      shader.push("}");
+      return shader;
+    },
 
-        // Those uniforms are 
-        // ModelView * Projection * rotation of the rigid sys (Stereopolis)
+        // without_two_pano: set true to create a lightened shader (for mobile) 
+    createSimpleProjectiveFS : function(nbImages,without_two_pano,without_disto)
+    {
+      var shader = [];
+      shader.push("#ifdef GL_ES");
+      shader.push("precision  highp float;");
+      shader.push("#endif");
 
-        "uniform mat4 mvpp0;",
-        "uniform mat4 mvpp1;",
-        "uniform mat4 mvpp2;",
-        "uniform mat4 mvpp3;",
-        "uniform mat4 mvpp4;",
-        "uniform mat4 mvpp0bis;",
-        "uniform mat4 mvpp1bis;",
-        "uniform mat4 mvpp2bis;",
-        "uniform mat4 mvpp3bis;",
-        "uniform mat4 mvpp4bis;",
-
-        "uniform vec4 translation0;",
-        "uniform vec4 translation1;",
-        "uniform vec4 translation2;",
-        "uniform vec4 translation3;",
-        "uniform vec4 translation4;",
-        "uniform vec4 translation0bis;",
-        "uniform vec4 translation1bis;",
-        "uniform vec4 translation2bis;",
-        "uniform vec4 translation3bis;",
-        "uniform vec4 translation4bis;",
-
-        "varying vec4 v_texcoord0;",
-        "varying vec4 v_texcoord1;",
-        "varying vec4 v_texcoord2;",
-        "varying vec4 v_texcoord3;",
-        "varying vec4 v_texcoord4;",
-        "varying vec4 v_texcoord0bis;",
-        "varying vec4 v_texcoord1bis;",
-        "varying vec4 v_texcoord2bis;",
-        "varying vec4 v_texcoord3bis;",
-        "varying vec4 v_texcoord4bis;",
-
-        "vec4 pos;",
-
-        "void main() {",
-
-        "    pos =  vec4(position,1.);",
-        "    v_texcoord0 =  mvpp0 * (pos- translation0);",
-        "    v_texcoord1 =  mvpp1 * (pos- translation1);",
-        "    v_texcoord2 =  mvpp2 * (pos- translation2);",
-        "    v_texcoord3 =  mvpp3 * (pos- translation3);",
-        "    v_texcoord4 =  mvpp4 * (pos- translation4);",
-        "    v_texcoord0bis =  mvpp0bis * (pos- translation0bis);",
-        "    v_texcoord1bis =  mvpp1bis * (pos- translation1bis);",
-        "    v_texcoord2bis =  mvpp2bis * (pos- translation2bis);",
-        "    v_texcoord3bis =  mvpp3bis * (pos- translation3bis);",
-        "    v_texcoord4bis =  mvpp4bis * (pos- translation4bis);",
-
-        "    gl_Position  =  projectionMatrix *  modelViewMatrix * pos;",
-
-        "}"
-    ],
-    
-     shaderTextureProjective2FS : [
-         
-        "#ifdef GL_ES",
-        "precision  highp float;",
-        "#endif",
-
-        "uniform mat4 mvpp0;",
-        "uniform mat4 mvpp1;",
-        "uniform mat4 mvpp2;",
-        "uniform mat4 mvpp3;",
-        "uniform mat4 mvpp4;",
-        "uniform mat4 mvpp0bis;",
-        "uniform mat4 mvpp1bis;",
-        "uniform mat4 mvpp2bis;",
-        "uniform mat4 mvpp3bis;",
-        "uniform mat4 mvpp4bis;",
-
-        "uniform sampler2D   texture0;",
-        "uniform sampler2D   texture1;",
-        "uniform sampler2D   texture2;",
-        "uniform sampler2D   texture3;",
-        "uniform sampler2D   texture4;",
-        "uniform sampler2D   texture0bis;",
-        "uniform sampler2D   texture1bis;",
-        "uniform sampler2D   texture2bis;",
-        "uniform sampler2D   texture3bis;",
-        "uniform sampler2D   texture4bis;",
-
-        "uniform sampler2D   textureMask0;",
-        "uniform sampler2D   textureMask1;",
-        "uniform sampler2D   textureMask2;",
-        "uniform sampler2D   textureMask3;",
-        "uniform sampler2D   textureMask4;",
-
-        "uniform vec4 translation;",	
-        "uniform vec4 translationbis;",
-
-        "varying vec4 v_texcoord0;",
-        "varying vec4 v_texcoord1;",
-        "varying vec4 v_texcoord2;",
-        "varying vec4 v_texcoord3;",
-        "varying vec4 v_texcoord4;",
-        "varying vec4 v_texcoord0bis;",
-        "varying vec4 v_texcoord1bis;",
-        "varying vec4 v_texcoord2bis;",
-        "varying vec4 v_texcoord3bis;",
-        "varying vec4 v_texcoord4bis;",
+      for (var i=0; i< nbImages; ++i){
+        if (!without_two_pano)
+        {
+          shader.push("uniform sampler2D   texture"+i+";");
+          shader.push("varying vec4 v_texcoord"+i+";");
+          shader.push("uniform float indice_time"+i+";");
+        }
+        shader.push("uniform sampler2D   textureMask"+i+";");
+        shader.push("uniform sampler2D   texture"+i+"bis;");
+        shader.push("varying vec4 v_texcoord"+i+"bis;");
+        shader.push("uniform vec4 distortion"+i+";");
+	shader.push("uniform vec2 pps"+i+";");
+	shader.push("uniform vec2 size"+i+";");
+      }
 
 
-        "uniform float indice_time0;",
-        "uniform float indice_time1;",
-        "uniform float indice_time2;",
-        "uniform float indice_time3;",
-        "uniform float indice_time4;",
+ 	shader.push("vec4 getColorWithCorrectedCoord(sampler2D texture, sampler2D mask, vec2 size,vec2 p)");
+        shader.push(" {  ");
+        shader.push("   vec2 d2 = min(p.xy,size-p.xy);");
+        shader.push("   float d = min(d2.x,d2.y);");
+        shader.push("   if (d<0.) return vec4(0.);");
+        shader.push("   p /= size;");
+        shader.push("   p.y = 1. - p.y; ");
+        shader.push("   vec4 c = texture2D(texture,p);");
+        shader.push("   float m = min(d*0.1,1.)*(1.-texture2D(mask,p).r);");
+        shader.push("   return c*m;");
+        shader.push(" }");
+      
+      if (!without_disto)
+      {
+	shader.push(" vec2 correctDistortionAndCoord(vec4 texcoord,vec4 dist,vec2 pps){");
+       	shader.push("      vec2 p = texcoord.xy/texcoord.w;");
+       	shader.push("      vec2 v = p - pps;");
+       	shader.push("      float v2 = dot(v,v);");
+       	shader.push("      if(v2>dist.w || texcoord.w < 0.) return vec2(-1.);");
+       	shader.push("      float r = v2*(dist.x+v2*(dist.y+v2*dist.z));");
+       	shader.push("      return p+r*v; ");
+      	shader.push("  }");
 
-        "uniform vec4 distortion0;",
-        "uniform vec4 distortion1;",
-        "uniform vec4 distortion2;",
-        "uniform vec4 distortion3;",
-        "uniform vec4 distortion4;",
-        
-        "vec2 size = vec2(2048.0,2048.0);",
-        "vec2 pps = vec2(1042.178,1020.435);",
+      	shader.push("vec4 getColor(sampler2D texture, sampler2D mask, vec4 dist, vec2 pps,vec2 size,vec4 coord)");
+      	shader.push(" {  ");
+      	shader.push("   return getColorWithCorrectedCoord(texture,mask,size,correctDistortionAndCoord(coord,dist,pps));");
+      	shader.push(" }");
 
-      " vec2 correctDistortionAndCoord(vec4 dist, vec4 texcoord){",
-      "      vec2 p = texcoord.xy/texcoord.w;",
-      "      vec2 v = p - pps;",
-      "      float v2 = dot(v,v);",
-      "      if(v2>dist.w || texcoord.w < 0.) return vec2(-1.);",
-      "      float r = v2*(dist.x+v2*(dist.y+v2*dist.z));",
-      "      return p+r*v; ",
-      "  }",
+      }
+      else
+      {
+	shader.push("vec4 getColor(sampler2D texture, sampler2D mask,vec2 size,vec4 coord)");
+        shader.push(" {  ");
+	shader.push("	vec2 p=coord.xy/coord.w;");
+	shader.push("   if ((coord.w<0.)||(p.x<0.)||(p.y<0.)||(p.x>size.x)||(p.y>size.y))");
+	shader.push("		return  vec4(0.,0.,0.,0.);");
+        shader.push("   return getColorWithCorrectedCoord(texture,mask,size,p);");
+        shader.push(" }");
+     }
+      
+      shader.push(" void main(void)");
+      shader.push(" {  ");
+      shader.push("  vec4 color = vec4(0.,0.,0.,0.);");
+      if (!without_two_pano)
+      {
+	if (!without_disto)
+        {
+	  for (var i=0; i< nbImages; ++i)
+	  {
+	    shader.push("  color += indice_time"+i+"*getColor(texture"+i+",textureMask"+i+",distortion"+i+",pps"+i+",size"+i+",v_texcoord"+i+");");
+            shader.push("  color += (1.-indice_time"+i+")*getColor(texture"+i+"bis,textureMask"+i+",distortion"+i+",pps"+i+",size"+i+",v_texcoord"+i+"bis);");
+	  }
+	}
+	else
+	{
+	  for (var i=0; i< nbImages; ++i)
+	  {
+            shader.push("  color += indice_time"+i+"*getColor(texture"+i+",textureMask"+i+",size"+i+",v_texcoord"+i+");");
+            shader.push("  color += (1.-indice_time"+i+")*getColor(texture"+i+"bis,textureMask"+i+",size"+i+",v_texcoord"+i+"bis);");
+	  }
+        } 
+      }
+      else
+      {
+	if (!without_disto)
+        {
+	  for (var i=0; i< nbImages; ++i)
+		shader.push("  color += getColor(texture"+i+"bis,textureMask"+i+",distortion"+i+",pps"+i+",size"+i+",v_texcoord"+i+"bis);");
+	}
+	else
+	{
+          for (var i=0; i< nbImages; ++i)
+                shader.push("  color += getColor(texture"+i+"bis,textureMask"+i+",size"+i+",v_texcoord"+i+"bis);");
+	}
+      }
+      
+      shader.push("  if(color.a>1.) color /= color.a;");
+      shader.push("  gl_FragColor = color; ");
+      shader.push("} ");
 
-      "vec4 getColor(sampler2D texture, sampler2D mask, vec2 p)",
-      " {  ",
-      "   vec2 d2 = min(p.xy,size-p.xy);",
-      "   float d = min(d2.x,d2.y);",
-      "   if (d<0.) return vec4(0.);",
-      "   p /= size;",
-      "   p.y = 1. - p.y; ",
-      "   vec4 c = texture2D(texture,p);",
-      "   float m = min(d*0.1,1.)*(1.-texture2D(mask,p).r);",
-      "   return c*m;",
-      " }",
-
-      "vec4 getColor(sampler2D texture, sampler2D mask, vec4 dist, vec4 coord)",
-      " {  ",
-      "   return getColor(texture,mask,correctDistortionAndCoord(dist,coord));",
-      " }",
-
-       " void main(void)",
-       " {  ",
-
-        "  vec4 c0 = indice_time0*getColor(texture0,textureMask0,distortion0,v_texcoord0);",
-        "  vec4 c1 = indice_time1*getColor(texture1,textureMask1,distortion1,v_texcoord1);",
-        "  vec4 c2 = indice_time2*getColor(texture2,textureMask2,distortion2,v_texcoord2);",
-        "  vec4 c3 = indice_time3*getColor(texture3,textureMask3,distortion3,v_texcoord3);",
-        "  vec4 c4 = indice_time4*getColor(texture4,textureMask4,distortion4,v_texcoord4);",
-//        "  vec4 color = c0+c1+c2+c3+c4;",
-
-
-        "  vec4 c5 = (1.-indice_time0)*getColor(texture0bis,textureMask0,distortion0,v_texcoord0bis);",
-        "  vec4 c6 = (1.-indice_time1)*getColor(texture1bis,textureMask1,distortion1,v_texcoord1bis);",
-        "  vec4 c7 = (1.-indice_time2)*getColor(texture2bis,textureMask2,distortion2,v_texcoord2bis);",
-        "  vec4 c8 = (1.-indice_time3)*getColor(texture3bis,textureMask3,distortion3,v_texcoord3bis);",
-        "  vec4 c9 = (1.-indice_time4)*getColor(texture4bis,textureMask4,distortion4,v_texcoord4bis);",
-        "  vec4 color = c0+c1+c2+c3+c4+c5+c6+c7+c8+c9;",
-
-        "  if(color.a>1.) color /= color.a;",
-        "  gl_FragColor = color; ",
-    "} "         
-     
-        ],
+      return shader;
+    },
         
          shaderTextureProjective2LightFS : [
         

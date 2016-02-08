@@ -50,6 +50,8 @@ define(['lib/three','Sensor','jquery', 'PanoramicProvider'],
 
       // deprecated methods
       getDistortion: function(num){ return this.sensors[num].distortion; },
+      getPPS       : function(num){ return this.sensors[num].pps;},
+      getSize      : function(num){ return this.sensors[num].size;},
       getSommet    : function(num){ return this.sensors[num].position;   },
       getProjCam   : function(num){ return this.sensors[num].projection; },
       getMatCam    : function(num){ return this.sensors[num].rotation;   },
