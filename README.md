@@ -56,7 +56,7 @@ or start developping (and then run the demo in development mode).
 #### Running the demo locally
 
 To get a quick idea of what iTowns is, just type in what follows in the
-command line :
+command line:
 
 ```
 git clone -b gh-pages https://github.com/iTowns/itowns.git
@@ -68,7 +68,7 @@ The first command just clones this repository. The second one clones the sample
 data repository and the third lauch a simple HTTP serveur on your machine on
 port 8000 (choose another available port if 8000 is already in use).
 
-Then just point your web browser at [http://localhost:8000/itowns/](http://localhost:8000/itowns/) and enjoy !
+Then just point your web browser at [http://localhost:8000/itowns-sample-data/](http://localhost:8000/itowns-sample-data/) and enjoy!
 
 #### Building iTowns
 
@@ -105,7 +105,7 @@ Then run:
 npm start
 ```
 
-and open [http://localhost:8080/itowns/](http://localhost:8080/itowns/)
+and open [http://localhost:8080/itowns-sample-data/](http://localhost:8080/itowns-sample-data/)
 (note that the port is different from the “Running the demo locally” instructions)
 
 Any change to a source file will automatically trigger a reload of the demo in the browser.
