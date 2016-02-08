@@ -37,7 +37,7 @@ The V1 of iTowns Open Source is the core of the original iTowns from IGN Matis l
 
 ### Sample data
 
-You can test iTowns with a provided sample data set, courtesy of French IGN.
+You can test iTowns with a provided sample data set, courtesy of IGN.
 
 The sample data is here : https://github.com/iTowns/itowns-sample-data
 
@@ -108,11 +108,11 @@ npm start
 and open [http://localhost:8080/itowns/](http://localhost:8080/itowns/)
 (note that the port is different from the “Running the demo locally” instructions)
 
-Any change to a source file will automatically trigger a reload of the demo in the browser.  
+Any change to a source file will automatically trigger a reload of the demo in the browser.
 The webpack-dev-server that is launched by the `npm start` command builds the project on-the-fly
 (and in-memory) and generates source-maps for easy debugging in your browser.
 Note however that the code you run in the browser is not directory the code from the source files,
-it has been processed by webpack. 
+it has been processed by webpack.
 
 To change the port the server listens on, pass additional `-- --port PORT` arguments, e.g.
 
@@ -133,7 +133,7 @@ Meanwhile, iTowns version 2 is also at the design phase.
 
 ### Support
 
-iTowns is an original work from French IGN, MATIS research laboratory.
+iTowns is an original work from IGN, MATIS research laboratory.
 It has been funded through various research programs involving the French National Research Agency, Cap Digital, UPMC, Mines ParisTec, CNRS, LCPC.
 
 iTowns is currently maintained by IGN ( http://www.ign.fr ) and Oslandia ( http://www.oslandia.com )
