@@ -6,8 +6,8 @@
 		* and its projective camera information.
 		*/
 
-		define (['GraphicEngine','lib/three','Ori','Shader', 'PanoramicProvider'],
-			function (graphicEngine, THREE, Ori, Shader, PanoramicProvider) {
+		define (['GraphicEngine','lib/three','Ori','Shader', 'PanoramicProvider','url'],
+			function (graphicEngine, THREE, Ori, Shader, PanoramicProvider,url) {
 
 				window.requestAnimSelectionAlpha = (function(){
                          return  window.requestAnimationFrame || 
@@ -38,8 +38,10 @@
 						var tabMat=[];
 						var tabTrans=[];
 						var tabIntr=[];
-						for (var i=0; i< Ori.sensors.length; ++i){    
-							tabUrl.push(panoInfo.url_format.replace("{cam_id_pos}",Ori.sensors[i].infos.cam_id_pos));
+						var baseUrl = PanoramicProvider.getMetaDataSensorURL();
+						for (var i=0; i< Ori.sensors.length; ++i){
+							var panoUrl = panoInfo.url_format.replace("{cam_id_pos}",Ori.sensors[i].infos.cam_id_pos);
+							tabUrl.push(url.resolve(baseUrl,panoUrl));
 							var mat = new THREE.Matrix4().multiplyMatrices(Ori.getMatCam(i),Ori.getProjCam(i));
 							tabMat.push((new THREE.Matrix4().multiplyMatrices( rot,mat.clone() )).transpose());
 							var trans = Ori.getSommet(i).clone().applyProjection( rot); trans.w = 1;
@@ -130,7 +132,6 @@
 	            		var img = new Image(); 
 	            		img.crossOrigin = 'anonymous';
 	            		var that = this;
-	            		var url = panoInfo.url_format.replace("{cam_id_pos}",Ori.sensors[i].infos.cam_id_pos);
 	            		img.onload = function () { 	
 	            			var mat = new THREE.Matrix4().multiplyMatrices(Ori.getMatCam(i),Ori.getProjCam(i));
 	            			var trans = Ori.getSommet(i).clone().applyProjection( rotation); trans.w = 1;	
@@ -147,7 +148,9 @@
 	            			_shaderMat.uniforms['indice_time'+i].value = 1;			
             				that.tweenIndiceTime(i);
             		}; 
-	            		img.src = url; 
+						var baseUrl = PanoramicProvider.getMetaDataSensorURL();
+						var panoUrl = panoInfo.url_format.replace("{cam_id_pos}",Ori.sensors[i].infos.cam_id_pos);
+	            		img.src = url.resolve(baseUrl,panoUrl); 
 	            	}
 	            }
 	            return ProjectiveTexturing

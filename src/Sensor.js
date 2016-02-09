@@ -6,9 +6,9 @@
 */
 
 
-define ('Sensor',['lib/three','Utils'], function (THREE,Utils) { 
+define ('Sensor',['lib/three','Utils','url'], function (THREE,Utils,url) { 
 
-    Sensor = function (infos){
+    Sensor = function (baseUrl,infos){
         this.infos = infos;
         this.position = new THREE.Vector3().fromArray( infos.position );
         this.rotation = new THREE.Matrix4().fromArray( infos.rotation ).transpose();
@@ -17,7 +17,7 @@ define ('Sensor',['lib/three','Utils'], function (THREE,Utils) {
         var disto = new THREE.Vector3().fromArray(infos.distortion.poly357);
         var r2max = this.getDistortion_r2max(disto);
         this.distortion = new THREE.Vector4(disto.x,disto.y,disto.z,r2max);
-        this.mask = (infos.mask) ? THREE.ImageUtils.loadTexture(infos.mask) : undefined;
+        this.mask = (infos.mask) ? THREE.ImageUtils.loadTexture(url.resolve(baseUrl,infos.mask)) : undefined;
 
         // change conventions
         this.orientation = infos.orientation;
