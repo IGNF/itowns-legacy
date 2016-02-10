@@ -26,7 +26,6 @@
 				var ProjectiveTexturing = {
 
 					init: function(){
-						_localImageFiles = PanoramicProvider.getImageLocal();
 						_initiated = true;
 					},
 					isInitiated: function(){
@@ -37,16 +36,14 @@
 						var tabUrl=[];
 						var tabMat=[];
 						var tabTrans=[];
-						var tabIntr=[];
 						var baseUrl = PanoramicProvider.getMetaDataSensorURL();
 						for (var i=0; i< Ori.sensors.length; ++i){
 							var panoUrl = panoInfo.url_format.replace("{cam_id_pos}",Ori.sensors[i].infos.cam_id_pos);
 							tabUrl.push(url.resolve(baseUrl,panoUrl));
-							var mat = new THREE.Matrix4().multiplyMatrices(Ori.getMatCam(i),Ori.getProjCam(i));
-							tabMat.push((new THREE.Matrix4().multiplyMatrices( rot,mat.clone() )).transpose());
-							var trans = Ori.getSommet(i).clone().applyProjection( rot); trans.w = 1;
+							var mat = new THREE.Matrix3().multiplyMatrices(Ori.getMatCam(i),Ori.getProjCam(i));
+							tabMat.push((new THREE.Matrix3().multiplyMatrices( rot,mat.clone() )).transpose());
+							var trans = Ori.getSommet(i).clone().applyMatrix3( rot);
 							tabTrans.push(trans);
-							tabIntr.push(Ori.getDistortion(i));
 						}
 						switch(Ori.sensors.length){
 							case 5:
@@ -56,31 +53,41 @@
            			indice_time2:{type:'f',value:indice_time},
            			indice_time3:{type:'f',value:indice_time},
            			indice_time4:{type:'f',value:indice_time},
-								distortion0: {type:"v4",value:tabIntr[0]},
-								distortion1: {type:"v4",value:tabIntr[1]},
-								distortion2: {type:"v4",value:tabIntr[2]},
-								distortion3: {type:"v4",value:tabIntr[3]},
-								distortion4: {type:"v4",value:tabIntr[4]},
-								mvpp0:{type: 'm4',value: tabMat[0]},
-								mvpp1:{type: 'm4',value: tabMat[1]},
-								mvpp2:{type: 'm4',value: tabMat[2]},
-								mvpp3:{type: 'm4',value: tabMat[3]},
-								mvpp4:{type: 'm4',value: tabMat[4]},
-								mvpp0bis:{type: 'm4',value: tabMat[0]},
-								mvpp1bis:{type: 'm4',value: tabMat[1]},
-								mvpp2bis:{type: 'm4',value: tabMat[2]},
-								mvpp3bis:{type: 'm4',value: tabMat[3]},
-								mvpp4bis:{type: 'm4',value: tabMat[4]},
-								translation0:{type:"v4",value: tabTrans[0]},
-								translation1:{type:"v4",value: tabTrans[1]},
-								translation2:{type:"v4",value: tabTrans[2]},
-								translation3:{type:"v4",value: tabTrans[3]},
-								translation4:{type:"v4",value: tabTrans[4]},
-								translation0bis:{type:"v4",value: tabTrans[0]},
-								translation1bis:{type:"v4",value: tabTrans[1]},
-								translation2bis:{type:"v4",value: tabTrans[2]},
-								translation3bis:{type:"v4",value: tabTrans[3]},
-								translation4bis:{type:"v4",value: tabTrans[4]},
+								distortion0: {type:"v4",value:Ori.getDistortion(0)},
+								distortion1: {type:"v4",value:Ori.getDistortion(1)},
+								distortion2: {type:"v4",value:Ori.getDistortion(2)},
+								distortion3: {type:"v4",value:Ori.getDistortion(3)},
+								distortion4: {type:"v4",value:Ori.getDistortion(4)},
+								pps0: {type:"v2",value:Ori.getPPS(0)},
+								pps1: {type:"v2",value:Ori.getPPS(1)},
+								pps2: {type:"v2",value:Ori.getPPS(2)},
+								pps3: {type:"v2",value:Ori.getPPS(3)},
+								pps4: {type:"v2",value:Ori.getPPS(4)},
+								size0: {type:"v2",value:Ori.getSize(0)},
+								size1: {type:"v2",value:Ori.getSize(1)},
+								size2: {type:"v2",value:Ori.getSize(2)},
+								size3: {type:"v2",value:Ori.getSize(3)},
+								size4: {type:"v2",value:Ori.getSize(4)},
+								mvpp0:{type: 'm3',value: tabMat[0]},
+								mvpp1:{type: 'm3',value: tabMat[1]},
+								mvpp2:{type: 'm3',value: tabMat[2]},
+								mvpp3:{type: 'm3',value: tabMat[3]},
+								mvpp4:{type: 'm3',value: tabMat[4]},
+								mvpp0bis:{type: 'm3',value: tabMat[0]},
+								mvpp1bis:{type: 'm3',value: tabMat[1]},
+								mvpp2bis:{type: 'm3',value: tabMat[2]},
+								mvpp3bis:{type: 'm3',value: tabMat[3]},
+								mvpp4bis:{type: 'm3',value: tabMat[4]},
+								translation0:{type:"v3",value: tabTrans[0]},
+								translation1:{type:"v3",value: tabTrans[1]},
+								translation2:{type:"v3",value: tabTrans[2]},
+								translation3:{type:"v3",value: tabTrans[3]},
+								translation4:{type:"v3",value: tabTrans[4]},
+								translation0bis:{type:"v3",value: tabTrans[0]},
+								translation1bis:{type:"v3",value: tabTrans[1]},
+								translation2bis:{type:"v3",value: tabTrans[2]},
+								translation3bis:{type:"v3",value: tabTrans[3]},
+								translation4bis:{type:"v3",value: tabTrans[4]},
 								texture0: {type: 't',value: THREE.ImageUtils.loadTexture(tabUrl[0])},
 								texture1: {type: 't',value: THREE.ImageUtils.loadTexture(tabUrl[1])},
 								texture2: {type: 't',value: THREE.ImageUtils.loadTexture(tabUrl[2])},
@@ -133,13 +140,13 @@
 	            		img.crossOrigin = 'anonymous';
 	            		var that = this;
 	            		img.onload = function () { 	
-	            			var mat = new THREE.Matrix4().multiplyMatrices(Ori.getMatCam(i),Ori.getProjCam(i));
-	            			var trans = Ori.getSommet(i).clone().applyProjection( rotation); trans.w = 1;	
+	            			var mat = new THREE.Matrix3().multiplyMatrices(Ori.getMatCam(i),Ori.getProjCam(i));
+	            			var trans = Ori.getSommet(i).clone().applyMatrix3( rotation);	
                 		_shaderMat.uniforms['mvpp'+i].value = _shaderMat.uniforms['mvpp'+i+'bis'].value;
                 		_shaderMat.uniforms['translation'+i].value = _shaderMat.uniforms['translation'+i+'bis'].value;
                 		_shaderMat.uniforms['texture'+i].value =_shaderMat.uniforms['texture'+i+'bis'].value;
 
-	            			_shaderMat.uniforms['mvpp'+i+'bis'].value = (new THREE.Matrix4().multiplyMatrices( rotation,mat.clone() )).transpose();
+	            			_shaderMat.uniforms['mvpp'+i+'bis'].value = (new THREE.Matrix3().multiplyMatrices( rotation,mat.clone() )).transpose();
 	            			_shaderMat.uniforms['translation'+i+'bis'].value = translation.clone().add(trans);
 	            			_shaderMat.uniforms['texture'+i+'bis'].value = new THREE.Texture(this,THREE.UVMapping, 
 	            				THREE.RepeatWrapping, THREE.RepeatWrapping, THREE.LinearFilter,THREE.LinearFilter,THREE.RGBFormat);

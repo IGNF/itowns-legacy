@@ -116,7 +116,7 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
 
                 _barycentre = Ori.getPosition();
                 
-                _barycentre.applyProjection(matRotation);
+                _barycentre.applyMatrix3(matRotation);
 
                 gfxEngine.translateCameraSmoothly(posWithPivot.x + _barycentre.x, posWithPivot.y +_barycentre.y + altiOption, posWithPivot.z+ _barycentre.z);
 
@@ -240,7 +240,7 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
                 else
                     _barycentre = Ori.getBarycentreV1();  // For Paris.. and Terramob (old chantiers)
 
-                _barycentre.applyProjection(matRotation);
+                _barycentre.applyMatrix3(matRotation);
 
                 gfxEngine.translateCameraSmoothly(posWithPivot.x + _barycentre.x, posWithPivot.y +_barycentre.y, posWithPivot.z+ _barycentre.z);
 
@@ -308,7 +308,7 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
 
                 _barycentre = Ori.getPosition();  // For Paris.. and Terramob (old chantiers)
 
-                _barycentre.applyProjection(matRotation);
+                _barycentre.applyMatrix3(matRotation);
 
                 gfxEngine.translateCameraSmoothly(posWithPivot.x + _barycentre.x, posWithPivot.y +_barycentre.y, posWithPivot.z+ _barycentre.z);
 

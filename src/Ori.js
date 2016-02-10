@@ -39,7 +39,7 @@ define(['lib/three','Sensor','jquery', 'PanoramicProvider'],
         roll = parseFloat(roll)/ 180 * Math.PI;  // Deg to Rad   // axe Z
         // With quaternion  //set rotation.order to "YXZ", which is equivalent to "heading, pitch, and roll"
         var q = new THREE.Quaternion().setFromEuler(new THREE.Euler(-pitch,heading,-roll,'YXZ'),true);
-        return new THREE.Matrix4().makeRotationFromQuaternion(q);
+        return new THREE.Matrix3().makeRotationFromQuaternion(q);
       },
 
       getPosition: function(){
@@ -54,7 +54,9 @@ define(['lib/three','Sensor','jquery', 'PanoramicProvider'],
       getSommet    : function(num){ return this.sensors[num].position;   },
       getProjCam   : function(num){ return this.sensors[num].projection; },
       getMatCam    : function(num){ return this.sensors[num].rotation;   },
-      getMask      : function(num){ return this.sensors[num].mask;   }
+      getMask      : function(num){ return this.sensors[num].mask;   },
+      getSize      : function(num){ return this.sensors[num].size;   },
+      getPPS       : function(num){ return this.sensors[num].pps;   }
     };
 
     return Ori;

@@ -8,11 +8,13 @@
 
 define ('Sensor',['lib/three','Utils','url'], function (THREE,Utils,url) { 
 
+
     Sensor = function (baseUrl,infos){
         this.infos = infos;
         this.position = new THREE.Vector3().fromArray( infos.position );
-        this.rotation = new THREE.Matrix4().fromArray( infos.rotation ).transpose();
-        this.projection = new THREE.Matrix4().fromArray( infos.projection ).transpose();
+        this.rotation = new THREE.Matrix3().fromArray( infos.rotation );
+        this.projection = new THREE.Matrix3().fromArray( infos.projection );
+        this.size = new THREE.Vector2().fromArray(infos.size);
         this.pps = new THREE.Vector2().fromArray(infos.distortion.pps);
         var disto = new THREE.Vector3().fromArray(infos.distortion.poly357);
         var r2max = this.getDistortion_r2max(disto);
@@ -21,23 +23,20 @@ define ('Sensor',['lib/three','Utils','url'], function (THREE,Utils,url) {
 
         // change conventions
         this.orientation = infos.orientation;
-        this._itownsWay = new THREE.Matrix4( 0, 1, 0, 0,
-                                             0, 0,-1, 0,
-                                             1, 0, 0, 0,
-                                             0, 0, 0, 1 );
+        this._itownsWay = new THREE.Matrix3( 0, 1, 0,
+                                             0, 0,-1,
+                                             1, 0, 0);
                                            
-        this.Photogram_JMM = new THREE.Matrix4( 0, 0,-1, 0,
-                                               -1, 0, 0, 0,
-                                                0, 1, 0, 0,
-                                                0, 0, 0, 1);
+        this.Photogram_JMM = new THREE.Matrix3( 0, 0,-1,
+                                               -1, 0, 0,
+                                                0, 1, 0);
                                                
-        this.photgramme_image = new THREE.Matrix4( 1, 0, 0, 0,
-                                                  0,-1, 0, 0,
-                                                  0, 0,-1, 0,
-                                                  0, 0, 0, 1);
+        this.photgramme_image = new THREE.Matrix3( 1, 0, 0,
+                                                  0,-1, 0,
+                                                  0, 0,-1);
 
         this.rotation = this.getMatOrientationTotal();
-        this.position.applyProjection(this._itownsWay);
+        this.position.applyMatrix3(this._itownsWay);
      };
 
 
@@ -53,41 +52,38 @@ define ('Sensor',['lib/three','Utils','url'], function (THREE,Utils,url) {
         },
         
 
+
+// rotation * Photogram_JMM * getMatOrientationCapteur * photgramme_image
      Sensor.prototype.getMatOrientationTotal =
        function(){
-        var out = new THREE.Matrix4();
-        out = this.rotation.clone(); 
-        out = new THREE.Matrix4().multiplyMatrices( out.clone(), this.Photogram_JMM.clone() );
+        var out = this.rotation.clone();
+        out = new THREE.Matrix3().multiplyMatrices( out.clone(), this.Photogram_JMM.clone() );
         
-        out = new THREE.Matrix4().multiplyMatrices( out.clone(), this.getMatOrientationCapteur().clone());
-        out = new THREE.Matrix4().multiplyMatrices( out.clone(), this.photgramme_image.clone());
+        out = new THREE.Matrix3().multiplyMatrices( out.clone(), this.getMatOrientationCapteur().clone());
+        out = new THREE.Matrix3().multiplyMatrices( out.clone(), this.photgramme_image.clone());
 
-        out = new THREE.Matrix4().multiplyMatrices(this._itownsWay, out.clone());    
+        out = new THREE.Matrix3().multiplyMatrices(this._itownsWay, out.clone());    
         return out;
         
       }
       
     Sensor.prototype.getMatOrientationCapteur =  function(){
          
-            var ori0 = new THREE.Matrix4( 0,-1, 0, 0,
-                                          1, 0, 0, 0,
-                                          0, 0, 1, 0,
-                                          0, 0, 0, 1);
+            var ori0 = new THREE.Matrix3( 0,-1, 0,
+                                          1, 0, 0,
+                                          0, 0, 1);
 
-            var ori1 = new THREE.Matrix4( 0, 1, 0, 0,
-                                         -1, 0, 0, 0,
-                                          0, 0, 1, 0,
-                                          0, 0, 0, 1);
+            var ori1 = new THREE.Matrix3( 0, 1, 0,
+                                         -1, 0, 0,
+                                          0, 0, 1);
 
-            var ori2 = new THREE.Matrix4(-1, 0, 0, 0,
-                                          0,-1, 0, 0,
-                                          0, 0, 1, 0,
-                                          0, 0, 0, 1);
+            var ori2 = new THREE.Matrix3(-1, 0, 0,
+                                          0,-1, 0,
+                                          0, 0, 1);
 
-            var ori3 = new THREE.Matrix4( 1, 0, 0, 0,
-                                          0, 1, 0, 0,
-                                          0, 0, 1, 0,
-                                          0, 0, 0, 1);
+            var ori3 = new THREE.Matrix3( 1, 0, 0,
+                                          0, 1, 0,
+                                          0, 0, 1);
 
             switch(this.orientation){
                 case 0: return ori0;
