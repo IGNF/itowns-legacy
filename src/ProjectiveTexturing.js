@@ -32,46 +32,47 @@
 						return _initiated;
 					},
 					createShaderMat: function(panoInfo,rot){
+						var N = Ori.sensors.length;
 						var uniforms = {}
 						var baseUrl = PanoramicProvider.getMetaDataSensorURL();
-						for (var i=0; i< Ori.sensors.length; ++i){
+						for (var i=0; i< N; ++i){
 							var panoUrl = panoInfo.url_format.replace("{cam_id_pos}",Ori.sensors[i].infos.cam_id_pos);
 							var tex = url.resolve(baseUrl,panoUrl);
 							var mat = Ori.getMatrix(i).clone();
 							var mvpp = (new THREE.Matrix3().multiplyMatrices(rot,mat)).transpose();
 							var trans = Ori.getSommet(i).clone().applyMatrix3(rot);
-							uniforms['distortion' +i] = {type:'v4',value:Ori.getDistortion(i)};
-							uniforms['pps'        +i] = {type:'v2',value:Ori.getPPS(i)};
-							uniforms['size'       +i] = {type:'v2',value:Ori.getSize(i)};
-							uniforms['mask'       +i] = {type:'t' ,value:Ori.getMask(i)};
-							uniforms['alpha'+i      ] = {type:'f' ,value:0};
-							uniforms['alpha'+i+'bis'] = {type:'f' ,value:1};
-							uniforms['mvpp'+i       ] = {type:'m3',value:mvpp};
-							uniforms['mvpp'+i+'bis' ] = {type:'m3',value:mvpp};
-							uniforms['translation'+i      ] = {type:'v3',value:trans};
-							uniforms['translation'+i+'bis'] = {type:'v3',value:trans};
-							uniforms['texture'+i          ] = {type:'t' ,value:THREE.ImageUtils.loadTexture(tex)  };
-							uniforms['texture'+i+'bis'    ] = {type:'t' ,value:THREE.ImageUtils.loadTexture(tex)  };
+							uniforms['distortion['+i+']'] = {type:'v4',value:Ori.getDistortion(i)};
+							uniforms['pps['+i+']'] = {type:'v2',value:Ori.getPPS(i)};
+							uniforms['size['+i+']'] = {type:'v2',value:Ori.getSize(i)};
+							uniforms['mask['+i+']'] = {type:'t' ,value:Ori.getMask(i)};
+							uniforms['alpha['+i+']'] = {type:'f' ,value:0};
+							uniforms['alpha2['+i+']'] = {type:'f' ,value:1};
+							uniforms['mvpp['+i+']'] = {type:'m3',value:mvpp};
+							uniforms['mvpp2['+i+']'] = {type:'m3',value:mvpp};
+							uniforms['translation['+i+']'] = {type:'v3',value:trans};
+							uniforms['translation2['+i+']'] = {type:'v3',value:trans};
+							uniforms['texture['+i+']'] = {type:'t' ,value:THREE.ImageUtils.loadTexture(tex)  };
+							uniforms['texture2['+i+']'] = {type:'t' ,value:THREE.ImageUtils.loadTexture(tex)  };
 						}
             			// create the shader material for Three
             			_shaderMat = new THREE.ShaderMaterial({
             				uniforms:     	uniforms,
-            				vertexShader:   Shader.shaderTextureProjective2VS.join("\n"),
-            				fragmentShader: Shader.shaderTextureProjective2FS.join("\n"),
+            				vertexShader:   Shader.shaderTextureProjectiveVS(N),
+            				fragmentShader: Shader.shaderTextureProjectiveFS(N),
             				side: THREE.BackSide,   
             				transparent:true
             			});
             			return _shaderMat;
             		},
-					tweenIndiceTime: function (num){
-            			var i = _shaderMat.uniforms['alpha'+num].value;
-            			if(i>0){
-                			i -= 0.03;
-                			if(i<0) i=0;
-                			_shaderMat.uniforms['alpha'+num].value = i;
-                			_shaderMat.uniforms['alpha'+num+'bis'].value = 1-i;
+					tweenIndiceTime: function (i){
+            			var alpha = _shaderMat.uniforms['alpha['+i+']'].value;
+            			if(alpha>0){
+                			alpha -= 0.03;
+                			if(alpha<0) alpha=0;
+                			_shaderMat.uniforms['alpha['+i+']'].value = alpha;
+                			_shaderMat.uniforms['alpha2['+i+']'].value = 1-alpha;
                 			var that = this;
-                			requestAnimSelectionAlpha(function() { that.tweenIndiceTime(num); });                			
+                			requestAnimSelectionAlpha(function() { that.tweenIndiceTime(i); });                			
            	 			}	
 					},
             		changePanoTextureAfterloading: function (panoInfo,translation,rotation){
@@ -90,18 +91,18 @@
 							var mat = Ori.getMatrix(i).clone();
 							var mvpp = (new THREE.Matrix3().multiplyMatrices( rotation,mat )).transpose();
 	            			var trans = Ori.getSommet(i).clone().applyMatrix3(rotation);	
-							_shaderMat.uniforms['mvpp'+i].value = _shaderMat.uniforms['mvpp'+i+'bis'].value;
-							_shaderMat.uniforms['translation'+i].value = _shaderMat.uniforms['translation'+i+'bis'].value;
-							_shaderMat.uniforms['texture'+i].value =_shaderMat.uniforms['texture'+i+'bis'].value;
+							_shaderMat.uniforms['mvpp['+i+']'].value = _shaderMat.uniforms['mvpp2['+i+']'].value;
+							_shaderMat.uniforms['translation['+i+']'].value = _shaderMat.uniforms['translation2['+i+']'].value;
+							_shaderMat.uniforms['texture['+i+']'].value =_shaderMat.uniforms['texture2['+i+']'].value;
 
-	            			_shaderMat.uniforms['mvpp'+i+'bis'].value = mvpp;
-	            			_shaderMat.uniforms['translation'+i+'bis'].value = translation.clone().add(trans);
-	            			_shaderMat.uniforms['texture'+i+'bis'].value = new THREE.Texture(this,THREE.UVMapping, 
+	            			_shaderMat.uniforms['mvpp2['+i+']'].value = mvpp;
+	            			_shaderMat.uniforms['translation2['+i+']'].value = translation.clone().add(trans);
+	            			_shaderMat.uniforms['texture2['+i+']'].value = new THREE.Texture(this,THREE.UVMapping, 
 	            				THREE.RepeatWrapping, THREE.RepeatWrapping, THREE.LinearFilter,THREE.LinearFilter,THREE.RGBFormat);
-	            			_shaderMat.uniforms['texture'+i+'bis'].value.needsUpdate = true;
+	            			_shaderMat.uniforms['texture2['+i+']'].value.needsUpdate = true;
 
-	            			_shaderMat.uniforms['alpha'+i].value = 1;			
-	            			_shaderMat.uniforms['alpha'+i+'bis'].value = 0;			
+	            			_shaderMat.uniforms['alpha['+i+']' ].value = 1;			
+	            			_shaderMat.uniforms['alpha2['+i+']'].value = 0;			
             				that.tweenIndiceTime(i);
 						}; 
 						var baseUrl = PanoramicProvider.getMetaDataSensorURL();

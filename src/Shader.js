@@ -220,137 +220,52 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
         ],
     
              
-    shaderTextureProjective2VS : [
+    shaderTextureProjectiveVS : function(N) { return [
         
         "#ifdef GL_ES",
         "precision  highp float;",
         "#endif",
+        "#define N "+N,
 
-        // Those uniforms are 
-        // ModelView * Projection * rotation of the rigid sys (Stereopolis)
+        "uniform mat3 mvpp[N];",
+        "uniform mat3 mvpp2[N];",
 
-        "uniform mat3 mvpp0;",
-        "uniform mat3 mvpp1;",
-        "uniform mat3 mvpp2;",
-        "uniform mat3 mvpp3;",
-        "uniform mat3 mvpp4;",
-        "uniform mat3 mvpp0bis;",
-        "uniform mat3 mvpp1bis;",
-        "uniform mat3 mvpp2bis;",
-        "uniform mat3 mvpp3bis;",
-        "uniform mat3 mvpp4bis;",
-        
-        "uniform vec3 translation0;",
-        "uniform vec3 translation1;",
-        "uniform vec3 translation2;",
-        "uniform vec3 translation3;",
-        "uniform vec3 translation4;",
-        "uniform vec3 translation0bis;",
-        "uniform vec3 translation1bis;",
-        "uniform vec3 translation2bis;",
-        "uniform vec3 translation3bis;",
-        "uniform vec3 translation4bis;",
+        "uniform vec3 translation[N];",
+        "uniform vec3 translation2[N];",
 
-        "varying vec3 v_texcoord0;",
-        "varying vec3 v_texcoord1;",
-        "varying vec3 v_texcoord2;",
-        "varying vec3 v_texcoord3;",
-        "varying vec3 v_texcoord4;",
-        "varying vec3 v_texcoord0bis;",
-        "varying vec3 v_texcoord1bis;",
-        "varying vec3 v_texcoord2bis;",
-        "varying vec3 v_texcoord3bis;",
-        "varying vec3 v_texcoord4bis;",
+        "varying vec3 v_texcoord[N];",
+        "varying vec3 v_texcoord2[N];",
 
         "void main() {",
-        "        v_texcoord0 =  mvpp0 * (position- translation0);",
-        "        v_texcoord1 =  mvpp1 * (position- translation1);",
-        "        v_texcoord2 =  mvpp2 * (position- translation2);",
-        "        v_texcoord3 =  mvpp3 * (position- translation3);",
-        "        v_texcoord4 =  mvpp4 * (position- translation4);",
-        "        v_texcoord0bis =  mvpp0bis * (position- translation0bis);",
-        "        v_texcoord1bis =  mvpp1bis * (position- translation1bis);",
-        "        v_texcoord2bis =  mvpp2bis * (position- translation2bis);",
-        "        v_texcoord3bis =  mvpp3bis * (position- translation3bis);",
-        "        v_texcoord4bis =  mvpp4bis * (position- translation4bis);",
+        "    for(int i=0; i<N; ++i) {",
+        "        v_texcoord [i] =  mvpp [i] * (position- translation [i]);",
+        "        v_texcoord2[i] =  mvpp2[i] * (position- translation2[i]);",
+        "    }",
         "    gl_Position  =  projectionMatrix *  modelViewMatrix * vec4(position,1.);",
         "}"
-    ],
+    ].join('\n');},
     
-     shaderTextureProjective2FS : [
+     shaderTextureProjectiveFS : function(N) { return [
          
         "#ifdef GL_ES",
         "precision  highp float;",
         "#endif",
 
-        "uniform mat3 mvpp0;",
-        "uniform mat3 mvpp1;",
-        "uniform mat3 mvpp2;",
-        "uniform mat3 mvpp3;",
-        "uniform mat3 mvpp4;",
-        "uniform mat3 mvpp0bis;",
-        "uniform mat3 mvpp1bis;",
-        "uniform mat3 mvpp2bis;",
-        "uniform mat3 mvpp3bis;",
-        "uniform mat3 mvpp4bis;",
-
-        "uniform sampler2D   texture0;",
-        "uniform sampler2D   texture1;",
-        "uniform sampler2D   texture2;",
-        "uniform sampler2D   texture3;",
-        "uniform sampler2D   texture4;",
-        "uniform sampler2D   texture0bis;",
-        "uniform sampler2D   texture1bis;",
-        "uniform sampler2D   texture2bis;",
-        "uniform sampler2D   texture3bis;",
-        "uniform sampler2D   texture4bis;",
-
-        "uniform sampler2D   mask0;",
-        "uniform sampler2D   mask1;",
-        "uniform sampler2D   mask2;",
-        "uniform sampler2D   mask3;",
-        "uniform sampler2D   mask4;",
-
-        "varying vec3 v_texcoord0;",
-        "varying vec3 v_texcoord1;",
-        "varying vec3 v_texcoord2;",
-        "varying vec3 v_texcoord3;",
-        "varying vec3 v_texcoord4;",
-        "varying vec3 v_texcoord0bis;",
-        "varying vec3 v_texcoord1bis;",
-        "varying vec3 v_texcoord2bis;",
-        "varying vec3 v_texcoord3bis;",
-        "varying vec3 v_texcoord4bis;",
-
-
-        "uniform float alpha0;",
-        "uniform float alpha1;",
-        "uniform float alpha2;",
-        "uniform float alpha3;",
-        "uniform float alpha4;",
-        "uniform float alpha0bis;",
-        "uniform float alpha1bis;",
-        "uniform float alpha2bis;",
-        "uniform float alpha3bis;",
-        "uniform float alpha4bis;",
-
-        "uniform vec2 size0;",
-        "uniform vec2 size1;",
-        "uniform vec2 size2;",
-        "uniform vec2 size3;",
-        "uniform vec2 size4;",
+        "#define N "+N,
         
-        "uniform vec2 pps0;",
-        "uniform vec2 pps1;",
-        "uniform vec2 pps2;",
-        "uniform vec2 pps3;",
-        "uniform vec2 pps4;",
+        "varying vec3 v_texcoord[N];",
+        "varying vec3 v_texcoord2[N];",
         
-        "uniform vec4 distortion0;",
-        "uniform vec4 distortion1;",
-        "uniform vec4 distortion2;",
-        "uniform vec4 distortion3;",
-        "uniform vec4 distortion4;",
+        "uniform sampler2D   mask[N];",
+        "uniform sampler2D   texture[N];",
+        "uniform sampler2D   texture2[N];",
+
+        "uniform float alpha[N];",
+        "uniform float alpha2[N];",
+
+        "uniform vec2 size[N];",
+        "uniform vec2 pps[N];",
+        "uniform vec4 distortion[N];",
 
       " vec2 correctDistortionAndCoord(vec4 dist, vec2 pps, vec2 size, vec3 coord){",
       "      vec2 p = coord.xy/coord.z;",
@@ -378,27 +293,19 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
       "   return getColor(texture,mask,size,correctDistortionAndCoord(dist,pps,size,coord));",
       " }",
 
-       " void main(void)",
-       " {  ",
+      " void main(void)",
+      " {  ",
+      "  vec4 color = vec4(0.);",
+      "  for(int i=0; i<N; ++i) {",
+      "    color += alpha [i]*getColor(texture [i],mask[i],distortion[i],pps[i],size[i],v_texcoord [i]);",
+      "    color += alpha2[i]*getColor(texture2[i],mask[i],distortion[i],pps[i],size[i],v_texcoord2[i]);",
+      "  }",
 
-        "  vec4 c0 = alpha0*getColor(texture0,mask0,distortion0,pps0,size0,v_texcoord0);",
-        "  vec4 c1 = alpha1*getColor(texture1,mask1,distortion1,pps1,size1,v_texcoord1);",
-        "  vec4 c2 = alpha2*getColor(texture2,mask2,distortion2,pps2,size2,v_texcoord2);",
-        "  vec4 c3 = alpha3*getColor(texture3,mask3,distortion3,pps3,size3,v_texcoord3);",
-        "  vec4 c4 = alpha4*getColor(texture4,mask4,distortion4,pps4,size4,v_texcoord4);",
-
-        "  vec4 c5 = alpha0bis*getColor(texture0bis,mask0,distortion0,pps0,size0,v_texcoord0bis);",
-        "  vec4 c6 = alpha1bis*getColor(texture1bis,mask1,distortion1,pps1,size1,v_texcoord1bis);",
-        "  vec4 c7 = alpha2bis*getColor(texture2bis,mask2,distortion2,pps2,size2,v_texcoord2bis);",
-        "  vec4 c8 = alpha3bis*getColor(texture3bis,mask3,distortion3,pps3,size3,v_texcoord3bis);",
-        "  vec4 c9 = alpha4bis*getColor(texture4bis,mask4,distortion4,pps4,size4,v_texcoord4bis);",
-        "  vec4 color = c0+c1+c2+c3+c4+c5+c6+c7+c8+c9;",
-
-        "  if(color.a>1.) color /= color.a;",
-        "  gl_FragColor = color; ",
-    "} "         
+      "  if(color.a>1.) color /= color.a;",
+      "  gl_FragColor = color; ",
+   "} "         
      
-        ],
+    ].join('\n');},
         
          shaderTextureProjective2LightFS : [
         
