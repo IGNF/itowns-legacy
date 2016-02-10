@@ -35,7 +35,7 @@ function (graphicEngine, THREE, Ori, Shader, PanoramicProvider) {
         // New cameras
         var _mv_current_300,_mv_current_301,_mv_current_302,_mv_current_303,_mv_current_304;        
 
-        var rot21 = new THREE.Matrix4(	1,0,0,0,
+        var rot21 = new THREE.Matrix4().set(	1,0,0,0,
                                         0,1,0,0,
                                         0,0,1,0,
                                         0,0,0,1);

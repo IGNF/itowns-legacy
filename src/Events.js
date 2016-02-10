@@ -305,7 +305,10 @@ define (['Cartography', 'Navigation', 'GraphicEngine', 'LaserCloud','jquery', 'l
                     //var mB = MeshManager.getCurrentObject();  // Get rge mesh or at least a road plane
                     var mB = MeshManager.getCurrentMeshForClickAndGo();
                     var mFES = MeshManager.getMeshFES();
-                    _intersects = gfxEngine.getIntersected(event.clientX,event.clientY, [mB,mFES]);//gfxEngine.getScene().children);
+                    var objects = [];
+                    if (mB) objects.push(mB);
+                    if (mFES) objects.push(mFES);
+                    _intersects = gfxEngine.getIntersected(event.clientX,event.clientY, objects);//gfxEngine.getScene().children);
                     if(_intersects[0]){
                         _mouse3D = new THREE.Vector3(_intersects[0].point.x,_intersects[0].point.y,_intersects[0].point.z);   // y+0.05 to put over mesh RGE to see clean
                         Draw.drawSurface(_mouse3D,_intersects[0].face.normal);                   //CLICKANDGO

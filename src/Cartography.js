@@ -1,4 +1,4 @@
-define(['lib/three', 'jquery', 'Utils', 'Panoramic', 'Navigation','Config', 'geoportail'],
+define(['lib/three', 'jquery', 'Utils', 'Panoramic', 'Navigation','Config'],
         function(THREE, $, Utils, Panoramic, Navigation,  Config) {
 
             //***************************** PRIVATE MEMBERS OF MODULE ************************************************/

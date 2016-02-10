@@ -23,15 +23,15 @@ define ('Sensor',['lib/three','Utils','url'], function (THREE,Utils,url) {
 
         // change conventions
         this.orientation = infos.orientation;
-        this._itownsWay = new THREE.Matrix3( 0, 1, 0,
+        this._itownsWay = new THREE.Matrix3().set(0, 1, 0,
                                              0, 0,-1,
                                              1, 0, 0);
                                            
-        this.Photogram_JMM = new THREE.Matrix3( 0, 0,-1,
+        this.Photogram_JMM = new THREE.Matrix3().set(0, 0,-1,
                                                -1, 0, 0,
                                                 0, 1, 0);
                                                
-        this.photgramme_image = new THREE.Matrix3( 1, 0, 0,
+        this.photgramme_image = new THREE.Matrix3().set(1, 0, 0,
                                                   0,-1, 0,
                                                   0, 0,-1);
 
@@ -69,21 +69,21 @@ define ('Sensor',['lib/three','Utils','url'], function (THREE,Utils,url) {
       
     Sensor.prototype.getMatOrientationCapteur =  function(){
          
-            var ori0 = new THREE.Matrix3( 0,-1, 0,
-                                          1, 0, 0,
-                                          0, 0, 1);
+            var ori0 = new THREE.Matrix3().set( 0,-1, 0,
+												1, 0, 0,
+												0, 0, 1);
 
-            var ori1 = new THREE.Matrix3( 0, 1, 0,
-                                         -1, 0, 0,
-                                          0, 0, 1);
+            var ori1 = new THREE.Matrix3().set( 0, 1, 0,
+											   -1, 0, 0,
+												0, 0, 1);
 
-            var ori2 = new THREE.Matrix3(-1, 0, 0,
-                                          0,-1, 0,
-                                          0, 0, 1);
+            var ori2 = new THREE.Matrix3().set(-1, 0, 0,
+												0,-1, 0,
+												0, 0, 1);
 
-            var ori3 = new THREE.Matrix3( 1, 0, 0,
-                                          0, 1, 0,
-                                          0, 0, 1);
+            var ori3 = new THREE.Matrix3().set( 1, 0, 0,
+												0, 1, 0,
+												0, 0, 1);
 
             switch(this.orientation){
                 case 0: return ori0;

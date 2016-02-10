@@ -58,7 +58,8 @@ define(['lib/three', 'jquery', 'Utils', 'lib/postprocessing/EffectComposer'], fu
             _msWater = null,
             _renderPass,
     _textPanels = [],
-            _grid = null;
+            _grid = null,
+			raycaster = new THREE.Raycaster(); // create once
     // METHODS
     //*************************************
 
@@ -652,14 +653,9 @@ define(['lib/three', 'jquery', 'Utils', 'lib/postprocessing/EffectComposer'], fu
          * @returns {THREE.Mesh[]} Objects given as parameter and intersected by the ray
          */
         getIntersected: function(x, y, objects) {
-
             var point = Utils.toNDC(x, y);
-
-            var vector = new THREE.Vector3(point.x, point.y, 1);
-            var projector = new THREE.Projector();
-            var ray = projector.pickingRay(vector, _camera);
-
-            return ray.intersectObjects(objects);
+			raycaster.setFromCamera( point, _camera );
+			return raycaster.intersectObjects( objects );
         },
         addToScene: function(obj) {
             _scene.add(obj);

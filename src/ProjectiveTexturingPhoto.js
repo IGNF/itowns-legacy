@@ -37,14 +37,14 @@ function (graphicEngine, THREE, Ori, Shader, Utils,Draw) {
         var _translation = new THREE.Vector4(0.,0.,0.,1.);
         var _matOriPos = null;  
         
-        var _proj_cam  = new THREE.Matrix4(  1129.284,	0,	0.,	0.,
+        var _proj_cam  = new THREE.Matrix4().set(  1129.284,	0,	0.,	0.,
                                            0.,        1129.284,	0.,	0.,
                                            1042.178,  1020.435,	0.,	1.,
                                            0.,          0.,     0.,	0.);
         var _matMVP = null;                                 
                                            
 
-        var rot21 = new THREE.Matrix4(	1,0,0,0,
+        var rot21 = new THREE.Matrix4().set(	1,0,0,0,
                                         0,1,0,0,
                                         0,0,1,0,
                                         0,0,0,1);
@@ -124,7 +124,7 @@ function (graphicEngine, THREE, Ori, Shader, Utils,Draw) {
           
           getProjCam: function(num){
                
-              _proj_cam = new THREE.Matrix4( 200,	0,	0.,	0.,
+              _proj_cam = new THREE.Matrix4().set( 200,	0,	0.,	0.,
                                              0.,       200,	0.,	0.,
                                              200,      200,	0.,	1.,
                                              0.,        0.,     0.,	0.);

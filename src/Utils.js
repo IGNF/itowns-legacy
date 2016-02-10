@@ -1,4 +1,4 @@
-define(['RequestManager', 'geoportail'], function (RequestManager) {
+define(['RequestManager'], function (RequestManager) {
     
     /**
      * Tools used by iTOWNS modules

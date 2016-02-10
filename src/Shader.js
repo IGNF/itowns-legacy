@@ -86,6 +86,7 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
         "uniform mat3 mvpp[N];",
         "uniform vec3 translation[N];",
         "varying vec3 v_texcoord[N];",
+        "uniform vec3 test;",
         "void main() {",
         "    for(int i=0; i<N; ++i) v_texcoord[i] = mvpp[i] * (position-translation[i]);",
         "    gl_Position  =  projectionMatrix *  modelViewMatrix * vec4(position,1.);",
