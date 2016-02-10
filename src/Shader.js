@@ -228,19 +228,10 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
         "#define N "+N,
 
         "uniform mat3 mvpp[N];",
-        "uniform mat3 mvpp2[N];",
-
         "uniform vec3 translation[N];",
-        "uniform vec3 translation2[N];",
-
         "varying vec3 v_texcoord[N];",
-        "varying vec3 v_texcoord2[N];",
-
         "void main() {",
-        "    for(int i=0; i<N; ++i) {",
-        "        v_texcoord [i] =  mvpp [i] * (position- translation [i]);",
-        "        v_texcoord2[i] =  mvpp2[i] * (position- translation2[i]);",
-        "    }",
+        "    for(int i=0; i<N; ++i) v_texcoord[i] = mvpp[i] * (position-translation[i]);",
         "    gl_Position  =  projectionMatrix *  modelViewMatrix * vec4(position,1.);",
         "}"
     ].join('\n');},
@@ -250,22 +241,16 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
         "#ifdef GL_ES",
         "precision  highp float;",
         "#endif",
-
         "#define N "+N,
         
-        "varying vec3 v_texcoord[N];",
-        "varying vec3 v_texcoord2[N];",
-        
-        "uniform sampler2D   mask[N];",
-        "uniform sampler2D   texture[N];",
-        "uniform sampler2D   texture2[N];",
-
-        "uniform float alpha[N];",
-        "uniform float alpha2[N];",
-
-        "uniform vec2 size[N];",
-        "uniform vec2 pps[N];",
-        "uniform vec4 distortion[N];",
+        "varying vec3      v_texcoord[N];",
+        "uniform sampler2D mask[N];",
+        "uniform sampler2D texture[N];",
+        "uniform float     alpha[N];",
+        "uniform vec2      size[N];",
+        "uniform vec2      pps[N];",
+        "uniform vec4      distortion[N];",
+        "const float amin = 0.5;",
 
       " vec2 correctDistortionAndCoord(vec4 dist, vec2 pps, vec2 size, vec3 coord){",
       "      vec2 p = coord.xy/coord.z;",
@@ -284,7 +269,7 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
       "   p /= size;",
       "   p.y = 1. - p.y; ",
       "   vec4 c = texture2D(texture,p);",
-      "   float m = min(d*0.02,1.)*(1.-texture2D(mask,p).r);",
+      "   float m = min(d*0.02,1.-texture2D(mask,p).r);",
       "   return c*m;",
       " }",
 
@@ -294,15 +279,20 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
       " }",
 
       " void main(void)",
-      " {  ",
-      "  vec4 color = vec4(0.);",
+      " { ",
+      "  vec4 color  = vec4(0.);",
+      "  vec4 color0 = vec4(0.);",
+      "  int blend = 0;",
       "  for(int i=0; i<N; ++i) {",
-      "    color += alpha [i]*getColor(texture [i],mask[i],distortion[i],pps[i],size[i],v_texcoord [i]);",
-      "    color += alpha2[i]*getColor(texture2[i],mask[i],distortion[i],pps[i],size[i],v_texcoord2[i]);",
+      "    vec4 c = getColor(texture[i],mask[i],distortion[i],pps[i],size[i],v_texcoord[i]);",
+      "    color0 += c;",
+      "    color  += alpha[i]*c;",
+      "    if(c.a>0.) ++blend;",
       "  }",
-
-      "  if(color.a>1.) color /= color.a;",
-      "  gl_FragColor = color; ",
+      "  if(color0.a>1.) color0 /= color0.a;",
+      // if blending 2 images or more with sufficient opacity, return the normalized opaque color
+      // else mix the alpha-weighted color with the non-alpha-weighted color
+      "  gl_FragColor = (blend>1 && color.a>amin) ? color/color.a : color/amin+(1.-color.a/amin)*color0; ",
    "} "         
      
     ].join('\n');},
