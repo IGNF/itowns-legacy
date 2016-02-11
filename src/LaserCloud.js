@@ -375,10 +375,14 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
                                                                                     // start animation function
           this.indiceLaserFileLoaded++;// console.log(_currentNbPointsInBuffer);
           this.indicePacketInBuffer++;
+          
+          if(this.indiceLaserFileLoaded == 2)
+              _bufferGeometry.computeBoundingSphere();   // Once every new series load. Very important 
+           
           // Load the next file in the list if not last (seems faster than parallel load)
           if(this.indiceLaserFileLoaded < this.tabLaserFilesToLoad.length )
              this.readLaserPointsFileFromItownsGeneric(this.tabLaserFilesToLoad[this.indiceLaserFileLoaded],nbBitsPerAttribute,pivot);
-             else{
+             else{ 
                 setTimeout(function() {
                   LaserCloud.setLockMovement(1);}
                 , 800);
@@ -837,7 +841,7 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
             _geometryParticleSystemPicking.verticesNeedUpdate = true;
             _geometryParticleSystemPicking.colorsNeedUpdate = true;
             
-            _bufferGeometry.computeBoundingSphere();
+            //_bufferGeometry.computeBoundingSphere();
              // _bufferGeometry.verticesNeedUpdate = true;
              //console.log(_bufferGeometry.attributes.color,"  ",_bufferGeometry.attributes.uniqueid);
        },
@@ -1509,7 +1513,7 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
                                     //self.loadLaserBuffer(buffer);
                                     //self.addPointsToBuffer(buffer);
                                     self.addPointsToBufferGenericMesh(buffer,4,nbBitsPerAttribute,pivot);  //4 attributes of nbBitsPerAttribute bits with pivot _zero
-                    } else {
+                    } else { // Error but keep going on the stack
                                    // console.log("Error", xhr.statusText);
                                     self.indiceLaserFileLoaded++;
                                     if(self.indiceLaserFileLoaded < self.tabLaserFilesToLoad.length)
