@@ -151,13 +151,19 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
              for(var i=0;i<_nbIndiceMax ;++i){
               _indice_time_laser_tab[i] = 0.;
              }
-            this.createShader();
+            //this.createShader();
 
            
             _currentNbPointsInBuffer = 0;
             _bufferGeometry = new THREE.BufferGeometry();
             _bufferGeometry.dynamic = true;
 
+            _bufferGeometry.addAttribute( 'position', new THREE.BufferAttribute( _nbPointsBuffer, 3 ).setDynamic(true) );
+	    _bufferGeometry.addAttribute( 'color', new THREE.BufferAttribute( _nbPointsBuffer, 3 ).setDynamic(true) );
+            _bufferGeometry.addAttribute( 'displacement', new THREE.BufferAttribute( _nbPointsBuffer, 3 ).setDynamic(true) );
+            _bufferGeometry.addAttribute( 'uniqueid', new THREE.BufferAttribute( _nbPointsBuffer, 1 ).setDynamic(true) );
+
+/*
             _bufferGeometry.attributes = {
                 position: {
                     itemSize: 3,
@@ -181,15 +187,12 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
                     itemSize: 1,
                     array: new Float32Array(_nbPointsBuffer),
                     dynamic: true
-                },
-                classe: {
-                    itemSize: 1,
-                    array: new Float32Array(_nbPointsBuffer),
-                    dynamic: true
                 }
+
             };
-       
-        
+       */
+            this.createShader();
+            
             //*****Picking **********************
             _geometryParticleSystemPicking = new THREE.Geometry();
             _geometryParticleSystemPicking.vertices = new Array(_nbPointsBuffer);
@@ -198,16 +201,16 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
 
             this.initializeBufferValues();
 
-            _particleSystem = new THREE.ParticleSystem(
+            _particleSystem = new THREE.Points(
                     _bufferGeometry,
                     _shaderMatLaserCloud
                     );
 
             //*****Picking **********************
             _geometryParticleSystemPicking.colors = _colorsPicking;
-            var pMaterial = new THREE.ParticleBasicMaterial({size: 0.10, vertexColors: true, depthTest: false});  // map:sprite
+            var pMaterial = new THREE.PointsMaterial({size: 0.10, vertexColors: true, depthTest: false});  // map:sprite
             // create the particle system used to get the id (3D pos). Rendered to texture, not to screen.
-            _particleSystemPicking = new THREE.ParticleSystem(_geometryParticleSystemPicking, pMaterial);
+            _particleSystemPicking = new THREE.Points(_geometryParticleSystemPicking, pMaterial);
             // Modified RTT. Texture rendering ac le Color ID for Picking 3D
             _sceneRTT = new THREE.Scene();
             _sceneRTT.add(_particleSystemPicking);
@@ -241,7 +244,7 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
             // For BufferGeometry now we need to set everything here. Like transparent 
             _shaderMatLaserCloud = new THREE.ShaderMaterial({
                 uniforms: _shaderUniforms,
-                attributes: _shaderAttributes,
+            //    attributes: _bufferGeometry.attributes,// _shaderAttributes,
                 vertexShader: Shader.shaderLaserVS.join("\n"),//Shader.shaders['shaderLaser.vs'],
                 fragmentShader: Shader.shaderLaserFS.join("\n"),//Shader.shaders['shaderLaser.fs'],
                 vertexColors: THREE.VertexColors,
@@ -257,7 +260,7 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
             var positions = _bufferGeometry.attributes.position.array;
             var displacements = _bufferGeometry.attributes.displacement.array;
             var uniqueids = _bufferGeometry.attributes.uniqueid.array;
-            var classes = _bufferGeometry.attributes.classe.array;
+         //   var classes = _bufferGeometry.attributes.classe.array;
 
 
             var color2 = new THREE.Color();
@@ -282,7 +285,7 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
                 values_color[ n * 3 + 2 ] = color2.b;
 
                 uniqueids[ n + 0 ] = this.indiceLaserFileLoaded;
-                classes[ n + 0 ] = 0;
+             //   classes[ n + 0 ] = 0;
                 //Picking*****
                 _colorsPicking[n] = 0;
                 _geometryParticleSystemPicking.vertices[n] = new THREE.Vector3(0, 0, 0);
@@ -360,7 +363,7 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
  //       this.updateLaserAttributes(); 
           this.setLockMovement(0);
        
-          this.updateLaserAttributesSmartly(nbPoints);//offset); 
+          this.updateLaserAttributes(nbPoints);//offset); 
 
           _indiceTimeLaser = 0.5;                    
           if(!this.animateOn){this.animateOn = true; this.animatePoints2(); /*console.log('thisanimate');*/}  // First file
@@ -825,7 +828,7 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
             _geometryParticleSystemPicking.verticesNeedUpdate = true;
             _geometryParticleSystemPicking.colorsNeedUpdate = true;
              // _bufferGeometry.verticesNeedUpdate = true;
-
+             console.log(_bufferGeometry.attributes.color,"  ",_bufferGeometry.attributes.uniqueid);
        },
 
         // offset is _currentNbPointsInBuffer * 3; -> the place to start writing new points
