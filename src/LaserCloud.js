@@ -152,16 +152,15 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
               _indice_time_laser_tab[i] = 0.;
              }
             //this.createShader();
-
            
             _currentNbPointsInBuffer = 0;
             _bufferGeometry = new THREE.BufferGeometry();
-            _bufferGeometry.dynamic = true;
+            //_bufferGeometry.dynamic = true;
 
-            _bufferGeometry.addAttribute( 'position', new THREE.BufferAttribute( _nbPointsBuffer, 3 ).setDynamic(true) );
-	    _bufferGeometry.addAttribute( 'color', new THREE.BufferAttribute( _nbPointsBuffer, 3 ).setDynamic(true) );
-            _bufferGeometry.addAttribute( 'displacement', new THREE.BufferAttribute( _nbPointsBuffer, 3 ).setDynamic(true) );
-            _bufferGeometry.addAttribute( 'uniqueid', new THREE.BufferAttribute( _nbPointsBuffer, 1 ).setDynamic(true) );
+            _bufferGeometry.addAttribute( 'position',     new THREE.BufferAttribute( new Float32Array( _nbPointsBuffer * 3 ), 3 ).setDynamic(true) );
+	    _bufferGeometry.addAttribute( 'color',        new THREE.BufferAttribute( new Float32Array( _nbPointsBuffer * 3 ), 3 ).setDynamic(true) );
+            _bufferGeometry.addAttribute( 'displacement', new THREE.BufferAttribute( new Float32Array( _nbPointsBuffer * 3 ), 3 ).setDynamic(true) );
+            _bufferGeometry.addAttribute( 'uniqueid',     new THREE.BufferAttribute( new Float32Array( _nbPointsBuffer ), 1 ).setDynamic(true) );
 
 /*
             _bufferGeometry.attributes = {
@@ -216,17 +215,18 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
             _sceneRTT.add(_particleSystemPicking);
             
             //gfxEngine.addToScene(_particleSystemPicking);
-           this.laserCloudMaster.add(_particleSystem);
+             this.laserCloudMaster.add(_particleSystem);
         },
         
         createShader: function() {
 
+/*
             _shaderAttributes = {
                 displacement: {type: 'v3', value: []},
                 color: {type: 'v3', value: []},
                 uniqueid: {type: 'f', value: []}
             };
-
+*/
             _shaderUniforms = {
                 indice_time_laser: {type: 'f', value: _indiceTimeLaser},
                 currentidwork: {type: 'f', value: 1000.},
@@ -363,7 +363,7 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
  //       this.updateLaserAttributes(); 
           this.setLockMovement(0);
        
-          this.updateLaserAttributes(nbPoints);//offset); 
+          this.updateLaserAttributes();//(nbPoints);//offset); 
 
           _indiceTimeLaser = 0.5;                    
           if(!this.animateOn){this.animateOn = true; this.animatePoints2(); /*console.log('thisanimate');*/}  // First file
@@ -819,7 +819,11 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
 
 
       updateLaserAttributes: function() {
-
+/*
+            _bufferGeometry.attributes.position.updateRange.count = 3145728;
+            _bufferGeometry.attributes.color.updateRange.count = 3145728;
+            _bufferGeometry.attributes.uniqueid.updateRange.count = 1048576;
+   */         
             _bufferGeometry.attributes.position.needsUpdate = true;
             _bufferGeometry.attributes.color.needsUpdate = true; 
             _bufferGeometry.attributes.uniqueid.needsUpdate = true;
@@ -828,7 +832,7 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
             _geometryParticleSystemPicking.verticesNeedUpdate = true;
             _geometryParticleSystemPicking.colorsNeedUpdate = true;
              // _bufferGeometry.verticesNeedUpdate = true;
-             console.log(_bufferGeometry.attributes.color,"  ",_bufferGeometry.attributes.uniqueid);
+             //console.log(_bufferGeometry.attributes.color,"  ",_bufferGeometry.attributes.uniqueid);
        },
 
         // offset is _currentNbPointsInBuffer * 3; -> the place to start writing new points
@@ -837,7 +841,7 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
         // even if multiple of typearray(float32), https://developer.mozilla.org/en-US/docs/Web/API/Float32Array
         updateLaserAttributesSmartly: function(nbPoints){
             
-
+ 
               var offsetGeometry = (_currentNbPointsInBuffer -  (nbPoints-1)) * 12;
               var offsetSub = (_currentNbPointsInBuffer - (nbPoints-1)) * 3;
               var lengthSub = (nbPoints) * 3;
