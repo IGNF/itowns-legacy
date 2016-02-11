@@ -102,7 +102,7 @@ define(['lib/three', 'jquery', 'Utils', 'lib/postprocessing/EffectComposer'], fu
         _camera.position.x = 0;       
         _camera.position.y = 0.6;
         _camera.position.z = 0;  
-        _camera.scale = new THREE.Vector3(1, 1, -1);     // -1 for the z to go from user to inside the screen (north)
+        _camera.scale.set(1, 1, -1);     // -1 for the z to go from user to inside the screen (north)
         _angleCameraLat = 0;
         _angleCameraLon = 0;
         _targetDist = 100000;

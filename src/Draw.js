@@ -145,7 +145,7 @@ define(['lib/three', 'GraphicEngine','Utils','ProjectiveTexturing2', 'Shader'],
             if (!_surfaceOn)
                 this.initSurface();
             this.setSurfaceVisibility(true);
-            _surface.position = pos3D;
+            _surface.position.set(pos3D.x,pos3D.y,pos3D.z);
 
             var vec = norm.clone();
             // the cone points up 
