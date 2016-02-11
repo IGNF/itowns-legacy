@@ -148,19 +148,20 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
 
         initializeBufferGeometry: function() {
 
-             for(var i=0;i<_nbIndiceMax ;++i){
+            for(var i=0;i<_nbIndiceMax ;++i){
               _indice_time_laser_tab[i] = 0.;
-             }
-            //this.createShader();
+            }
+             
+            this.createShader();
            
             _currentNbPointsInBuffer = 0;
             _bufferGeometry = new THREE.BufferGeometry();
             //_bufferGeometry.dynamic = true;
 
-            _bufferGeometry.addAttribute( 'position',     new THREE.BufferAttribute( new Float32Array( _nbPointsBuffer * 3 ), 3 ).setDynamic(true) );
-	    _bufferGeometry.addAttribute( 'color',        new THREE.BufferAttribute( new Float32Array( _nbPointsBuffer * 3 ), 3 ).setDynamic(true) );
-            _bufferGeometry.addAttribute( 'displacement', new THREE.BufferAttribute( new Float32Array( _nbPointsBuffer * 3 ), 3 ).setDynamic(true) );
-            _bufferGeometry.addAttribute( 'uniqueid',     new THREE.BufferAttribute( new Float32Array( _nbPointsBuffer ), 1 ).setDynamic(true) );
+            _bufferGeometry.addAttribute( 'position',     new THREE.BufferAttribute( new Float32Array( _nbPointsBuffer * 3 ), 3 ));//.setDynamic(true) );
+	    _bufferGeometry.addAttribute( 'color',        new THREE.BufferAttribute( new Float32Array( _nbPointsBuffer * 3 ), 3 ));//.setDynamic(true) );
+            _bufferGeometry.addAttribute( 'displacement', new THREE.BufferAttribute( new Float32Array( _nbPointsBuffer * 3 ), 3 ));//.setDynamic(true) );
+            _bufferGeometry.addAttribute( 'uniqueid',     new THREE.BufferAttribute( new Float32Array( _nbPointsBuffer ), 1 ));//.setDynamic(true) );
 
 /*
             _bufferGeometry.attributes = {
@@ -190,7 +191,7 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
 
             };
        */
-            this.createShader();
+            
             
             //*****Picking **********************
             _geometryParticleSystemPicking = new THREE.Geometry();
@@ -214,8 +215,10 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
             _sceneRTT = new THREE.Scene();
             _sceneRTT.add(_particleSystemPicking);
             
-            //gfxEngine.addToScene(_particleSystemPicking);
-             this.laserCloudMaster.add(_particleSystem);
+            //gfxEngine.addToScene(_particleSystemPicking); 
+            this.laserCloudMaster.add(_particleSystem);
+            this.visible = true;
+            // this.laserCloudMaster.renderOrder = 1000;
         },
         
         createShader: function() {
@@ -251,6 +254,8 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
                 depthTest: false,
                 transparent: true
             });
+            
+       
 
         },
         
@@ -831,6 +836,8 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
             //Picking
             _geometryParticleSystemPicking.verticesNeedUpdate = true;
             _geometryParticleSystemPicking.colorsNeedUpdate = true;
+            
+            _bufferGeometry.computeBoundingSphere();
              // _bufferGeometry.verticesNeedUpdate = true;
              //console.log(_bufferGeometry.attributes.color,"  ",_bufferGeometry.attributes.uniqueid);
        },

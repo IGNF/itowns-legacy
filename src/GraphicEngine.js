@@ -717,10 +717,9 @@ define(['lib/three', 'jquery', 'Utils', 'lib/postprocessing/EffectComposer'], fu
             var meshPlane = new THREE.Mesh(geomPlane, material);
             meshPlane.name = name;
             meshPlane.id = name;
-            meshPlane.position = new THREE.Vector3(position.x, position.y, position.z);
-            //   meshPlane.rotation = _camera.rotation;
-            meshPlane.quaternion = _camera.quaternion;
-            meshPlane.scale.multiplyScalar(scale);
+            meshPlane.position.set(position.x, position.y, position.z);
+            meshPlane.quaternion.copy(_camera.quaternion);
+            meshPlane.scale.set( scale,scale,scale);//.multiplyScalar(scale);
             _textPanels.push(meshPlane);
             _scene.add(meshPlane);
 

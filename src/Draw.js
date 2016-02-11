@@ -198,7 +198,7 @@ define(['lib/three', 'GraphicEngine','Utils','ProjectiveTexturing2', 'Shader'],
             color = color || '#'+Math.floor(Math.random()*16777215).toString(16);
             var sphere = new THREE.SphereGeometry(radius, 8, 8);
             var sphereMesh = new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { transparent: true,depthTest:false, opacity: 0.8, color: color}));
-            sphereMesh.position = vec3;//new THREE.Vector3(vec3.x,vec2.y,vec3.z);
+            sphereMesh.position.set(vec3.x, vec3.y, vec3.z);//new THREE.Vector3(vec3.x,vec2.y,vec3.z);
             gfxEngine.addToScene(sphereMesh);
             if(userAdded){  // Means point added from 3D measure , so in order to save we put in tab
                 // Look for id if imported points homolog

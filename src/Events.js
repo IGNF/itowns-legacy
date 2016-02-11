@@ -67,9 +67,9 @@ define (['Cartography', 'Navigation', 'GraphicEngine', 'LaserCloud','jquery', 'l
 
                     if(/*!$("#chbxSnappON").prop("checked")*/true) {
                             var zero = gfxEngine.getZero();
-                            var pointLineMesureX = LaserCloud.getXYZFromClick2D(_mouseX,_mouseY);
+                            var pointLineMesureX = LaserCloud.getXYZFromClick2D(_mouseX,_mouseY,10);
                                _tabPointsMesureX.push(pointLineMesureX);
-                               var id= Draw.drawSphereAt(pointLineMesureX,0.04,0xFAE361,true);  // Useradded = true
+                            var id= Draw.drawSphereAt(pointLineMesureX,0.04,0xFAE361,true);  // Useradded = true
                             var realx = pointLineMesureX.x + parseFloat(zero.x),
                                 realy = pointLineMesureX.y + parseFloat(zero.y),
                                 realz = pointLineMesureX.z + parseFloat(zero.z);

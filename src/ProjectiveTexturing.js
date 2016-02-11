@@ -102,7 +102,7 @@
             				vertexShader:   Shader.shaderTextureProjectiveVS(P*N),
             				fragmentShader: Shader.shaderTextureProjectiveFS(P*N),
             				side: THREE.BackSide,   
-            				transparent:true
+            				transparent:false
             			});
             			return _shaderMat;
             		},
