@@ -768,6 +768,7 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'lib/threeExt', 'Panoramic', 'Di
                             gridWeather: [],
                             gridGeometry: null,
                             textureType : 'dds',
+							raycaster : new THREE.Raycaster(), // create once
                             //grillMap
                             gmap            : null,
                             createGMap      : function(){
@@ -828,11 +829,9 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'lib/threeExt', 'Panoramic', 'Di
                          
                             getDalleXYFromCamDirection: function(){
                                 
-                                var p = new THREE.Vector3(-9999,0,0);  // To detect no intersection
-                                var vector = new THREE.Vector3(0, 0, 1);
-                                var projector = new THREE.Projector();
-                                var ray = projector.pickingRay(vector, gfxEngine.getCamera());
-                                var objArray = ray.intersectObjects([this.gmap]);
+                                var p = new THREE.Vector3(-9999,0,0);  // To detect no intersection                               
+                                this.raycaster.setFromCamera(new THREE.Vector3(0, 0), gfxEngine.getCamera());
+                                var objArray = this.raycaster.intersectObjects([this.gmap]);
                                 if (objArray[0]) {
                                     
                                     p = objArray[0].point; // Pos 3D in scene of camera look to gmap plane
