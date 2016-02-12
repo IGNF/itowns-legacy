@@ -186,12 +186,9 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'lib/threeExt', 'Panoramic', 'Di
                         var bufferGeometry = THREE.BufferGeometryUtils.fromGeometry(geom2,{indice:n} );
 
                         var mat = this.createShaderForBati();
-                        for(var a=0;a<nbTexturesInShader;++a){
-                            
+                        for(var a=0;a<nbTexturesInShader;++a){                            
                            if(n+a< nbMaterials) this.affectTexture(mat,n+a,a);
-                            
                         }
-
                         var mesh = new THREE.Mesh(bufferGeometry,mat);//this.cachedMaterials.materials[n]);
                         
                         this.globalObject.add(mesh);
@@ -217,13 +214,12 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'lib/threeExt', 'Panoramic', 'Di
                  var texture;
                  THREE.ImageUtils.crossOrigin= 'use-credentials';   // No anonymous to keep ability to access password protected files (behind dir Viewer)
                  if(this.textureType=='.dds'){
-                    texture = THREE.ImageUtils.loadDDSTexture(urlTexture,null,
-                                           function() {
+					 var loader = new THREE.DDSLoader();
+                     texture = loader.load(urlTexture, function() {
                                                shaderMat.uniforms["u_textures"].value[numTexture] = texture;   // onLoad function
                                                texture.dispose();
                                            }
-                                  );
-                    texture.generateMipmaps = false;
+                                );
                    }
                 else{
                     texture = THREE.ImageUtils.loadTexture(urlTexture,null,function() { "http://www.itowns.fr/images/textures/quoc.png"
@@ -271,16 +267,10 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'lib/threeExt', 'Panoramic', 'Di
                     light: {type: "v3", value:  Cartography3D.light}                            
                };
                 
-              var attributesBati = {
-                  //position: {type: 'v3', value: []},
-                    materialindice: {type: 'f', value: []}
-              };
-
                               
                  // create the shader material
                 var shaderMat = new THREE.ShaderMaterial({
                         uniforms:     	uniformsBati,
-                        attributes: attributesBati,
                         vertexShader:   Shader.shaderBati3DVS.join("\n"),//Shader.shaders['shaderBati3D.vs'],
                         fragmentShader: Shader.shaderBati3DFS.join("\n"),//Shader.shaders['shaderBati3D.fs'],
                         side: THREE.DoubleSide,

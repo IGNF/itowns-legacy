@@ -1759,49 +1759,16 @@ THREE.BufferGeometryUtils = {
 
 		var bufferGeometry = new THREE.BufferGeometry();
 
-		bufferGeometry.attributes = {
+		var positions = new Float32Array( faces.length * 3 * 3 );
+		var normals = new Float32Array( faces.length * 3 * 3 );
+        var materialindice = new Float32Array( faces.length *3 );
 
-			position: {
-				itemSize: 3,
-				array: new Float32Array( faces.length * 3 * 3 )
-			},
-			normal: {
-				itemSize: 3,
-				array: new Float32Array( faces.length * 3 * 3 )
-			},
-                        materialindice : {
-				itemSize: 1,
-				array: new Float32Array( faces.length *3 )
-			}
+		var colors, uvs;
+		if ( vertexColors !== THREE.NoColors )
+			colors = new Float32Array( faces.length * 3 * 3 );
 
-		}
-
-		var positions = bufferGeometry.attributes.position.array;
-		var normals = bufferGeometry.attributes.normal.array;
-                var materialindice = bufferGeometry.attributes.materialindice.array;
-
-		if ( vertexColors !== THREE.NoColors ) {
-
-			bufferGeometry.attributes.color = {
-				itemSize: 3,
-				array: new Float32Array( faces.length * 3 * 3 )
-			};
-
-			var colors = bufferGeometry.attributes.color.array;
-
-		}
-
-		if ( hasFaceVertexUv === true ) {
-
-			bufferGeometry.attributes.uv = {
-				itemSize: 2,
-				array: new Float32Array( faces.length * 3 * 2 )
-			};
-
-			var uvs = bufferGeometry.attributes.uv.array;
-
-		}
-                
+		if ( hasFaceVertexUv === true )
+			uvs = new Float32Array( faces.length * 3 * 2 );
 
 		var i2 = 0, i3 = 0;
 		for ( var i = 0; i < faces.length; i ++ ) {
@@ -1906,6 +1873,16 @@ THREE.BufferGeometryUtils = {
 
 		}
 
+		bufferGeometry.addAttribute('position', new THREE.BufferAttribute( positions, 9 ) );
+		bufferGeometry.addAttribute('normal', new THREE.BufferAttribute( normals, 9 ) );
+		bufferGeometry.addAttribute('materialindice', new THREE.BufferAttribute( materialindice, 3 ) );
+		
+		if ( vertexColors !== THREE.NoColors )
+			bufferGeometry.addAttribute('color', new THREE.BufferAttribute( colors, 9 ) );
+
+		if ( hasFaceVertexUv === true )
+			bufferGeometry.addAttribute('uv', new THREE.BufferAttribute( uvs, 6 ) );
+			
 		bufferGeometry.computeBoundingSphere();
 
 		return bufferGeometry;
