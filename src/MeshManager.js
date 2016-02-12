@@ -837,7 +837,8 @@
             
             
             setSkyBoxVisibility: function(b){
-                this.skyBox.visible = b;
+                if(this.skyBox && b) this.generateSkyBox();
+                if(this.skyBox) this.skyBox.visible = b;
             },
        
        

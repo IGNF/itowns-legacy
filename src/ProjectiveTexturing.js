@@ -22,6 +22,7 @@
 
 				var _shaderMat = null;
 				var _initiated = false;
+				var _alpha = 1;
 				var _targetNbPanoramics;
 
 				var ProjectiveTexturing = {
@@ -34,6 +35,19 @@
 					isInitiated: function(){
 						return _initiated;
 					},	
+					
+					setGeneralOpacity: function(value){
+						_alpha = value;
+					},
+					
+					tweenGeneralOpacityUp: function(){
+						if(_alpha<1){
+							_alpha += ((_alpha+0.01))*0.04;
+							if(_alpha>1) _alpha=1;
+							requestAnimSelectionAlpha(this.tweenGeneralOpacityUp.bind(this));
+						}
+					},
+        
 					
 					// display all the images of the panoramics
 					nbImages: function(){
@@ -83,7 +97,7 @@
 								uniforms.pps.value[j] = Ori.getPPS(i);
 								uniforms.size.value[j] = Ori.getSize(i);
 								uniforms.mask.value[j] = Ori.getMask(i);
-								uniforms.alpha.value[j] = 1-pano;
+								uniforms.alpha.value[j] = _alpha*(1-pano);
 								uniforms.mvpp.value[j]=mvpp;
 								uniforms.translation.value[j]=trans;
 								uniforms.texture.value[j] = THREE.ImageUtils.loadTexture(src);
@@ -112,8 +126,8 @@
 	            			var j = i + this.nbImages();
                 			alpha += 0.03;
                 			if(alpha>1) alpha=1;
-                			_shaderMat.uniforms.alpha.value[i] = alpha;
-                			_shaderMat.uniforms.alpha.value[j] = 1-alpha;
+                			_shaderMat.uniforms.alpha.value[i] = _alpha*alpha;
+                			_shaderMat.uniforms.alpha.value[j] = _alpha*(1-alpha);
                 			var that = this;
                 			requestAnimSelectionAlpha(function() { that.tweenIndiceTime(i); });                			
            	 			}	
@@ -139,7 +153,7 @@
 								_shaderMat.uniforms.mvpp.value[j] = _shaderMat.uniforms.mvpp.value[i];
 								_shaderMat.uniforms.translation.value[j] = _shaderMat.uniforms.translation.value[i];
 								_shaderMat.uniforms.texture.value[j] =_shaderMat.uniforms.texture.value[i];
-								_shaderMat.uniforms.alpha.value[j] = 1;
+								_shaderMat.uniforms.alpha.value[j] = _alpha;
 								_shaderMat.uniforms.alpha.value[i] = 0;
 								that.tweenIndiceTime(i);
 							}
