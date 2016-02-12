@@ -1,4 +1,4 @@
-define(['lib/three', 'jquery', 'Utils', 'lib/postprocessing/EffectComposer'], function(THREE, $, Utils, EffectComposer) {
+define(['three', 'jquery', 'Utils', 'lib/postprocessing/EffectComposer'], function(THREE, $, Utils, EffectComposer) {
 
     //PRIVATE MEMBERS*****************************************************************************************
     //********************************************************************************************************

@@ -1,4 +1,4 @@
-define (['Cartography', 'Navigation', 'GraphicEngine', 'LaserCloud','jquery', 'lib/three', 'Draw',
+define (['Cartography', 'Navigation', 'GraphicEngine', 'LaserCloud','jquery', 'three', 'Draw',
         'MeshManager','ProjectiveTexturing2','ProjectiveTexturingPhoto','Ori','Measure','Panoramic','lib/postprocessing/WeatherEffects',
         'Utils','SphericalPanoramic', 'Dispatcher'],
     function (Carto, Navigation, gfxEngine, LaserCloud , $, THREE, Draw, MeshManager, ProjectiveTexturing2, ProjectiveTexturingPhoto,Ori,

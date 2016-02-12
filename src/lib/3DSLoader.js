@@ -1,7 +1,7 @@
 /*nguyen dot quocdinh at gmail dot com
  */
 
-define (['lib/three','lib/BinaryStream','lib/PlatformInfo'],function(THREE,BinaryStream,PlatformInfo){
+define (['three','lib/BinaryStream','lib/PlatformInfo'],function(THREE,BinaryStream,PlatformInfo){
         var DS3Loader = function(dalle) {
                     this.decimalPrecision = 3;
                     this._materials = {};

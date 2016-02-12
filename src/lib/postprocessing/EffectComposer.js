@@ -4,7 +4,7 @@
  * @Tuned A.D IGN   
  *   Careful RGBA format for target !!!
  */
-define(['lib/three'],function(THREE){
+define(['three'],function(THREE){
 THREE.EffectComposer = function ( renderer, renderTarget ) {
 
 	this.renderer = renderer;
@@ -1744,9 +1744,7 @@ THREE.BufferGeometryUtils = {
 	fromGeometry: function geometryToBufferGeometry( geometry, settings ) {
 
 		if ( geometry instanceof THREE.BufferGeometry ) {
-
 			return geometry;
-
 		}
 
 		settings = settings || { 'vertexColors': THREE.NoColors };
@@ -1760,7 +1758,6 @@ THREE.BufferGeometryUtils = {
 		var bufferGeometry = new THREE.BufferGeometry();
 
 		var positions = new Float32Array( faces.length * 3 * 3 );
-		var normals = new Float32Array( faces.length * 3 * 3 );
         var materialindice = new Float32Array( faces.length *3 );
 
 		var colors, uvs;
@@ -1776,7 +1773,6 @@ THREE.BufferGeometryUtils = {
 			var face = faces[ i ];
                         var materialIndiceCurrent = face.materialIndex;
                         var matIndiceNormalized = materialIndiceCurrent - settings.indice;
-                       // matIndiceNormalized = Math.random();
       
                         materialindice[i*3]   = matIndiceNormalized;
                         materialindice[i*3+1] = matIndiceNormalized;
@@ -1798,22 +1794,6 @@ THREE.BufferGeometryUtils = {
 			positions[ i3 + 6 ] = c.x;
 			positions[ i3 + 7 ] = c.y;
 			positions[ i3 + 8 ] = c.z;
-
-			var na = face.vertexNormals[ 0 ];
-			var nb = face.vertexNormals[ 1 ];
-			var nc = face.vertexNormals[ 2 ];
-
-			normals[ i3     ] = na.x;
-			normals[ i3 + 1 ] = na.y;
-			normals[ i3 + 2 ] = na.z;
-
-			normals[ i3 + 3 ] = nb.x;
-			normals[ i3 + 4 ] = nb.y;
-			normals[ i3 + 5 ] = nb.z;
-
-			normals[ i3 + 6 ] = nc.x;
-			normals[ i3 + 7 ] = nc.y;
-			normals[ i3 + 8 ] = nc.z;
 
 			if ( vertexColors === THREE.FaceColors ) {
 
@@ -1873,15 +1853,14 @@ THREE.BufferGeometryUtils = {
 
 		}
 
-		bufferGeometry.addAttribute('position', new THREE.BufferAttribute( positions, 9 ) );
-		bufferGeometry.addAttribute('normal', new THREE.BufferAttribute( normals, 9 ) );
-		bufferGeometry.addAttribute('materialindice', new THREE.BufferAttribute( materialindice, 3 ) );
+		bufferGeometry.addAttribute('position', new THREE.BufferAttribute( positions, 3 ) );
+		bufferGeometry.addAttribute('materialindice', new THREE.BufferAttribute( materialindice, 1 ) );
 		
 		if ( vertexColors !== THREE.NoColors )
-			bufferGeometry.addAttribute('color', new THREE.BufferAttribute( colors, 9 ) );
+			bufferGeometry.addAttribute('color', new THREE.BufferAttribute( colors, 3 ) );
 
 		if ( hasFaceVertexUv === true )
-			bufferGeometry.addAttribute('uv', new THREE.BufferAttribute( uvs, 6 ) );
+			bufferGeometry.addAttribute('uv', new THREE.BufferAttribute( uvs, 2 ) );
 			
 		bufferGeometry.computeBoundingSphere();
 

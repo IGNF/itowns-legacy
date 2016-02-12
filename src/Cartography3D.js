@@ -2,8 +2,8 @@
  * To manage Bati 3D layer
  * quocdinh dot nguyen at gmail dot com
  */
-define(['jquery', 'GraphicEngine', 'lib/three', 'lib/threeExt', 'Panoramic', 'Dispatcher', 'Cartography','lib/3DSLoader', 'Shader','lib/B3DLoader','Draw', 'Utils', 'Config'],
-    function($, gfxEngine, THREE, THREEExt, Panoramic, Dispatcher, Cartography, DS3Loader, Shader, B3DLoader, Draw, Utils, Config) {
+define(['jquery', 'GraphicEngine', 'three', 'lib/threeExt', 'Panoramic', 'Dispatcher', 'Cartography','lib/3DSLoader', 'Shader','lib/B3DLoader','lib/DDSLoader','Draw', 'Utils', 'Config'],
+    function($, gfxEngine, THREE, THREEExt, Panoramic, Dispatcher, Cartography, DS3Loader, Shader, B3DLoader, DDSLoader, Draw, Utils, Config) {
         
         
                

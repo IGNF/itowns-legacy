@@ -4,7 +4,7 @@
  * @class Manages laser data
  * @require THREE.JS
  */
-define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatcher', 'Cartography','Draw',  'CVML','ProjectiveTexturing2','Utils', 'LasReader', 'Config'],
+define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher', 'Cartography','Draw',  'CVML','ProjectiveTexturing2','Utils', 'LasReader', 'Config'],
     function($, gfxEngine, THREE, Shader, Panoramic, Dispatcher, Cartography, Draw, CVML, ProjectiveTexturing2, Utils, LasReader, Config) {
 
     var _particleSystem = null,

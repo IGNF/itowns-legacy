@@ -6,7 +6,7 @@
 * and its projective camera information.
 */
 
-define (['GraphicEngine','lib/three','Ori','Shader', 'PanoramicProvider'],
+define (['GraphicEngine','three','Ori','Shader', 'PanoramicProvider'],
 function (graphicEngine, THREE, Ori, Shader, PanoramicProvider) {
 
             window.requestAnimSelectionAlpha = (function(){

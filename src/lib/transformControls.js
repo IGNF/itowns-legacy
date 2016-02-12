@@ -4,7 +4,7 @@
 
 "use strict";
 
-define(["lib/three"], function(THREE) {
+define(["three"], function(THREE) {
     
     var TransformGizmoMaterial = function(parameters) {
 

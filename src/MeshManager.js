@@ -1,6 +1,6 @@
 
 
-    define (['GraphicEngine','jquery', 'Config', 'lib/three','Utils','ProjectiveTexturing','Ori','TileTexture','Draw','CVML','Cartography'],
+    define (['GraphicEngine','jquery', 'Config', 'three','Utils','ProjectiveTexturing','Ori','TileTexture','Draw','CVML','Cartography'],
         function(gfxEngine, $, Config, THREE, Utils,  ProjectiveTexturing, Ori, TileTexture, Draw, CVML) {
 
 

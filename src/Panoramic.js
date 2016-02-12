@@ -10,7 +10,7 @@
  * 
  */ 
  
-define (['lib/three', 'Ori','MeshManager', 'PanoramicProvider', 'lib/when', 'Navigation'], function ( THREE, Ori, MeshManager, PanoramicProvider, when, Navigation) {
+define (['three', 'Ori','MeshManager', 'PanoramicProvider', 'lib/when', 'Navigation'], function ( THREE, Ori, MeshManager, PanoramicProvider, when, Navigation) {
     
     
     var _panoGlobale = new THREE.Object3D(),

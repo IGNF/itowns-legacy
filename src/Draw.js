@@ -1,4 +1,4 @@
-define(['lib/three', 'GraphicEngine','Utils','ProjectiveTexturing2', 'Shader'],
+define(['three', 'GraphicEngine','Utils','ProjectiveTexturing2', 'Shader'],
     function(THREE, gfxEngine, Utils, ProjectiveTexturing2, Shader) {
 
     //PRIVATE MEMBERS******************************************************************************************
