@@ -11,7 +11,8 @@ define("API",['jquery', 'GraphicEngine', 'Navigation', 'Panoramic', 'LaserCloud'
 
          API = function(options){
              
-            this.dataURL = options.dataURL || Config.dataURL;  // Specify if using local files or distant : "local", "distant"
+           this.laser = options.laser;
+           this.dataURL = options.dataURL || Config.dataURL;  // Specify if using local files or distant : "local", "distant"
            // Config.init("stereopolis");
             
             this.positionInit = options.positionInit || {x:651182.91,y:39.6,z:6861343.03};
@@ -25,7 +26,7 @@ define("API",['jquery', 'GraphicEngine', 'Navigation', 'Panoramic', 'LaserCloud'
             }
             
             if(options.usingLaserCloud) {
-                this.addLayer("pointCloud",this.dataURL);
+                this.addLayer("pointCloud",this.dataURL,this.laser);
             }
 
             this.version = 0.1;
@@ -146,7 +147,7 @@ define("API",['jquery', 'GraphicEngine', 'Navigation', 'Panoramic', 'LaserCloud'
         
         // Layers **************************************************************************
         
-        API.prototype.addLayer = function(layerName, dataURL){
+        API.prototype.addLayer = function(layerName, dataURL, infos){
             
            // console.log("addLayer", layerName);
             
@@ -156,7 +157,7 @@ define("API",['jquery', 'GraphicEngine', 'Navigation', 'Panoramic', 'LaserCloud'
                 
                     if (!LaserCloud.initiated) {
                             Measure.init();
-                            LaserCloud.init(gfxEngine.getZero(), dataURL); //Init itself and its shaders
+                            LaserCloud.init(gfxEngine.getZero(), dataURL, infos); //Init itself and its shaders
                             gfxEngine.addToScene(LaserCloud.laserCloudMaster);
                             LaserCloud.launchLaserAroundCurrentTime(10, 11);
                             //LaserCloud.setVisibility(true);
@@ -169,13 +170,13 @@ define("API",['jquery', 'GraphicEngine', 'Navigation', 'Panoramic', 'LaserCloud'
                         LaserCloud.setVisibility(true);
                         LaserCloud.btnSwitchPoint = true;
                  }else{
-                    setTimeout(function(){API.prototype.addLayer("pointCloud",dataURL);}, 150);
+                    setTimeout(function(){API.prototype.addLayer("pointCloud",dataURL,infos);}, 150);
                 }
             }
 
             if(layerName == "3DBuilding"){
                     if (!Cartography3D.isCartoInitialized()) {
-                                Cartography3D.initCarto3D(dataURL);
+                                Cartography3D.initCarto3D(dataURL,infos); // todo : handle offset
                                 Panoramic.setVisibility(false);
                     }
             }   

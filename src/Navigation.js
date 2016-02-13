@@ -109,9 +109,9 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
 
              /*************************** Projection ******************************************************************/
                 var matRotation = Ori.computeMatOriFromHeadingPitchRoll(
-                                        targetPanoInfo.pan_xml_heading_pp,
-                                        targetPanoInfo.pan_xml_pitch_pp,
-                                        targetPanoInfo.pan_xml_roll_pp
+                                        targetPanoInfo.heading,
+                                        targetPanoInfo.pitch,
+                                        targetPanoInfo.roll
                                     );
 
                 _barycentre = Ori.getPosition();
@@ -169,7 +169,7 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
                Panoramic.setInfos(targetPanoInfo.url,targetPanoInfo);
              /*************************** Projection ******************************************************************/
                 // rotation from heading TODO real 3D Rotation with pitch and roll
-                var teta = parseFloat(targetPanoInfo.pan_xml_heading_pp)/ 180 * Math.PI;  // Deg to Rad
+                var teta = parseFloat(targetPanoInfo.heading)/ 180 * Math.PI;  // Deg to Rad
                 var cosTeta = Math.cos(teta);
                 var sinTeta = Math.sin(teta);
                 var matRotation = new THREE.Matrix4().set(cosTeta,0,-sinTeta,0,
@@ -228,9 +228,9 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
              /*************************** Projection ******************************************************************/
                 // rotation from heading TODO real 3D Rotation with pitch and roll
                 var matRotation = Ori.computeMatOriFromHeadingPitchRoll(
-                                        targetPanoInfo.pan_xml_heading_pp,
-                                        targetPanoInfo.pan_xml_pitch_pp,
-                                        targetPanoInfo.pan_xml_roll_pp
+                                        targetPanoInfo.heading,
+                                        targetPanoInfo.pitch,
+                                        targetPanoInfo.roll
                                     );
 
 
@@ -300,9 +300,9 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
              /*************************** Projection ******************************************************************/
                 // rotation from heading TODO real 3D Rotation with pitch and roll
                 var matRotation = Ori.computeMatOriFromHeadingPitchRoll(
-                                        targetPanoInfo.pan_xml_heading_pp,
-                                        targetPanoInfo.pan_xml_pitch_pp,
-                                        targetPanoInfo.pan_xml_roll_pp
+                                        targetPanoInfo.heading,
+                                        targetPanoInfo.pitch,
+                                        targetPanoInfo.roll
                                     );
 
 

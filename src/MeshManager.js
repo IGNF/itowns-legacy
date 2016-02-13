@@ -505,9 +505,9 @@
                     _currentObject = mesh;
 
                     var matRotation = Ori.computeMatOriFromHeadingPitchRoll(
-                                        this.panoInfo.pan_xml_heading_pp,
-                                        this.panoInfo.pan_xml_pitch_pp,
-                                        this.panoInfo.pan_xml_roll_pp
+                                        this.panoInfo.heading,
+                                        this.panoInfo.pitch,
+                                        this.panoInfo.roll
                                     );
 
                     ProjectiveTexturing.init();

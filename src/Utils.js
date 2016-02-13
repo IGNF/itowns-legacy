@@ -167,18 +167,19 @@ define(['RequestManager'], function (RequestManager) {
                 pano.panoInfo.easting = info.easting;
                 pano.panoInfo.northing = info.northing;
                 pano.panoInfo.altitude = info.altitude;
-                pano.panoInfo.pan_xml_heading_pp = info.heading;
-                pano.panoInfo.pan_xml_pitch_pp =info.pitch;
-                pano.panoInfo.pan_xml_roll_pp = info.roll;
+                pano.panoInfo.date = info.date;
+                pano.panoInfo.heading = info.heading;
+                pano.panoInfo.pitch =info.pitch;
+                pano.panoInfo.roll = info.roll;
                 pano.loadUrl(pano.url);
                 
                 console.log(pano.panoInfo.easting - initialInfo['easting']);
                 pano.updateGlobalPano(new THREE.Vector3(pano.panoInfo.easting - initialInfo['easting'],
                                                             pano.panoInfo.altitude - initialInfo['altitude'],
                                                             pano.panoInfo.northing - initialInfo['northing']),
-                                          new THREE.Vector3(IT.Utils.deg2Rad(pano.panoInfo.pan_xml_roll_pp),
-                                                            IT.Utils.deg2Rad(pano.panoInfo.pan_xml_heading_pp),
-                                                            IT.Utils.deg2Rad(pano.panoInfo.pan_xml_pitch_pp)));
+                                          new THREE.Vector3(IT.Utils.deg2Rad(pano.panoInfo.roll),
+                                                            IT.Utils.deg2Rad(pano.panoInfo.heading),
+                                                            IT.Utils.deg2Rad(pano.panoInfo.pitch)));
                                                             
        
                 var translation = {

@@ -18,17 +18,14 @@ define (['three', 'Ori','MeshManager', 'PanoramicProvider', 'lib/when', 'Navigat
     _initiated = false,
     _visibility = true,
     _panoInfo = {
-        url_format:'',
-        easting:0, 
+        pano:'',
+        easting:0,
         northing:0,
-        altitude:0, 
-        pan_xml_heading_pp:0,
-        pan_xml_pitch_pp:0,
-        pan_xml_roll_pp:0,
-        pan_time_utc:'',
-        near_address_num:0,
-        near_address_name:'',
-        id_platform:''
+        altitude:0,
+        heading:0,
+        pitch:0,
+        roll:0,
+        date:new Date()
     },
     _dataURL = null,
     _decalageUTC = 15;
@@ -48,17 +45,16 @@ define (['three', 'Ori','MeshManager', 'PanoramicProvider', 'lib/when', 'Navigat
             
             _dataURL = dataURL;
             PanoramicProvider.init(_dataURL);
-            
+            var that = this;
             // Get info for initPosition from Data base
             PanoramicProvider.getMetaDataFromPos(pos.x, pos.z, 50).then(
                         function(response){
-                            _panoInfo = response[0];
+                            that.setInfos('',response[0]);
                             _initiated = true;
                            // Init orientation module (used for intrinseque and extraseque parameters)
                             Ori.init();
                         }
                     );
-            
             
             // Needs to have ori initiated
             this.testInitOri(); // Generate Mesh with projective images and building geometry
@@ -79,19 +75,15 @@ define (['three', 'Ori','MeshManager', 'PanoramicProvider', 'lib/when', 'Navigat
         
         
         setInfos: function(url,infos){
-  
             _url = url || '';
-            _panoInfo.url_format = infos.url_format || '';
-            _panoInfo.id_platform = infos.id_platform || '';
+            _panoInfo.pano = infos.pano || '';
             _panoInfo.easting = parseFloat(infos.easting) || 0;
             _panoInfo.northing = parseFloat(infos.northing) || 0;                            
             _panoInfo.altitude = parseFloat(infos.altitude) || 0;
-            _panoInfo.pan_xml_heading_pp = parseFloat(infos.heading) ||  parseFloat(infos.pan_xml_heading_pp) ||  0;
-            _panoInfo.pan_xml_pitch_pp = parseFloat(infos.pitch) || parseFloat(infos.pan_xml_pitch_pp) || 0;
-            _panoInfo.pan_xml_roll_pp = parseFloat(infos.roll) || parseFloat(infos.pan_xml_roll_pp) ||  0;
-            _panoInfo.pan_time_utc = infos.time_utc || infos.pan_time_utc || ''; 
-            _panoInfo.near_address_num = infos.near_address_num || 0;
-            _panoInfo.near_address_name = infos.near_address_name || '';
+            _panoInfo.heading = parseFloat(infos.heading)  ||  0;
+            _panoInfo.pitch = parseFloat(infos.pitch)  || 0;
+            _panoInfo.roll = parseFloat(infos.roll) ||  0;
+            _panoInfo.date = new Date(infos.date); 
         },
      
 
@@ -190,13 +182,7 @@ define (['three', 'Ori','MeshManager', 'PanoramicProvider', 'lib/when', 'Navigat
             var urlLocal = "?easting="+_panoInfo.easting+"&northing="+_panoInfo.northing+"&mobile="+params.mobile+"&nc="+params.nc;
             window.history.pushState("string test", "titre", urlLocal);
         },
-        
-        // ex: Toulouse-131010_0729-00-00002_0000501
-        getPanoName: function(){
-            var base = _panoInfo.url_format.substring(_panoInfo.url_format.lastIndexOf('/') + 1);
-            return base.replace("{cam_id_pos}","00");
-        },
-        
+                
         // Toulouse-131010_0729-00-00002_0000501
         // -> n= -1 will return Toulouse-131010_0729-00-00002_0000500
         getPanoNameAtIndice: function(n){
@@ -213,27 +199,25 @@ define (['three', 'Ori','MeshManager', 'PanoramicProvider', 'lib/when', 'Navigat
             return _url;
         },
         
-         getVisibility: function(){
+        getVisibility: function(){
             return _visibility;
         },
-
         
-        // get date frome name (not db pan_date)
         getPanoDate: function(){
-            var datee = _panoInfo.url_format.substr(_panoInfo.url_format.indexOf('-')+1,6);  // ex:080422
-            var dateNewFormat = "20"+ datee.substr(0,2)+ "_"+ datee.substr(2,2) + "_"+ datee.substr(4,2);
-            //ex: 2008_04_22
-            return dateNewFormat;
+            return _panoInfo.date;
+        },
+
+        getYYMMDD: function(){
+            var d =  _panoInfo.date;
+            return (""+d.getUTCFullYear()).slice(-2) + ("0"+(d.getUTCMonth()+1)).slice(-2) + ("0" + d.getUTCDate()).slice(-2);
         },
 
         getPanoHours: function(){
-            var timeUTC = _panoInfo.pan_time_utc.split(":");   
-            return parseFloat(timeUTC[0]);
+            return _panoInfo.date.getUTCHours();
         },
 
         getPanoSecondsInHour: function(){
-            var timeUTC = _panoInfo.pan_time_utc.split(":");   
-            return parseInt(timeUTC[1])*60 + parseInt(timeUTC[2]); 
+            return _panoInfo.date.getUTCMinutes()*60+_panoInfo.date.getUTCSeconds();
         },
         
         getDecalageUTC: function(){
@@ -241,9 +225,8 @@ define (['three', 'Ori','MeshManager', 'PanoramicProvider', 'lib/when', 'Navigat
             return _decalageUTC;
         },
         
-        setDecalageUTC: function(){
-            
-            // Code JP
+        setDecalageUTC: function(decalageUTC){
+            _decalageUTC = decalageUTC;
         },
 
         setPanoInfos: function(panoInfos){
