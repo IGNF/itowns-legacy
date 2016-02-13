@@ -4,7 +4,7 @@
  * @class Manages laser data
  * @require THREE.JS
  */
-define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatcher', 'Cartography','Draw',  'CVML','ProjectiveTexturing2','Utils', 'LasReader', 'Config'],
+define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher', 'Cartography','Draw',  'CVML','ProjectiveTexturing2','Utils', 'LasReader', 'Config'],
     function($, gfxEngine, THREE, Shader, Panoramic, Dispatcher, Cartography, Draw, CVML, ProjectiveTexturing2, Utils, LasReader, Config) {
 
     var _particleSystem = null,
@@ -148,16 +148,22 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
 
         initializeBufferGeometry: function() {
 
-             for(var i=0;i<_nbIndiceMax ;++i){
+            for(var i=0;i<_nbIndiceMax ;++i){
               _indice_time_laser_tab[i] = 0.;
-             }
+            }
+             
             this.createShader();
-
            
             _currentNbPointsInBuffer = 0;
             _bufferGeometry = new THREE.BufferGeometry();
-            _bufferGeometry.dynamic = true;
+            //_bufferGeometry.dynamic = true;
 
+            _bufferGeometry.addAttribute( 'position',     new THREE.BufferAttribute( new Float32Array( _nbPointsBuffer * 3 ), 3 ));//.setDynamic(true) );
+	    _bufferGeometry.addAttribute( 'color',        new THREE.BufferAttribute( new Float32Array( _nbPointsBuffer * 3 ), 3 ));//.setDynamic(true) );
+            _bufferGeometry.addAttribute( 'displacement', new THREE.BufferAttribute( new Float32Array( _nbPointsBuffer * 3 ), 3 ));//.setDynamic(true) );
+            _bufferGeometry.addAttribute( 'uniqueid',     new THREE.BufferAttribute( new Float32Array( _nbPointsBuffer ), 1 ));//.setDynamic(true) );
+
+/*
             _bufferGeometry.attributes = {
                 position: {
                     itemSize: 3,
@@ -181,15 +187,12 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
                     itemSize: 1,
                     array: new Float32Array(_nbPointsBuffer),
                     dynamic: true
-                },
-                classe: {
-                    itemSize: 1,
-                    array: new Float32Array(_nbPointsBuffer),
-                    dynamic: true
                 }
+
             };
-       
-        
+       */
+            
+            
             //*****Picking **********************
             _geometryParticleSystemPicking = new THREE.Geometry();
             _geometryParticleSystemPicking.vertices = new Array(_nbPointsBuffer);
@@ -198,32 +201,35 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
 
             this.initializeBufferValues();
 
-            _particleSystem = new THREE.ParticleSystem(
+            _particleSystem = new THREE.Points(
                     _bufferGeometry,
                     _shaderMatLaserCloud
                     );
 
             //*****Picking **********************
             _geometryParticleSystemPicking.colors = _colorsPicking;
-            var pMaterial = new THREE.ParticleBasicMaterial({size: 0.10, vertexColors: true, depthTest: false});  // map:sprite
+            var pMaterial = new THREE.PointsMaterial({size: 0.10, vertexColors: true, depthTest: false});  // map:sprite
             // create the particle system used to get the id (3D pos). Rendered to texture, not to screen.
-            _particleSystemPicking = new THREE.ParticleSystem(_geometryParticleSystemPicking, pMaterial);
+            _particleSystemPicking = new THREE.Points(_geometryParticleSystemPicking, pMaterial);
             // Modified RTT. Texture rendering ac le Color ID for Picking 3D
             _sceneRTT = new THREE.Scene();
             _sceneRTT.add(_particleSystemPicking);
             
-            //gfxEngine.addToScene(_particleSystemPicking);
-           this.laserCloudMaster.add(_particleSystem);
+            //gfxEngine.addToScene(_particleSystemPicking); 
+            this.laserCloudMaster.add(_particleSystem);
+            this.visible = true;
+            // this.laserCloudMaster.renderOrder = 1000;
         },
         
         createShader: function() {
 
+/*
             _shaderAttributes = {
                 displacement: {type: 'v3', value: []},
                 color: {type: 'v3', value: []},
                 uniqueid: {type: 'f', value: []}
             };
-
+*/
             _shaderUniforms = {
                 indice_time_laser: {type: 'f', value: _indiceTimeLaser},
                 currentidwork: {type: 'f', value: 1000.},
@@ -241,13 +247,15 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
             // For BufferGeometry now we need to set everything here. Like transparent 
             _shaderMatLaserCloud = new THREE.ShaderMaterial({
                 uniforms: _shaderUniforms,
-                attributes: _shaderAttributes,
+            //    attributes: _bufferGeometry.attributes,// _shaderAttributes,
                 vertexShader: Shader.shaderLaserVS.join("\n"),//Shader.shaders['shaderLaser.vs'],
                 fragmentShader: Shader.shaderLaserFS.join("\n"),//Shader.shaders['shaderLaser.fs'],
                 vertexColors: THREE.VertexColors,
                 depthTest: false,
                 transparent: true
             });
+            
+       
 
         },
         
@@ -257,7 +265,7 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
             var positions = _bufferGeometry.attributes.position.array;
             var displacements = _bufferGeometry.attributes.displacement.array;
             var uniqueids = _bufferGeometry.attributes.uniqueid.array;
-            var classes = _bufferGeometry.attributes.classe.array;
+         //   var classes = _bufferGeometry.attributes.classe.array;
 
 
             var color2 = new THREE.Color();
@@ -282,7 +290,7 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
                 values_color[ n * 3 + 2 ] = color2.b;
 
                 uniqueids[ n + 0 ] = this.indiceLaserFileLoaded;
-                classes[ n + 0 ] = 0;
+             //   classes[ n + 0 ] = 0;
                 //Picking*****
                 _colorsPicking[n] = 0;
                 _geometryParticleSystemPicking.vertices[n] = new THREE.Vector3(0, 0, 0);
@@ -360,17 +368,21 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
  //       this.updateLaserAttributes(); 
           this.setLockMovement(0);
        
-          this.updateLaserAttributesSmartly(nbPoints);//offset); 
+          this.updateLaserAttributes();//(nbPoints);//offset); 
 
           _indiceTimeLaser = 0.5;                    
           if(!this.animateOn){this.animateOn = true; this.animatePoints2(); /*console.log('thisanimate');*/}  // First file
                                                                                     // start animation function
           this.indiceLaserFileLoaded++;// console.log(_currentNbPointsInBuffer);
           this.indicePacketInBuffer++;
+          
+          if(this.indiceLaserFileLoaded == 2)
+              _bufferGeometry.computeBoundingSphere();   // Once every new series load. Very important 
+           
           // Load the next file in the list if not last (seems faster than parallel load)
           if(this.indiceLaserFileLoaded < this.tabLaserFilesToLoad.length )
              this.readLaserPointsFileFromItownsGeneric(this.tabLaserFilesToLoad[this.indiceLaserFileLoaded],nbBitsPerAttribute,pivot);
-             else{
+             else{ 
                 setTimeout(function() {
                   LaserCloud.setLockMovement(1);}
                 , 800);
@@ -816,7 +828,11 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
 
 
       updateLaserAttributes: function() {
-
+/*
+            _bufferGeometry.attributes.position.updateRange.count = 3145728;
+            _bufferGeometry.attributes.color.updateRange.count = 3145728;
+            _bufferGeometry.attributes.uniqueid.updateRange.count = 1048576;
+   */         
             _bufferGeometry.attributes.position.needsUpdate = true;
             _bufferGeometry.attributes.color.needsUpdate = true; 
             _bufferGeometry.attributes.uniqueid.needsUpdate = true;
@@ -824,8 +840,10 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
             //Picking
             _geometryParticleSystemPicking.verticesNeedUpdate = true;
             _geometryParticleSystemPicking.colorsNeedUpdate = true;
+            
+            //_bufferGeometry.computeBoundingSphere();
              // _bufferGeometry.verticesNeedUpdate = true;
-
+             //console.log(_bufferGeometry.attributes.color,"  ",_bufferGeometry.attributes.uniqueid);
        },
 
         // offset is _currentNbPointsInBuffer * 3; -> the place to start writing new points
@@ -834,7 +852,7 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
         // even if multiple of typearray(float32), https://developer.mozilla.org/en-US/docs/Web/API/Float32Array
         updateLaserAttributesSmartly: function(nbPoints){
             
-
+ 
               var offsetGeometry = (_currentNbPointsInBuffer -  (nbPoints-1)) * 12;
               var offsetSub = (_currentNbPointsInBuffer - (nbPoints-1)) * 3;
               var lengthSub = (nbPoints) * 3;
@@ -1495,7 +1513,7 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
                                     //self.loadLaserBuffer(buffer);
                                     //self.addPointsToBuffer(buffer);
                                     self.addPointsToBufferGenericMesh(buffer,4,nbBitsPerAttribute,pivot);  //4 attributes of nbBitsPerAttribute bits with pivot _zero
-                    } else {
+                    } else { // Error but keep going on the stack
                                    // console.log("Error", xhr.statusText);
                                     self.indiceLaserFileLoaded++;
                                     if(self.indiceLaserFileLoaded < self.tabLaserFilesToLoad.length)

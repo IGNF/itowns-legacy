@@ -5,7 +5,7 @@
  * @class Manages laser data
  * @require THREE.JS
  */
-define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatcher', 'Cartography','Draw', 'ProjectiveTexturing2', 'Utils'],
+define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher', 'Cartography','Draw', 'ProjectiveTexturing2', 'Utils'],
     function($, gfxEngine, THREE, Shader, Panoramic, Dispatcher, Cartography, Draw, ProjectiveTexturing2, Utils) {
         
                 

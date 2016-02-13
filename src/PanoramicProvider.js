@@ -5,7 +5,7 @@
  * @requires ThreeJS
  * 
  */ 
- define (['lib/three', 'Utils', 'Config', 'jquery', 'lib/when'], function ( THREE, Utils, Config, $, when) {
+ define (['three', 'Utils', 'Config', 'jquery', 'lib/when'], function ( THREE, Utils, Config, $, when) {
     
         
     var _urlMetaDataProviderPos = "",

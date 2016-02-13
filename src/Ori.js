@@ -7,7 +7,7 @@
 * @Depends Sensor.js
 */
 
-define(['lib/three','Sensor','jquery', 'PanoramicProvider'],
+define(['three','Sensor','jquery', 'PanoramicProvider'],
   function (THREE, Sensor, $, PanoramicProvider) {
 
     var Ori = {

@@ -6,7 +6,7 @@
 */
 
 
-define ('Sensor',['lib/three','Utils','url'], function (THREE,Utils,url) { 
+define ('Sensor',['three','Utils','url'], function (THREE,Utils,url) { 
 
 
     Sensor = function (infos){

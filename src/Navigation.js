@@ -1,4 +1,4 @@
-define (['lib/three', 'GraphicEngine', 'RequestManager', 'Config', 'Utils',  'Panoramic', 'PanoramicProvider', 'Dispatcher','ProjectiveTexturing','MeshManager', 'Ori', 'Draw', 'Cartography3D', 'lib/when'],
+define (['three', 'GraphicEngine', 'RequestManager', 'Config', 'Utils',  'Panoramic', 'PanoramicProvider', 'Dispatcher','ProjectiveTexturing','MeshManager', 'Ori', 'Draw', 'Cartography3D', 'lib/when'],
 function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicProvider, Dispatcher, ProjectiveTexturing, MeshManager,  Ori, Draw, Cartography3D, when)
 {
 
@@ -172,7 +172,7 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
                 var teta = parseFloat(targetPanoInfo.pan_xml_heading_pp)/ 180 * Math.PI;  // Deg to Rad
                 var cosTeta = Math.cos(teta);
                 var sinTeta = Math.sin(teta);
-                var matRotation = new THREE.Matrix4( cosTeta,0,-sinTeta,0,
+                var matRotation = new THREE.Matrix4().set(cosTeta,0,-sinTeta,0,
                                                        0,        1,0,      0,
                                                        sinTeta,0,cosTeta,0,
                                                        0,0,0,1);

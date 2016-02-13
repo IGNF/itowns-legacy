@@ -1,6 +1,6 @@
 
 
-    define (['GraphicEngine','jquery', 'Config', 'lib/three','Utils','ProjectiveTexturing','Ori','TileTexture','Draw','CVML','Cartography'],
+    define (['GraphicEngine','jquery', 'Config', 'three','Utils','ProjectiveTexturing','Ori','TileTexture','Draw','CVML','Cartography'],
         function(gfxEngine, $, Config, THREE, Utils,  ProjectiveTexturing, Ori, TileTexture, Draw, CVML) {
 
 
@@ -837,7 +837,8 @@
             
             
             setSkyBoxVisibility: function(b){
-                this.skyBox.visible = b;
+                if(this.skyBox && b) this.generateSkyBox();
+                if(this.skyBox) this.skyBox.visible = b;
             },
        
        

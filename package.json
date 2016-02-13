@@ -18,7 +18,8 @@
   },
   "homepage": "https://itowns.github.io/",
   "dependencies": {
-    "jquery": "^2.0.0"
+    "jquery": "^2.0.0",
+    "three": "0.74.0"
   },
   "devDependencies": {
     "webpack": "^1.12.12",

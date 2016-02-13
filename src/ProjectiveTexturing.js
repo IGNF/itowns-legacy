@@ -6,7 +6,7 @@
 		* and its projective camera information.
 		*/
 
-		define (['GraphicEngine','lib/three','Ori','Shader', 'PanoramicProvider','url'],
+		define (['GraphicEngine','three','Ori','Shader', 'PanoramicProvider','url'],
 			function (graphicEngine, THREE, Ori, Shader, PanoramicProvider,url) {
 
 				window.requestAnimSelectionAlpha = (function(){
@@ -22,6 +22,7 @@
 
 				var _shaderMat = null;
 				var _initiated = false;
+				var _alpha = 1;
 				var _targetNbPanoramics;
 				var _withMask = true;
 
@@ -35,6 +36,19 @@
 					isInitiated: function(){
 						return _initiated;
 					},	
+					
+					setGeneralOpacity: function(value){
+						_alpha = value;
+					},
+					
+					tweenGeneralOpacityUp: function(){
+						if(_alpha<1){
+							_alpha += ((_alpha+0.01))*0.04;
+							if(_alpha>1) _alpha=1;
+							requestAnimSelectionAlpha(this.tweenGeneralOpacityUp.bind(this));
+						}
+					},
+        
 					
 					// display all the images of the panoramics
 					nbImages: function(){
@@ -59,10 +73,10 @@
 						var maxNbPanoramics = Math.floor(Math.min(maxVaryingVec,(maxTextureImageUnits-M))/N);
 						var P = Math.min(_targetNbPanoramics,maxNbPanoramics);
 						console.log("Masks : ", M);
-						console.log("Images per panoramic  : ", N ,"/",N);
-						console.log("Panoramics displayed : ", P ,"/",_targetNbPanoramics);
-						console.log("Varying usage : ", (N*P) ,"/",maxVaryingVec);
-						console.log("Texture units usage : ", (M+N*P) ,"/",maxTextureImageUnits);
+						console.log("Images per panoramic  : ", N );
+						console.log("Panoramics : ", P ," displayed /",_targetNbPanoramics, " targeted");
+						console.log("Varyings : ", (N*P) ," used /",maxVaryingVec, " available");
+						console.log("Texture units : ", (M+N*P) ," used /",maxTextureImageUnits," available");
 						return P;
 					},
 					
@@ -108,14 +122,13 @@
 								uniforms.distortion.value[j] = Ori.getDistortion(i);
 								uniforms.pps.value[j] = Ori.getPPS(i);
 								uniforms.size.value[j] = Ori.getSize(i);
-								uniforms.alpha.value[j] = 1-pano;
+								uniforms.alpha.value[j] = _alpha*(1-pano);
 								uniforms.mvpp.value[j]=mvpp;
 								uniforms.translation.value[j]=trans;
 								uniforms.texture.value[j] = null;
 								idmask[j]=m;
 							}
 						}
-						console.log(uniforms.mask.value);
           	// create the shader material for Three
           	_shaderMat = new THREE.ShaderMaterial({
           		uniforms:     	uniforms,
@@ -139,14 +152,15 @@
 						}
             return _shaderMat;
           },
+
 					tweenIndiceTime: function (i){
             			var alpha = _shaderMat.uniforms.alpha.value[i];
             			if(alpha<1){
 	            			var j = i + this.nbImages();
                 			alpha += 0.03;
                 			if(alpha>1) alpha=1;
-                			_shaderMat.uniforms.alpha.value[i] = alpha;
-                			_shaderMat.uniforms.alpha.value[j] = 1-alpha;
+                			_shaderMat.uniforms.alpha.value[i] = _alpha*alpha;
+                			_shaderMat.uniforms.alpha.value[j] = _alpha*(1-alpha);
                 			var that = this;
                 			requestAnimSelectionAlpha(function() { that.tweenIndiceTime(i); });                			
            	 			}	
@@ -169,7 +183,7 @@
 											_shaderMat.uniforms.mvpp.value[j] = _shaderMat.uniforms.mvpp.value[i];
 											_shaderMat.uniforms.translation.value[j] = _shaderMat.uniforms.translation.value[i];
 											_shaderMat.uniforms.texture.value[j] =_shaderMat.uniforms.texture.value[i];
-											_shaderMat.uniforms.alpha.value[j] = 1;
+											_shaderMat.uniforms.alpha.value[j] = _alpha;
 											_shaderMat.uniforms.alpha.value[i] = 0;
 											that.tweenIndiceTime(i);
 										}
@@ -177,7 +191,6 @@
 	            			_shaderMat.uniforms.mvpp.value[i] = mvpp;
 	            			_shaderMat.uniforms.translation.value[i] = translation.clone().add(trans);
 	            			_shaderMat.uniforms.texture.value[i] = tex;
-	            			_shaderMat.uniforms.texture.value[i].needsUpdate = true;
 									});
 								} 
 	            }

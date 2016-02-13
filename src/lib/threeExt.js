@@ -3,7 +3,7 @@
  * Nguyen dot QuocDinh at gmail dot com
  */
 
-define(['lib/three'],function(THREE){
+define(['three'],function(THREE){
 
 
 		// mbredif: extend THREE.Matrix3 prototype to with some THREE.Matrix4 functionalities
