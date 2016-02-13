@@ -123,7 +123,7 @@ define(['jquery', 'GraphicEngine', 'three', 'lib/threeExt', 'Panoramic', 'Dispat
                     THREE.GeometryUtils.merge( this.geometry, object );
             };
             dalleClasse.prototype.mergeGeometry = function(geom){
-                    THREE.GeometryUtils.merge( this.geometry, geom);
+                    this.geometry.merge(geom);
             };
             dalleClasse.prototype.checkDoubleVertices = function(){
                     this.geometry.mergeVertices(); 
@@ -530,7 +530,7 @@ define(['jquery', 'GraphicEngine', 'three', 'lib/threeExt', 'Panoramic', 'Dispat
                               this.geometry.computeFaceNormals();
                               this.geometry.computeVertexNormals();  
                               
-                             //self.mergeGeometry(new THREE.Mesh(geometry));
+                             //self.mergeGeometry(geometry);
                    //}// end check uv
             };
             /*
@@ -555,6 +555,9 @@ define(['jquery', 'GraphicEngine', 'three', 'lib/threeExt', 'Panoramic', 'Dispat
             dalleClasse.prototype.parse3DSGeometry = function(instant3DS){
                                     
                  var self = this, obj = instant3DS._cur_obj; 
+/*
+// messes up the UV coordinates if enabled...
+
                  if(obj.uvs !== undefined){        
                              var geometry = new THREE.Geometry();
                                    //add vertices and faces
@@ -588,8 +591,9 @@ define(['jquery', 'GraphicEngine', 'three', 'lib/threeExt', 'Panoramic', 'Dispat
                                     }    
                               }
 
-                              self.mergeGeometry(new THREE.Mesh(geometry));
+                              self.mergeGeometry(geometry);
                    }
+*/
             };
             
                 dalleClasse.prototype.parseB3DGeometry = function(instantB3D){
@@ -628,7 +632,7 @@ define(['jquery', 'GraphicEngine', 'three', 'lib/threeExt', 'Panoramic', 'Dispat
                                     }    
                               }
 
-                              self.mergeGeometry(new THREE.Mesh(geometry));
+                              self.mergeGeometry(geometry);
                    }
             };
             

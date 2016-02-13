@@ -114,7 +114,7 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
           "}",
         ].join("\n");
       }
-console.log(gatherColors);
+      
       return [
          
         "#ifdef GL_ES",
