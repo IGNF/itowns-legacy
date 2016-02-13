@@ -19,13 +19,13 @@ define(['lib/three','Sensor','jquery', 'PanoramicProvider'],
         var that = this;
         var baseUrl = PanoramicProvider.getMetaDataSensorURL();
         $.getJSON(baseUrl, function (data){
-         that.handleDBData(baseUrl,data);
+         that.handleDBData(data);
        });
       },
 
-      handleDBData :function(baseUrl,data){
+      handleDBData :function(data){
         for (var i =0; i< data.length; ++i)  // For all DB sensor info we create sensor object
-          this.sensors.push(new Sensor(baseUrl,data[i]));
+          this.sensors.push(new Sensor(data[i]));
         this.initiated = true;
         console.log('Orientation module is loaded');
       },

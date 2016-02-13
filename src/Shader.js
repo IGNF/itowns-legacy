@@ -77,7 +77,6 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
              },
             
     shaderTextureProjectiveVS : function(N) { return [
-        
         "#ifdef GL_ES",
         "precision  highp float;",
         "#endif",
@@ -86,30 +85,54 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
         "uniform mat3 mvpp[N];",
         "uniform vec3 translation[N];",
         "varying vec3 v_texcoord[N];",
-        "uniform vec3 test;",
+
         "void main() {",
         "    for(int i=0; i<N; ++i) v_texcoord[i] = mvpp[i] * (position-translation[i]);",
         "    gl_Position  =  projectionMatrix *  modelViewMatrix * vec4(position,1.);",
         "}"
     ].join('\n');},
     
-     shaderTextureProjectiveFS : function(N) { return [
+     shaderTextureProjectiveFS : function(N,idmask) {
+      idmask = idmask || [];
+      var M = 0;
+      for(var i=0;i<N;++i) 
+        if(M<=idmask[i]) M=idmask[i]+1;
+
+      var gatherColors = "";
+      for(var i=0; i<N; ++i) {
+        gatherColors +=  [
+          "{",
+          "  const int i = "+i+";",
+          "  vec3 p = getUVD(size[i],undistort(distortion[i],pps[i],size[i],v_texcoord[i]));",
+          (idmask[i]>=0) ? "  p.z = min(p.z,1.-texture2D(mask["+idmask[i]+"],p.xy).r);" : "",
+          "  if(p.z>0.) { ",
+          "    vec4 c = p.z*texture2D(texture[i],p.xy);",
+          "    color0 += c;",
+          "    color  += alpha[i]*c;",
+          "    if(c.a>0.) ++blend;",
+          "  }",
+          "}",
+        ].join("\n");
+      }
+console.log(gatherColors);
+      return [
          
         "#ifdef GL_ES",
         "precision  highp float;",
         "#endif",
+        "#define M "+M,
         "#define N "+N,
         
         "varying vec3      v_texcoord[N];",
-        "uniform sampler2D mask[N];",
+        (M>0) ? "uniform sampler2D mask[M];" : "",
         "uniform sampler2D texture[N];",
         "uniform float     alpha[N];",
         "uniform vec2      size[N];",
         "uniform vec2      pps[N];",
         "uniform vec4      distortion[N];",
         "const float amin = 0.5;",
-
-      " vec2 correctDistortionAndCoord(vec4 dist, vec2 pps, vec2 size, vec3 coord){",
+      "vec2 undistort(vec4 dist, vec2 pps, vec2 size, vec3 coord)",
+      " { ",
       "      vec2 p = coord.xy/coord.z;",
       "      vec2 v = p - pps;",
       "      float v2 = dot(v,v);",
@@ -118,21 +141,11 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
       "      return p+r*v; ",
       "  }",
 
-      "vec4 getColor(sampler2D texture, sampler2D mask, vec2 size, vec2 p)",
+      "vec3 getUVD(vec2 size, vec2 p)",
       " {  ",
       "   vec2 d2 = min(p.xy,size-p.xy);",
       "   float d = min(d2.x,d2.y);",
-      "   if (d<0.) return vec4(0.);",
-      "   p /= size;",
-      "   p.y = 1. - p.y; ",
-      "   vec4 c = texture2D(texture,p);",
-      "   float m = min(d*0.02,1.-texture2D(mask,p).r);",
-      "   return c*m;",
-      " }",
-
-      "vec4 getColor(sampler2D texture, sampler2D mask, vec4 dist, vec2 pps, vec2 size, vec3 coord)",
-      " {  ",
-      "   return getColor(texture,mask,size,correctDistortionAndCoord(dist,pps,size,coord));",
+      "   return vec3( p/size,  d*0.02);",
       " }",
 
       " void main(void)",
@@ -140,12 +153,9 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
       "  vec4 color  = vec4(0.);",
       "  vec4 color0 = vec4(0.);",
       "  int blend = 0;",
-      "  for(int i=0; i<N; ++i) {",
-      "    vec4 c = getColor(texture[i],mask[i],distortion[i],pps[i],size[i],v_texcoord[i]);",
-      "    color0 += c;",
-      "    color  += alpha[i]*c;",
-      "    if(c.a>0.) ++blend;",
-      "  }",
+      
+      gatherColors,
+      
       "  if(color0.a>1.) color0 /= color0.a;",
       // if blending 2 images or more with sufficient opacity, return the normalized opaque color
       // else mix the alpha-weighted color with the non-alpha-weighted color
