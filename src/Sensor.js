@@ -15,10 +15,12 @@ define ('Sensor',['three','Utils','url'], function (THREE,Utils,url) {
         this.rotation = new THREE.Matrix3().fromArray( infos.rotation );
         this.projection = new THREE.Matrix3().fromArray( infos.projection );
         this.size = new THREE.Vector2().fromArray(infos.size);
-        this.pps = new THREE.Vector2().fromArray(infos.distortion.pps);
-        var disto = new THREE.Vector3().fromArray(infos.distortion.poly357);
-        var r2max = this.getDistortion_r2max(disto);
-        this.distortion = new THREE.Vector4(disto.x,disto.y,disto.z,r2max);
+        if(infos.distortion) {
+            this.pps = new THREE.Vector2().fromArray(infos.distortion.pps);
+            var disto = new THREE.Vector3().fromArray(infos.distortion.poly357);
+            var r2max = this.getDistortion_r2max(disto);
+            this.distortion = new THREE.Vector4(disto.x,disto.y,disto.z,r2max);
+        }
         this.mask = infos.mask;
 
         // change conventions

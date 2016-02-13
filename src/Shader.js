@@ -92,35 +92,49 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
         "}"
     ].join('\n');},
     
-     shaderTextureProjectiveFS : function(N,idmask) {
+     shaderTextureProjectiveFS : function(N,idmask, iddisto) {
       idmask = idmask || [];
+      iddisto = iddisto || [];
       var M = 0;
-      for(var i=0;i<N;++i) 
+      for(var i=0;i<idmask.length;++i) 
         if(M<=idmask[i]) M=idmask[i]+1;
+      var D = 0;
+      for(var i=0;i<iddisto.length;++i) 
+        if(D<=iddisto[i]) D=iddisto[i]+1;
 
-      var gatherColors = "";
+      var mainLoop = "";
       for(var i=0; i<N; ++i) {
-        gatherColors +=  [
-          "{",
-          "  const int i = "+i+";",
-          "  vec3 p = getUVD(size[i],undistort(distortion[i],pps[i],size[i],v_texcoord[i]));",
-          (idmask[i]>=0) ? "  p.z = min(p.z,1.-texture2D(mask["+idmask[i]+"],p.xy).r);" : "",
-          "  if(p.z>0.) { ",
-          "    vec4 c = p.z*texture2D(texture[i],p.xy);",
+        var m = idmask[i];
+        var d = iddisto[i];
+        mainLoop +=  [
+          // if in front of the camera
+          "if(v_texcoord["+i+"].z>0.) {",
+          // projective divide to get pixel coordinates
+          "  vec2 p =  v_texcoord["+i+"].xy/v_texcoord["+i+"].z;",
+          // apply distortion, if any
+          (d>=0) ? "  distort(p,distortion["+d+"],pps["+d+"]);" : "",
+          // get [0,1] texture coordinates and the distance to the texture border, in pixels
+          "  float d = borderfadeoutinv * getUV(p,size["+i+"]);",
+          // apply mask, if any
+          (m>=0) ? "  d = min(d,1.-texture2D(mask["+m+"],p).r);" : "",
+          // if still valid sample the texture and accumulate colors and counters
+          "  if(d>0.) { ",
+          "    vec4 c = d*texture2D(texture["+i+"],p);",
           "    color0 += c;",
-          "    color  += alpha[i]*c;",
+          "    color  += c * alpha["+i+"];",
           "    if(c.a>0.) ++blend;",
           "  }",
-          "}",
+          "}",""
         ].join("\n");
       }
-      
+
       return [
          
         "#ifdef GL_ES",
         "precision  highp float;",
         "#endif",
         "#define M "+M,
+        "#define D "+D,
         "#define N "+N,
         
         "varying vec3      v_texcoord[N];",
@@ -128,24 +142,25 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
         "uniform sampler2D texture[N];",
         "uniform float     alpha[N];",
         "uniform vec2      size[N];",
-        "uniform vec2      pps[N];",
-        "uniform vec4      distortion[N];",
-        "const float amin = 0.5;",
-      "vec2 undistort(vec4 dist, vec2 pps, vec2 size, vec3 coord)",
-      " { ",
-      "      vec2 p = coord.xy/coord.z;",
-      "      vec2 v = p - pps;",
-      "      float v2 = dot(v,v);",
-      "      if(v2>dist.w || coord.z < 0.) return vec2(-1.);",
-      "      float r = v2*(dist.x+v2*(dist.y+v2*dist.z));",
-      "      return p+r*v; ",
-      "  }",
+        (D>0) ? "uniform vec2      pps[D];" : "",
+        (D>0) ? "uniform vec4      distortion[D];" : "",
 
-      "vec3 getUVD(vec2 size, vec2 p)",
+        "const float amin = 0.5;",
+        "const float borderfadeoutinv = 0.02;", // 50 pixel fade out at image borders
+
+      "void distort(inout vec2 p, vec4 dist, vec2 pps)",
+      "{ ",
+      "  vec2 v = p - pps;",
+      "  float v2 = dot(v,v);",
+      "  if(v2>dist.w) p = vec2(-1.);", // (-1,-1) or anything outside of the image
+      "  else p += (v2*(dist.x+v2*(dist.y+v2*dist.z)))*v;",
+      "}",
+
+      "float getUV(inout vec2 p, vec2 size)",
       " {  ",
-      "   vec2 d2 = min(p.xy,size-p.xy);",
-      "   float d = min(d2.x,d2.y);",
-      "   return vec3( p/size,  d*0.02);",
+      "   vec2 d = min(p.xy,size-p.xy);",
+      "   p/=size;",
+      "   return min(d.x,d.y);",
       " }",
 
       " void main(void)",
@@ -154,7 +169,7 @@ define ( ['jquery', 'Utils'],function ( $, Utils) {
       "  vec4 color0 = vec4(0.);",
       "  int blend = 0;",
       
-      gatherColors,
+      mainLoop,
       
       "  if(color0.a>1.) color0 /= color0.a;",
       // if blending 2 images or more with sufficient opacity, return the normalized opaque color

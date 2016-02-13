@@ -25,6 +25,7 @@
 				var _alpha = 1;
 				var _targetNbPanoramics;
 				var _withMask = true;
+				var _withDistortion = true;
 
 				var ProjectiveTexturing = {
 					
@@ -108,6 +109,7 @@
 							mask        : {type:'tv' ,value:[]}
 						};
 						var idmask = [];
+						var iddist = [];
 						for (var i=0; i<N; ++i){
 							var mat = Ori.getMatrix(i).clone();
 							var mvpp = (new THREE.Matrix3().multiplyMatrices(rot,mat)).transpose();
@@ -117,23 +119,28 @@
 								m = uniforms.mask.value.length;
 								uniforms.mask.value[m] = null;
 							}
+							var d = -1;
+							if(_withDistortion && Ori.getDistortion(i)) {
+								d = uniforms.distortion.value.length;
+								uniforms.distortion.value[d] = Ori.getDistortion(i);
+								uniforms.pps.value[d] = Ori.getPPS(i);
+							}
 							for(var pano=0; pano<P; ++pano) {
 								var j = i+N*pano;
-								uniforms.distortion.value[j] = Ori.getDistortion(i);
-								uniforms.pps.value[j] = Ori.getPPS(i);
 								uniforms.size.value[j] = Ori.getSize(i);
 								uniforms.alpha.value[j] = _alpha*(1-pano);
 								uniforms.mvpp.value[j]=mvpp;
 								uniforms.translation.value[j]=trans;
 								uniforms.texture.value[j] = null;
 								idmask[j]=m;
+								iddist[j]=d;
 							}
 						}
           	// create the shader material for Three
           	_shaderMat = new THREE.ShaderMaterial({
           		uniforms:     	uniforms,
           		vertexShader:   Shader.shaderTextureProjectiveVS(P*N),
-          		fragmentShader: Shader.shaderTextureProjectiveFS(P*N,idmask),
+          		fragmentShader: Shader.shaderTextureProjectiveFS(P*N,idmask,iddist),
           		side: THREE.BackSide,   
           		transparent:true
           	});
@@ -145,7 +152,7 @@
 									_shaderMat.uniforms.mask.value[m] = tex; 
 								}, m);
 							}
-							var panoUrl = panoInfo.url_format.replace("{cam_id_pos}",Ori.sensors[i].infos.cam_id_pos);
+							var panoUrl = PanoramicProvider.getUrlImageFile().replace("{cam}",Ori.sensors[i].infos.cam).replace("{pano}",panoInfo.pano);
   						this.loadTexture(panoUrl, function(tex,i) { 	
 								_shaderMat.uniforms.texture.value[i] = tex;
 							}, i);
@@ -172,7 +179,7 @@
             		},
 	         		// Load an Image(html) then use it as a texture. Wait loading before passing to the shader to avoid black effect
 	         		chargeOneImageCam: function (panoInfo,translation,rotation,i){
-								var panoUrl = panoInfo.url_format.replace("{cam_id_pos}",Ori.sensors[i].infos.cam_id_pos);
+								var panoUrl = PanoramicProvider.getUrlImageFile().replace("{cam}",Ori.sensors[i].infos.cam).replace("{pano}",panoInfo.pano);
 								var that = this;
 								this.loadTexture(panoUrl, function(tex) { 	
 										var mat = Ori.getMatrix(i).clone();
@@ -197,3 +204,4 @@
 	            return ProjectiveTexturing
 	        	}
 	        )
+              
