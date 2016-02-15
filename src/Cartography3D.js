@@ -1101,7 +1101,7 @@ define(['jquery', 'GraphicEngine', 'three', 'lib/threeExt', 'Panoramic', 'Dispat
                                                 this.listDalles[i].setDalleZeroPivot(zero);
                                                 if(!this.using3DS) {
                                                     this.listDalles[i].load();
-                                                }{
+                                                } else {
                                                     this.listDalles[i].setLoDLevel(0);  
                                                     this.listDalles[i].load3DS();
                                                 }    

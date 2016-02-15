@@ -5,8 +5,8 @@
  */
 
 
-define("API",['jquery', 'GraphicEngine', 'Navigation', 'Panoramic', 'LaserCloud', 'Measure', 'Dispatcher', 'Cartography', 'Cartography3D', 'Config'],
-        function($, gfxEngine, Navigation,   Panoramic,   LaserCloud,   Measure,   Dispatcher, Cartography, Cartography3D, Config){
+define("API",['jquery', 'GraphicEngine', 'Navigation', 'MeshManager', 'Panoramic', 'LaserCloud', 'Measure', 'Dispatcher', 'Cartography', 'Cartography3D', 'Config'],
+        function($, gfxEngine, Navigation, MeshManager, Panoramic,   LaserCloud,   Measure,   Dispatcher, Cartography, Cartography3D, Config){
     
 
          API = function(options){
@@ -139,6 +139,14 @@ define("API",['jquery', 'GraphicEngine', 'Navigation', 'Panoramic', 'LaserCloud'
              
         API.prototype.setPanoramicVisible= function(bool){
             Panoramic.setVisibility(bool);
+            Cartography3D.setVisibility(!bool);
+            Cartography3D.setOpacity(bool ? 0 : 1);
+            MeshManager.setSkyBoxVisibility(!bool);
+            gfxEngine.translateCameraSmoothly(-10001,100,0);   // Translate to 100 meters up
+        };
+
+        API.prototype.getPanoramicVisible= function(){
+            return Panoramic.getVisibility();
         };
         
         API.prototype.setLowResolution = function(bool){

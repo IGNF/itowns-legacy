@@ -1,7 +1,7 @@
-define (['Cartography', 'Navigation', 'GraphicEngine', 'LaserCloud','jquery', 'three', 'Draw',
-        'MeshManager','ProjectiveTexturing2','ProjectiveTexturingPhoto','Ori','Measure','Panoramic','lib/postprocessing/WeatherEffects',
+define (['Cartography', 'Cartography3D', 'Navigation', 'GraphicEngine', 'LaserCloud','jquery', 'three', 'Draw',
+        'MeshManager','Ori','Measure','Panoramic','lib/postprocessing/WeatherEffects',
         'Utils','SphericalPanoramic', 'Dispatcher'],
-    function (Carto, Navigation, gfxEngine, LaserCloud , $, THREE, Draw, MeshManager, ProjectiveTexturing2, ProjectiveTexturingPhoto,Ori,
+    function (Carto, Cartography3D, Navigation, gfxEngine, LaserCloud , $, THREE, Draw, MeshManager,Ori,
     Measure, Panoramic, WeatherEffects,  Utils, SphericalPanoramic, Dispatcher)
     {
 
@@ -197,6 +197,7 @@ define (['Cartography', 'Navigation', 'GraphicEngine', 'LaserCloud','jquery', 't
                         Panoramic.tweenGeneralOpacityUp();
                         Panoramic.setVisibility(true);
                         MeshManager.setSkyBoxVisibility(false);
+						Cartography3D.setVisibility(false);
                     }else
                         clickAndGo(Draw.getSurfaceType()); 
                     //setTimeout(Panoramic.setVisibility, 1000);
