@@ -142,7 +142,10 @@ define("API",['jquery', 'GraphicEngine', 'Navigation', 'MeshManager', 'Panoramic
             Cartography3D.setVisibility(!bool);
             Cartography3D.setOpacity(bool ? 0 : 1);
             MeshManager.setSkyBoxVisibility(!bool);
-            gfxEngine.translateCameraSmoothly(-10001,100,0);   // Translate to 100 meters up
+            if(bool)
+				gfxEngine.translateCameraSmoothly(0,0,0);   // Translate to 100 meters up
+			else
+				gfxEngine.translateCameraSmoothly(-10001,100,0);   // Translate to 100 meters up
         };
 
         API.prototype.getPanoramicVisible= function(){
