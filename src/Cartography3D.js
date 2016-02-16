@@ -660,31 +660,7 @@ define(['jquery', 'GraphicEngine', 'three', 'lib/threeExt', 'Panoramic', 'Dispat
                     this.scale  = ( scale !== undefined ) ? scale : 1;
                     this.list   = [];
                     this.textureType = textureType;
-
-                
-                    var nbDallesCote = 2;
-                    if (this.textureType == '.jpg') nbDallesCote = 2;
-                    /*
-                    for(var i=-nbDallesCote/2 +1 ;i<nbDallesCote/2 +1;++i){
-                          for(var j=-nbDallesCote/2 ;j<nbDallesCote/2 ;++j){
-                             
-                             if (this.textureType == '.jpg'){
-                                  this.createTile(lon, lat, i, j, LODs.SECOND);
-                             }else{
-                                 
-                                if(Math.abs(i)<1) this.createTile(lon, lat, i, j, LODs.ORIGIN);
-                                else
-                                    if(Math.abs(i)<3) this.createTile(lon, lat, i, j, LODs.ORIGIN);
-                                else
-                                   this.createTile(lon, lat, i, j, LODs.THIRD);
-                              
-                             }
-                          
-                          }
-                    }*/
-                    
-                    this.createTile(lon, lat, 0, 0, LODs.SECOND);
-           
+                    this.createMapWithSingleTile(lon,lat);
                 };
                 
                
@@ -717,7 +693,33 @@ define(['jquery', 'GraphicEngine', 'three', 'lib/threeExt', 'Panoramic', 'Dispat
                               
                     },
                     
-                   createTile2: function (lon, lat, x, y, lod) {
+                    createMap : function(lon,lat){
+                          var nbDallesCote = 2;
+                          if (this.textureType == '.jpg') nbDallesCote = 2;
+                          for(var i=-nbDallesCote/2 +1 ;i<nbDallesCote/2 +1;++i){
+                                  for(var j=-nbDallesCote/2 ;j<nbDallesCote/2 ;++j){
+
+                                     if (this.textureType == '.jpg'){
+                                          this.createTile(lon, lat, i, j, LODs.SECOND);
+                                     }else{
+
+                                        if(Math.abs(i)<1) this.createTile(lon, lat, i, j, LODs.ORIGIN);
+                                        else
+                                            if(Math.abs(i)<3) this.createTile(lon, lat, i, j, LODs.ORIGIN);
+                                        else
+                                           this.createTile(lon, lat, i, j, LODs.THIRD);
+
+                                     }
+
+                                  }
+                          }
+                    },
+                    
+                    createMapWithSingleTile : function(lon,lat){
+                         this.createTile(lon, lat, 0, 0, LODs.SECOND);
+                    },
+                    
+                    createTile2: function (lon, lat, x, y, lod) {
                          // if(gfxEngine.isMobileEnvironment)
                           var name  = (lon+x).toString() + "-" + (lat+y).toString();
                           var dalle =  new dalleClasse();
