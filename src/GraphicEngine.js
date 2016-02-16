@@ -1,4 +1,4 @@
-define(['lib/three', 'jquery', 'Utils', 'lib/postprocessing/EffectComposer'], function(THREE, $, Utils, EffectComposer) {
+define(['three', 'jquery', 'Utils', 'lib/postprocessing/EffectComposer'], function(THREE, $, Utils, EffectComposer) {
 
     //PRIVATE MEMBERS*****************************************************************************************
     //********************************************************************************************************
@@ -58,7 +58,8 @@ define(['lib/three', 'jquery', 'Utils', 'lib/postprocessing/EffectComposer'], fu
             _msWater = null,
             _renderPass,
     _textPanels = [],
-            _grid = null;
+            _grid = null,
+			raycaster = new THREE.Raycaster(); // create once
     // METHODS
     //*************************************
 
@@ -101,7 +102,7 @@ define(['lib/three', 'jquery', 'Utils', 'lib/postprocessing/EffectComposer'], fu
         _camera.position.x = 0;       
         _camera.position.y = 0.6;
         _camera.position.z = 0;  
-        _camera.scale = new THREE.Vector3(1, 1, -1);     // -1 for the z to go from user to inside the screen (north)
+        _camera.scale.set(1, 1, -1);     // -1 for the z to go from user to inside the screen (north)
         _angleCameraLat = 0;
         _angleCameraLon = 0;
         _targetDist = 100000;
@@ -652,14 +653,9 @@ define(['lib/three', 'jquery', 'Utils', 'lib/postprocessing/EffectComposer'], fu
          * @returns {THREE.Mesh[]} Objects given as parameter and intersected by the ray
          */
         getIntersected: function(x, y, objects) {
-
             var point = Utils.toNDC(x, y);
-
-            var vector = new THREE.Vector3(point.x, point.y, 1);
-            var projector = new THREE.Projector();
-            var ray = projector.pickingRay(vector, _camera);
-
-            return ray.intersectObjects(objects);
+			raycaster.setFromCamera( point, _camera );
+			return raycaster.intersectObjects( objects );
         },
         addToScene: function(obj) {
             _scene.add(obj);
@@ -721,10 +717,9 @@ define(['lib/three', 'jquery', 'Utils', 'lib/postprocessing/EffectComposer'], fu
             var meshPlane = new THREE.Mesh(geomPlane, material);
             meshPlane.name = name;
             meshPlane.id = name;
-            meshPlane.position = new THREE.Vector3(position.x, position.y, position.z);
-            //   meshPlane.rotation = _camera.rotation;
-            meshPlane.quaternion = _camera.quaternion;
-            meshPlane.scale.multiplyScalar(scale);
+            meshPlane.position.set(position.x, position.y, position.z);
+            meshPlane.quaternion.copy(_camera.quaternion);
+            meshPlane.scale.set( scale,scale,scale);//.multiplyScalar(scale);
             _textPanels.push(meshPlane);
             _scene.add(meshPlane);
 

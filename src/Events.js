@@ -1,7 +1,7 @@
-define (['Cartography', 'Navigation', 'GraphicEngine', 'LaserCloud','jquery', 'lib/three', 'Draw',
-        'MeshManager','ProjectiveTexturing2','ProjectiveTexturingPhoto','Ori','Measure','Panoramic','lib/postprocessing/WeatherEffects',
+define (['Cartography', 'Cartography3D', 'Navigation', 'GraphicEngine', 'LaserCloud','jquery', 'three', 'Draw',
+        'MeshManager','Ori','Measure','Panoramic','lib/postprocessing/WeatherEffects',
         'Utils','SphericalPanoramic', 'Dispatcher'],
-    function (Carto, Navigation, gfxEngine, LaserCloud , $, THREE, Draw, MeshManager, ProjectiveTexturing2, ProjectiveTexturingPhoto,Ori,
+    function (Carto, Cartography3D, Navigation, gfxEngine, LaserCloud , $, THREE, Draw, MeshManager,Ori,
     Measure, Panoramic, WeatherEffects,  Utils, SphericalPanoramic, Dispatcher)
     {
 
@@ -67,9 +67,9 @@ define (['Cartography', 'Navigation', 'GraphicEngine', 'LaserCloud','jquery', 'l
 
                     if(/*!$("#chbxSnappON").prop("checked")*/true) {
                             var zero = gfxEngine.getZero();
-                            var pointLineMesureX = LaserCloud.getXYZFromClick2D(_mouseX,_mouseY);
+                            var pointLineMesureX = LaserCloud.getXYZFromClick2D(_mouseX,_mouseY,10);
                                _tabPointsMesureX.push(pointLineMesureX);
-                               var id= Draw.drawSphereAt(pointLineMesureX,0.04,0xFAE361,true);  // Useradded = true
+                            var id= Draw.drawSphereAt(pointLineMesureX,0.04,0xFAE361,true);  // Useradded = true
                             var realx = pointLineMesureX.x + parseFloat(zero.x),
                                 realy = pointLineMesureX.y + parseFloat(zero.y),
                                 realz = pointLineMesureX.z + parseFloat(zero.z);
@@ -197,6 +197,7 @@ define (['Cartography', 'Navigation', 'GraphicEngine', 'LaserCloud','jquery', 'l
                         Panoramic.tweenGeneralOpacityUp();
                         Panoramic.setVisibility(true);
                         MeshManager.setSkyBoxVisibility(false);
+						Cartography3D.setVisibility(false);
                     }else
                         clickAndGo(Draw.getSurfaceType()); 
                     //setTimeout(Panoramic.setVisibility, 1000);
@@ -305,7 +306,10 @@ define (['Cartography', 'Navigation', 'GraphicEngine', 'LaserCloud','jquery', 'l
                     //var mB = MeshManager.getCurrentObject();  // Get rge mesh or at least a road plane
                     var mB = MeshManager.getCurrentMeshForClickAndGo();
                     var mFES = MeshManager.getMeshFES();
-                    _intersects = gfxEngine.getIntersected(event.clientX,event.clientY, [mB,mFES]);//gfxEngine.getScene().children);
+                    var objects = [];
+                    if (mB) objects.push(mB);
+                    if (mFES) objects.push(mFES);
+                    _intersects = gfxEngine.getIntersected(event.clientX,event.clientY, objects);//gfxEngine.getScene().children);
                     if(_intersects[0]){
                         _mouse3D = new THREE.Vector3(_intersects[0].point.x,_intersects[0].point.y,_intersects[0].point.z);   // y+0.05 to put over mesh RGE to see clean
                         Draw.drawSurface(_mouse3D,_intersects[0].face.normal);                   //CLICKANDGO

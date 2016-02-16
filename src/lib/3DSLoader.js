@@ -1,7 +1,7 @@
 /*nguyen dot quocdinh at gmail dot com
  */
 
-define (['lib/three','lib/BinaryStream','lib/PlatformInfo'],function(THREE,BinaryStream,PlatformInfo){
+define (['three','lib/BinaryStream','lib/PlatformInfo'],function(THREE,BinaryStream,PlatformInfo){
         var DS3Loader = function(dalle) {
                     this.decimalPrecision = 3;
                     this._materials = {};
@@ -304,7 +304,7 @@ define (['lib/three','lib/BinaryStream','lib/PlatformInfo'],function(THREE,Binar
                 n24 = reader.readFloat32(); // Y
                 n44 = 1;
                 //console.log(n11, n12, n13, n14, n21, n22, n23, n24, n31, n32, n33, n34, n41, n42, n43, n44);
-                return new THREE.Matrix4( n11, n12, n13, n14, n21, n22, n23, n24, n31, n32, n33, n34, n41, n42, n43, n44 );
+                return new THREE.Matrix4().set(n11, n12, n13, n14, n21, n22, n23, n24, n31, n32, n33, n34, n41, n42, n43, n44 );
         };
 
         DS3Loader.prototype.parseObjectAnimation = function (reader,end) {

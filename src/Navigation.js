@@ -1,4 +1,4 @@
-define (['lib/three', 'GraphicEngine', 'RequestManager', 'Config', 'Utils',  'Panoramic', 'PanoramicProvider', 'Dispatcher','ProjectiveTexturing','MeshManager', 'Ori', 'Draw', 'Cartography3D', 'lib/when'],
+define (['three', 'GraphicEngine', 'RequestManager', 'Config', 'Utils',  'Panoramic', 'PanoramicProvider', 'Dispatcher','ProjectiveTexturing','MeshManager', 'Ori', 'Draw', 'Cartography3D', 'lib/when'],
 function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicProvider, Dispatcher, ProjectiveTexturing, MeshManager,  Ori, Draw, Cartography3D, when)
 {
 
@@ -109,14 +109,14 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
 
              /*************************** Projection ******************************************************************/
                 var matRotation = Ori.computeMatOriFromHeadingPitchRoll(
-                                        targetPanoInfo.pan_xml_heading_pp,
-                                        targetPanoInfo.pan_xml_pitch_pp,
-                                        targetPanoInfo.pan_xml_roll_pp
+                                        targetPanoInfo.heading,
+                                        targetPanoInfo.pitch,
+                                        targetPanoInfo.roll
                                     );
 
                 _barycentre = Ori.getPosition();
                 
-                _barycentre.applyProjection(matRotation);
+                _barycentre.applyMatrix3(matRotation);
 
                 gfxEngine.translateCameraSmoothly(posWithPivot.x + _barycentre.x, posWithPivot.y +_barycentre.y + altiOption, posWithPivot.z+ _barycentre.z);
 
@@ -169,10 +169,10 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
                Panoramic.setInfos(targetPanoInfo.url,targetPanoInfo);
              /*************************** Projection ******************************************************************/
                 // rotation from heading TODO real 3D Rotation with pitch and roll
-                var teta = parseFloat(targetPanoInfo.pan_xml_heading_pp)/ 180 * Math.PI;  // Deg to Rad
+                var teta = parseFloat(targetPanoInfo.heading)/ 180 * Math.PI;  // Deg to Rad
                 var cosTeta = Math.cos(teta);
                 var sinTeta = Math.sin(teta);
-                var matRotation = new THREE.Matrix4( cosTeta,0,-sinTeta,0,
+                var matRotation = new THREE.Matrix4().set(cosTeta,0,-sinTeta,0,
                                                        0,        1,0,      0,
                                                        sinTeta,0,cosTeta,0,
                                                        0,0,0,1);
@@ -228,9 +228,9 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
              /*************************** Projection ******************************************************************/
                 // rotation from heading TODO real 3D Rotation with pitch and roll
                 var matRotation = Ori.computeMatOriFromHeadingPitchRoll(
-                                        targetPanoInfo.pan_xml_heading_pp,
-                                        targetPanoInfo.pan_xml_pitch_pp,
-                                        targetPanoInfo.pan_xml_roll_pp
+                                        targetPanoInfo.heading,
+                                        targetPanoInfo.pitch,
+                                        targetPanoInfo.roll
                                     );
 
 
@@ -240,7 +240,7 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
                 else
                     _barycentre = Ori.getBarycentreV1();  // For Paris.. and Terramob (old chantiers)
 
-                _barycentre.applyProjection(matRotation);
+                _barycentre.applyMatrix3(matRotation);
 
                 gfxEngine.translateCameraSmoothly(posWithPivot.x + _barycentre.x, posWithPivot.y +_barycentre.y, posWithPivot.z+ _barycentre.z);
 
@@ -300,15 +300,15 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
              /*************************** Projection ******************************************************************/
                 // rotation from heading TODO real 3D Rotation with pitch and roll
                 var matRotation = Ori.computeMatOriFromHeadingPitchRoll(
-                                        targetPanoInfo.pan_xml_heading_pp,
-                                        targetPanoInfo.pan_xml_pitch_pp,
-                                        targetPanoInfo.pan_xml_roll_pp
+                                        targetPanoInfo.heading,
+                                        targetPanoInfo.pitch,
+                                        targetPanoInfo.roll
                                     );
 
 
                 _barycentre = Ori.getPosition();  // For Paris.. and Terramob (old chantiers)
 
-                _barycentre.applyProjection(matRotation);
+                _barycentre.applyMatrix3(matRotation);
 
                 gfxEngine.translateCameraSmoothly(posWithPivot.x + _barycentre.x, posWithPivot.y +_barycentre.y, posWithPivot.z+ _barycentre.z);
 

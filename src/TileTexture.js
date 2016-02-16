@@ -5,7 +5,7 @@
  * @requires ThreeJS
  */ 
 
-define (['lib/three'], function (THREE) { 
+define (['three'], function (THREE) { 
 
     // nbTW,nbTH : number of trianges for w and h for the plane3D
     TileTexture = function(url,layer,formatImg,pos,sizeTileMeters,sizeTilePx,nbTiles,geom,pivotGrid,sideGrid,radiusMarge, key, sizeCell){

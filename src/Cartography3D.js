@@ -2,8 +2,8 @@
  * To manage Bati 3D layer
  * quocdinh dot nguyen at gmail dot com
  */
-define(['jquery', 'GraphicEngine', 'lib/three', 'lib/threeExt', 'Panoramic', 'Dispatcher', 'Cartography','lib/3DSLoader', 'Shader','lib/B3DLoader','Draw', 'Utils', 'Config'],
-    function($, gfxEngine, THREE, THREEExt, Panoramic, Dispatcher, Cartography, DS3Loader, Shader, B3DLoader, Draw, Utils, Config) {
+define(['jquery', 'GraphicEngine', 'three', 'lib/threeExt', 'Panoramic', 'Dispatcher', 'Cartography','lib/3DSLoader', 'Shader','lib/B3DLoader','lib/DDSLoader','Draw', 'Utils', 'Config'],
+    function($, gfxEngine, THREE, THREEExt, Panoramic, Dispatcher, Cartography, DS3Loader, Shader, B3DLoader, DDSLoader, Draw, Utils, Config) {
         
         
                
@@ -123,7 +123,7 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'lib/threeExt', 'Panoramic', 'Di
                     THREE.GeometryUtils.merge( this.geometry, object );
             };
             dalleClasse.prototype.mergeGeometry = function(geom){
-                    THREE.GeometryUtils.merge( this.geometry, geom);
+                    this.geometry.merge(geom);
             };
             dalleClasse.prototype.checkDoubleVertices = function(){
                     this.geometry.mergeVertices(); 
@@ -186,12 +186,9 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'lib/threeExt', 'Panoramic', 'Di
                         var bufferGeometry = THREE.BufferGeometryUtils.fromGeometry(geom2,{indice:n} );
 
                         var mat = this.createShaderForBati();
-                        for(var a=0;a<nbTexturesInShader;++a){
-                            
+                        for(var a=0;a<nbTexturesInShader;++a){                            
                            if(n+a< nbMaterials) this.affectTexture(mat,n+a,a);
-                            
                         }
-
                         var mesh = new THREE.Mesh(bufferGeometry,mat);//this.cachedMaterials.materials[n]);
                         
                         this.globalObject.add(mesh);
@@ -217,13 +214,12 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'lib/threeExt', 'Panoramic', 'Di
                  var texture;
                  THREE.ImageUtils.crossOrigin= 'use-credentials';   // No anonymous to keep ability to access password protected files (behind dir Viewer)
                  if(this.textureType=='.dds'){
-                    texture = THREE.ImageUtils.loadDDSTexture(urlTexture,null,
-                                           function() {
+					 var loader = new THREE.DDSLoader();
+                     texture = loader.load(urlTexture, function() {
                                                shaderMat.uniforms["u_textures"].value[numTexture] = texture;   // onLoad function
                                                texture.dispose();
                                            }
-                                  );
-                    texture.generateMipmaps = false;
+                                );
                    }
                 else{
                     texture = THREE.ImageUtils.loadTexture(urlTexture,null,function() { "http://www.itowns.fr/images/textures/quoc.png"
@@ -271,16 +267,10 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'lib/threeExt', 'Panoramic', 'Di
                     light: {type: "v3", value:  Cartography3D.light}                            
                };
                 
-              var attributesBati = {
-                  //position: {type: 'v3', value: []},
-                    materialindice: {type: 'f', value: []}
-              };
-
                               
                  // create the shader material
                 var shaderMat = new THREE.ShaderMaterial({
                         uniforms:     	uniformsBati,
-                        attributes: attributesBati,
                         vertexShader:   Shader.shaderBati3DVS.join("\n"),//Shader.shaders['shaderBati3D.vs'],
                         fragmentShader: Shader.shaderBati3DFS.join("\n"),//Shader.shaders['shaderBati3D.fs'],
                         side: THREE.DoubleSide,
@@ -540,7 +530,7 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'lib/threeExt', 'Panoramic', 'Di
                               this.geometry.computeFaceNormals();
                               this.geometry.computeVertexNormals();  
                               
-                             //self.mergeGeometry(new THREE.Mesh(geometry));
+                             //self.mergeGeometry(geometry);
                    //}// end check uv
             };
             /*
@@ -565,6 +555,9 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'lib/threeExt', 'Panoramic', 'Di
             dalleClasse.prototype.parse3DSGeometry = function(instant3DS){
                                     
                  var self = this, obj = instant3DS._cur_obj; 
+/*
+// messes up the UV coordinates if enabled...
+
                  if(obj.uvs !== undefined){        
                              var geometry = new THREE.Geometry();
                                    //add vertices and faces
@@ -598,8 +591,9 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'lib/threeExt', 'Panoramic', 'Di
                                     }    
                               }
 
-                              self.mergeGeometry(new THREE.Mesh(geometry));
+                              self.mergeGeometry(geometry);
                    }
+*/
             };
             
                 dalleClasse.prototype.parseB3DGeometry = function(instantB3D){
@@ -638,7 +632,7 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'lib/threeExt', 'Panoramic', 'Di
                                     }    
                               }
 
-                              self.mergeGeometry(new THREE.Mesh(geometry));
+                              self.mergeGeometry(geometry);
                    }
             };
             
@@ -768,6 +762,7 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'lib/threeExt', 'Panoramic', 'Di
                             gridWeather: [],
                             gridGeometry: null,
                             textureType : 'dds',
+							raycaster : new THREE.Raycaster(), // create once
                             //grillMap
                             gmap            : null,
                             createGMap      : function(){
@@ -828,11 +823,9 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'lib/threeExt', 'Panoramic', 'Di
                          
                             getDalleXYFromCamDirection: function(){
                                 
-                                var p = new THREE.Vector3(-9999,0,0);  // To detect no intersection
-                                var vector = new THREE.Vector3(0, 0, 1);
-                                var projector = new THREE.Projector();
-                                var ray = projector.pickingRay(vector, gfxEngine.getCamera());
-                                var objArray = ray.intersectObjects([this.gmap]);
+                                var p = new THREE.Vector3(-9999,0,0);  // To detect no intersection                               
+                                this.raycaster.setFromCamera(new THREE.Vector3(0, 0), gfxEngine.getCamera());
+                                var objArray = this.raycaster.intersectObjects([this.gmap]);
                                 if (objArray[0]) {
                                     
                                     p = objArray[0].point; // Pos 3D in scene of camera look to gmap plane
@@ -1108,7 +1101,7 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'lib/threeExt', 'Panoramic', 'Di
                                                 this.listDalles[i].setDalleZeroPivot(zero);
                                                 if(!this.using3DS) {
                                                     this.listDalles[i].load();
-                                                }{
+                                                } else {
                                                     this.listDalles[i].setLoDLevel(0);  
                                                     this.listDalles[i].load3DS();
                                                 }    

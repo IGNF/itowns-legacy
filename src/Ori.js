@@ -7,7 +7,7 @@
 * @Depends Sensor.js
 */
 
-define(['lib/three','Sensor','jquery', 'PanoramicProvider'],
+define(['three','Sensor','jquery', 'PanoramicProvider'],
   function (THREE, Sensor, $, PanoramicProvider) {
 
     var Ori = {
@@ -19,13 +19,13 @@ define(['lib/three','Sensor','jquery', 'PanoramicProvider'],
         var that = this;
         var baseUrl = PanoramicProvider.getMetaDataSensorURL();
         $.getJSON(baseUrl, function (data){
-         that.handleDBData(baseUrl,data);
+         that.handleDBData(data);
        });
       },
 
-      handleDBData :function(baseUrl,data){
+      handleDBData :function(data){
         for (var i =0; i< data.length; ++i)  // For all DB sensor info we create sensor object
-          this.sensors.push(new Sensor(baseUrl,data[i]));
+          this.sensors.push(new Sensor(data[i]));
         this.initiated = true;
         console.log('Orientation module is loaded');
       },
@@ -39,7 +39,7 @@ define(['lib/three','Sensor','jquery', 'PanoramicProvider'],
         roll = parseFloat(roll)/ 180 * Math.PI;  // Deg to Rad   // axe Z
         // With quaternion  //set rotation.order to "YXZ", which is equivalent to "heading, pitch, and roll"
         var q = new THREE.Quaternion().setFromEuler(new THREE.Euler(-pitch,heading,-roll,'YXZ'),true);
-        return new THREE.Matrix4().makeRotationFromQuaternion(q);
+        return new THREE.Matrix3().makeRotationFromQuaternion(q);
       },
 
       getPosition: function(){
@@ -50,11 +50,14 @@ define(['lib/three','Sensor','jquery', 'PanoramicProvider'],
       },
 
       // deprecated methods
-      getDistortion: function(num){ return this.sensors[num].distortion; },
-      getSommet    : function(num){ return this.sensors[num].position;   },
-      getProjCam   : function(num){ return this.sensors[num].projection; },
-      getMatCam    : function(num){ return this.sensors[num].rotation;   },
-      getMask      : function(num){ return this.sensors[num].mask;   }
+      getDistortion: function(i){ return this.sensors[i].distortion; },
+      getSommet    : function(i){ return this.sensors[i].position;   },
+      getProjection: function(i){ return this.sensors[i].projection; },
+      getRotation  : function(i){ return this.sensors[i].rotation;   },
+      getMask      : function(i){ return this.sensors[i].mask;   },
+      getSize      : function(i){ return this.sensors[i].size;   },
+      getPPS       : function(i){ return this.sensors[i].pps;   },
+      getMatrix    : function(i){ return new THREE.Matrix3().multiplyMatrices(this.getRotation(i),this.getProjection(i)); }
     };
 
     return Ori;

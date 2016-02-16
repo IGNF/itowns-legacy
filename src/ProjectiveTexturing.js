@@ -6,7 +6,7 @@
 		* and its projective camera information.
 		*/
 
-		define (['GraphicEngine','lib/three','Ori','Shader', 'PanoramicProvider','url'],
+		define (['GraphicEngine','three','Ori','Shader', 'PanoramicProvider','url'],
 			function (graphicEngine, THREE, Ori, Shader, PanoramicProvider,url) {
 
 				window.requestAnimSelectionAlpha = (function(){
@@ -22,102 +22,154 @@
 
 				var _shaderMat = null;
 				var _initiated = false;
+				var _alpha = 1;
+				var _targetNbPanoramics;
+				var _withMask = true;
+				var _withDistortion = true;
 
 				var ProjectiveTexturing = {
-
-					init: function(){
-						_localImageFiles = PanoramicProvider.getImageLocal();
+					
+					init: function(targetNbPanoramics){
+						_targetNbPanoramics = targetNbPanoramics || 2;
 						_initiated = true;
 					},
+					
 					isInitiated: function(){
 						return _initiated;
+					},	
+					
+					setGeneralOpacity: function(value){
+						_alpha = value;
 					},
-					createShaderMat: function(panoInfo,rot){
-						var indice_time = 0;
-						var tabUrl=[];
-						var tabMat=[];
-						var tabTrans=[];
-						var tabIntr=[];
-						var baseUrl = PanoramicProvider.getMetaDataSensorURL();
-						for (var i=0; i< Ori.sensors.length; ++i){
-							var panoUrl = panoInfo.url_format.replace("{cam_id_pos}",Ori.sensors[i].infos.cam_id_pos);
-							tabUrl.push(url.resolve(baseUrl,panoUrl));
-							var mat = new THREE.Matrix4().multiplyMatrices(Ori.getMatCam(i),Ori.getProjCam(i));
-							tabMat.push((new THREE.Matrix4().multiplyMatrices( rot,mat.clone() )).transpose());
-							var trans = Ori.getSommet(i).clone().applyProjection( rot); trans.w = 1;
-							tabTrans.push(trans);
-							tabIntr.push(Ori.getDistortion(i));
+					
+					tweenGeneralOpacityUp: function(){
+						if(_alpha<1){
+							_alpha += ((_alpha+0.01))*0.04;
+							if(_alpha>1) _alpha=1;
+							requestAnimSelectionAlpha(this.tweenGeneralOpacityUp.bind(this));
 						}
-						switch(Ori.sensors.length){
-							case 5:
-							var uniforms5 = {
-								indice_time0:{type:'f',value:indice_time},
-           			indice_time1:{type:'f',value:indice_time},
-           			indice_time2:{type:'f',value:indice_time},
-           			indice_time3:{type:'f',value:indice_time},
-           			indice_time4:{type:'f',value:indice_time},
-								distortion0: {type:"v4",value:tabIntr[0]},
-								distortion1: {type:"v4",value:tabIntr[1]},
-								distortion2: {type:"v4",value:tabIntr[2]},
-								distortion3: {type:"v4",value:tabIntr[3]},
-								distortion4: {type:"v4",value:tabIntr[4]},
-								mvpp0:{type: 'm4',value: tabMat[0]},
-								mvpp1:{type: 'm4',value: tabMat[1]},
-								mvpp2:{type: 'm4',value: tabMat[2]},
-								mvpp3:{type: 'm4',value: tabMat[3]},
-								mvpp4:{type: 'm4',value: tabMat[4]},
-								mvpp0bis:{type: 'm4',value: tabMat[0]},
-								mvpp1bis:{type: 'm4',value: tabMat[1]},
-								mvpp2bis:{type: 'm4',value: tabMat[2]},
-								mvpp3bis:{type: 'm4',value: tabMat[3]},
-								mvpp4bis:{type: 'm4',value: tabMat[4]},
-								translation0:{type:"v4",value: tabTrans[0]},
-								translation1:{type:"v4",value: tabTrans[1]},
-								translation2:{type:"v4",value: tabTrans[2]},
-								translation3:{type:"v4",value: tabTrans[3]},
-								translation4:{type:"v4",value: tabTrans[4]},
-								translation0bis:{type:"v4",value: tabTrans[0]},
-								translation1bis:{type:"v4",value: tabTrans[1]},
-								translation2bis:{type:"v4",value: tabTrans[2]},
-								translation3bis:{type:"v4",value: tabTrans[3]},
-								translation4bis:{type:"v4",value: tabTrans[4]},
-								texture0: {type: 't',value: THREE.ImageUtils.loadTexture(tabUrl[0])},
-								texture1: {type: 't',value: THREE.ImageUtils.loadTexture(tabUrl[1])},
-								texture2: {type: 't',value: THREE.ImageUtils.loadTexture(tabUrl[2])},
-								texture3: {type: 't',value: THREE.ImageUtils.loadTexture(tabUrl[3])},
-								texture4: {type: 't',value: THREE.ImageUtils.loadTexture(tabUrl[4])},
-								texture0bis: {type: 't',value: THREE.ImageUtils.loadTexture(tabUrl[0])},
-								texture1bis: {type: 't',value: THREE.ImageUtils.loadTexture(tabUrl[1])},
-								texture2bis: {type: 't',value: THREE.ImageUtils.loadTexture(tabUrl[2])},
-								texture3bis: {type: 't',value: THREE.ImageUtils.loadTexture(tabUrl[3])},
-								texture4bis: {type: 't',value: THREE.ImageUtils.loadTexture(tabUrl[4])},
-								textureMask0: {type: 't',value: Ori.getMask(0)},
-								textureMask1: {type: 't',value: Ori.getMask(1)},
-								textureMask2: {type: 't',value: Ori.getMask(2)},
-								textureMask3: {type: 't',value: Ori.getMask(3)},
-								textureMask4: {type: 't',value: Ori.getMask(4)}
-							};
-            				// create the shader material for Three
-            				_shaderMat = new THREE.ShaderMaterial({
-            					uniforms:     	uniforms5,
-            					vertexShader:   Shader.shaderTextureProjective2VS.join("\n"),
-            					fragmentShader: Shader.shaderTextureProjective2FS.join("\n"),
-            					side: THREE.BackSide,   
-            					transparent:true
-            				});
-            				break;
-            				default:
-            			}
-            			return _shaderMat;
-            		},
-					tweenIndiceTime: function (num){
-            			var i = _shaderMat.uniforms['indice_time'+num].value;
-            			if(i>0){
-                			i -= 0.03;
-                			if(i<0) i=0;
-                			_shaderMat.uniforms['indice_time'+num].value = i;
+					},
+        
+					
+					// display all the images of the panoramics
+					nbImages: function(){
+						return Ori.sensors.length;
+					},
+					
+					nbMasks: function(){
+						if(!_withMask) return 0;
+						var count = 0;
+						for (var i=0; i<this.nbImages(); ++i)
+							if(Ori.getMask(i)) ++count;
+						return count;
+					},
+					
+					// throttle down the number of panoramics to meet the gl.MAX_* constraints
+					nbPanoramics: function(){ 
+						var N = this.nbImages();
+						var gl = graphicEngine.getRenderer().getContext();
+						var M = this.nbMasks();
+						var maxVaryingVec = gl.getParameter(gl.MAX_VARYING_VECTORS);
+						var maxTextureImageUnits = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
+						var maxNbPanoramics = Math.floor(Math.min(maxVaryingVec,(maxTextureImageUnits-M))/N);
+						var P = Math.min(_targetNbPanoramics,maxNbPanoramics);
+						console.log("Masks : ", M);
+						console.log("Images per panoramic  : ", N );
+						console.log("Panoramics : ", P ," displayed /",_targetNbPanoramics, " targeted");
+						console.log("Varyings : ", (N*P) ," used /",maxVaryingVec, " available");
+						console.log("Texture units : ", (M+N*P) ," used /",maxTextureImageUnits," available");
+						return P;
+					},
+					
+					loadTexture: function(src,onload,data){
+	          var img = new Image(); 
+	          img.crossOrigin = 'anonymous';
+	          img.onload = function () { 	
+	          	var tex = new THREE.Texture(this,THREE.UVMapping, 
+	          		THREE.RepeatWrapping, THREE.RepeatWrapping, THREE.LinearFilter,THREE.LinearFilter,THREE.RGBFormat);
+							tex.needsUpdate = true;
+							tex.flipY = false;
+							onload(tex,data);
+						}
+						var baseUrl = PanoramicProvider.getMetaDataSensorURL();
+						img.src = url.resolve(baseUrl,src);
+					},
+
+					createShaderMat: function(panoInfo,rot){  
+						var N = this.nbImages();
+						var P = this.nbPanoramics();
+						var uniforms = {
+							distortion  : {type:'v4v',value:[]},
+							pps         : {type:'v2v',value:[]},
+							size        : {type:'v2v',value:[]},
+							alpha       : {type:'fv1',value:[]},
+							mvpp        : {type:'m3v',value:[]},
+							translation : {type:'v3v',value:[]},
+							texture     : {type:'tv' ,value:[]},
+							mask        : {type:'tv' ,value:[]}
+						};
+						var idmask = [];
+						var iddist = [];
+						for (var i=0; i<N; ++i){
+							var mat = Ori.getMatrix(i).clone();
+							var mvpp = (new THREE.Matrix3().multiplyMatrices(rot,mat)).transpose();
+							var trans = Ori.getSommet(i).clone().applyMatrix3(rot);
+							var m = -1;
+							if(_withMask && Ori.getMask(i)) {
+								m = uniforms.mask.value.length;
+								uniforms.mask.value[m] = null;
+							}
+							var d = -1;
+							if(_withDistortion && Ori.getDistortion(i)) {
+								d = uniforms.distortion.value.length;
+								uniforms.distortion.value[d] = Ori.getDistortion(i);
+								uniforms.pps.value[d] = Ori.getPPS(i);
+							}
+							for(var pano=0; pano<P; ++pano) {
+								var j = i+N*pano;
+								uniforms.size.value[j] = Ori.getSize(i);
+								uniforms.alpha.value[j] = _alpha*(1-pano);
+								uniforms.mvpp.value[j]=mvpp;
+								uniforms.translation.value[j]=trans;
+								uniforms.texture.value[j] = null;
+								idmask[j]=m;
+								iddist[j]=d;
+							}
+						}
+          	// create the shader material for Three
+          	_shaderMat = new THREE.ShaderMaterial({
+          		uniforms:     	uniforms,
+          		vertexShader:   Shader.shaderTextureProjectiveVS(P*N),
+          		fragmentShader: Shader.shaderTextureProjectiveFS(P*N,idmask,iddist),
+          		side: THREE.BackSide,   
+          		transparent:true
+          	});
+
+						for (var i=0; i<N; ++i) {
+							var m= idmask[i];
+							if(m>=0) {
+								this.loadTexture(Ori.getMask(i), function(tex,m) { 	
+									_shaderMat.uniforms.mask.value[m] = tex; 
+								}, m);
+							}
+							var panoUrl = PanoramicProvider.getUrlImageFile().replace("{cam}",Ori.sensors[i].infos.cam).replace("{pano}",panoInfo.pano);
+  						this.loadTexture(panoUrl, function(tex,i) { 	
+								_shaderMat.uniforms.texture.value[i] = tex;
+							}, i);
+						}
+            return _shaderMat;
+          },
+
+					tweenIndiceTime: function (i){
+            			var alpha = _shaderMat.uniforms.alpha.value[i];
+            			if(alpha<1){
+	            			var j = i + this.nbImages();
+                			alpha += 0.03;
+                			if(alpha>1) alpha=1;
+                			_shaderMat.uniforms.alpha.value[i] = _alpha*alpha;
+                			_shaderMat.uniforms.alpha.value[j] = _alpha*(1-alpha);
                 			var that = this;
-                			requestAnimSelectionAlpha(function() { that.tweenIndiceTime(num); });                			
+                			requestAnimSelectionAlpha(function() { that.tweenIndiceTime(i); });                			
            	 			}	
 					},
             		changePanoTextureAfterloading: function (panoInfo,translation,rotation){
@@ -127,32 +179,29 @@
             		},
 	         		// Load an Image(html) then use it as a texture. Wait loading before passing to the shader to avoid black effect
 	         		chargeOneImageCam: function (panoInfo,translation,rotation,i){
-	         			// move from bis to main pano
-	            		// Load the new image
-	            		var img = new Image(); 
-	            		img.crossOrigin = 'anonymous';
-	            		var that = this;
-	            		img.onload = function () { 	
-	            			var mat = new THREE.Matrix4().multiplyMatrices(Ori.getMatCam(i),Ori.getProjCam(i));
-	            			var trans = Ori.getSommet(i).clone().applyProjection( rotation); trans.w = 1;	
-                		_shaderMat.uniforms['mvpp'+i].value = _shaderMat.uniforms['mvpp'+i+'bis'].value;
-                		_shaderMat.uniforms['translation'+i].value = _shaderMat.uniforms['translation'+i+'bis'].value;
-                		_shaderMat.uniforms['texture'+i].value =_shaderMat.uniforms['texture'+i+'bis'].value;
+								var panoUrl = PanoramicProvider.getUrlImageFile().replace("{cam}",Ori.sensors[i].infos.cam).replace("{pano}",panoInfo.pano);
+								var that = this;
+								this.loadTexture(panoUrl, function(tex) { 	
+										var mat = Ori.getMatrix(i).clone();
+										var mvpp = (new THREE.Matrix3().multiplyMatrices( rotation,mat )).transpose();
+	            			var trans = Ori.getSommet(i).clone().applyMatrix3(rotation);
+	            			var j = i + that.nbImages();
+	            			if(j<_shaderMat.uniforms.mvpp.value.length) {
+											_shaderMat.uniforms.mvpp.value[j] = _shaderMat.uniforms.mvpp.value[i];
+											_shaderMat.uniforms.translation.value[j] = _shaderMat.uniforms.translation.value[i];
+											_shaderMat.uniforms.texture.value[j] =_shaderMat.uniforms.texture.value[i];
+											_shaderMat.uniforms.alpha.value[j] = _alpha;
+											_shaderMat.uniforms.alpha.value[i] = 0;
+											that.tweenIndiceTime(i);
+										}
 
-	            			_shaderMat.uniforms['mvpp'+i+'bis'].value = (new THREE.Matrix4().multiplyMatrices( rotation,mat.clone() )).transpose();
-	            			_shaderMat.uniforms['translation'+i+'bis'].value = translation.clone().add(trans);
-	            			_shaderMat.uniforms['texture'+i+'bis'].value = new THREE.Texture(this,THREE.UVMapping, 
-	            				THREE.RepeatWrapping, THREE.RepeatWrapping, THREE.LinearFilter,THREE.LinearFilter,THREE.RGBFormat);
-	            			_shaderMat.uniforms['texture'+i+'bis'].value.needsUpdate = true;
-
-	            			_shaderMat.uniforms['indice_time'+i].value = 1;			
-            				that.tweenIndiceTime(i);
-            		}; 
-						var baseUrl = PanoramicProvider.getMetaDataSensorURL();
-						var panoUrl = panoInfo.url_format.replace("{cam_id_pos}",Ori.sensors[i].infos.cam_id_pos);
-	            		img.src = url.resolve(baseUrl,panoUrl); 
-	            	}
+	            			_shaderMat.uniforms.mvpp.value[i] = mvpp;
+	            			_shaderMat.uniforms.translation.value[i] = translation.clone().add(trans);
+	            			_shaderMat.uniforms.texture.value[i] = tex;
+									});
+								} 
 	            }
 	            return ProjectiveTexturing
-	        }
+	        	}
 	        )
+              

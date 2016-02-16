@@ -1,5 +1,5 @@
 define(
-        ['jquery', 'lib/three', 'Events', 'Cartography', 'Navigation', 'Itinerary', 'LaserCloud', 'Panoramic', 'GraphicEngine', 'Draw',
+        ['jquery', 'three', 'Events', 'Cartography', 'Navigation', 'Itinerary', 'LaserCloud', 'Panoramic', 'GraphicEngine', 'Draw',
             'Config', 'Geonames', 'Measure', 'MeshManager', 'lib/postprocessing/WeatherEffects', 'Import', 'Carousel', 'Cartography3D', 'prefixfree', 'jqueryui'],
         function($, THREE, Events, Cartography, Navigation, Itinerary, LaserCloud,
                 Panoramic, gfxEngine, Draw, Config, Geonames, Measure, MeshManager, WeatherEffects, Import,  Carousel, Cartography3D ) {

@@ -4,7 +4,7 @@
  * @class Manages laser data
  * @require THREE.JS
  */
-define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatcher', 'Cartography','Draw',  'CVML','ProjectiveTexturing2','Utils', 'LasReader', 'Config'],
+define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher', 'Cartography','Draw',  'CVML','ProjectiveTexturing2','Utils', 'LasReader', 'Config'],
     function($, gfxEngine, THREE, Shader, Panoramic, Dispatcher, Cartography, Draw, CVML, ProjectiveTexturing2, Utils, LasReader, Config) {
 
     var _particleSystem = null,
@@ -44,14 +44,6 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
         _nbTime = 1.,
         _indice_time_laser_tab = [],//new Float32Array(40);
         _nbIndiceMax = 160,
-        _pivotNantes = {x:352000,y:0,z:6688000},
-        _pivotNantesHalage = {x:339000,y:0,z:6713000},
-        _pivotParis6 = {x:649000,y:0,z:6840000},
-        _pivotParis2014Louvre = {x:650000,y:0,z:6860000},
-        _pivotCasqy = {x:624000,y:0,z:6850000},
-        _pivotToulouse = {x:570000,y:0,z:6275000},
-        _pivotAurillac = {x:655000,y:0,z:6430000},
-        _pivotChampigny = {x:664000,y:-43.7,z:6850000},
         _currentLaserPivot = {},
         _nbClassLidar = 0,
         _zero = null, // Translation substracting the init position to all coords
@@ -119,8 +111,9 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
         annotationOn : false,
             
             
-        init: function(zero,dataURL) {
+        init: function(zero,dataURL,infos) {
 
+            _currentLaserPivot = infos.offset;
             _zero = zero;
             _dataURL = dataURL.urlPointCloud || Config.dataURL.defaultUrlPointCloud;
             _localURL = _dataURL.indexOf("www") < 0;
@@ -148,16 +141,22 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
 
         initializeBufferGeometry: function() {
 
-             for(var i=0;i<_nbIndiceMax ;++i){
+            for(var i=0;i<_nbIndiceMax ;++i){
               _indice_time_laser_tab[i] = 0.;
-             }
+            }
+             
             this.createShader();
-
            
             _currentNbPointsInBuffer = 0;
             _bufferGeometry = new THREE.BufferGeometry();
-            _bufferGeometry.dynamic = true;
+            //_bufferGeometry.dynamic = true;
 
+            _bufferGeometry.addAttribute( 'position',     new THREE.BufferAttribute( new Float32Array( _nbPointsBuffer * 3 ), 3 ));//.setDynamic(true) );
+	        _bufferGeometry.addAttribute( 'color',        new THREE.BufferAttribute( new Float32Array( _nbPointsBuffer * 3 ), 3 ));//.setDynamic(true) );
+            _bufferGeometry.addAttribute( 'displacement', new THREE.BufferAttribute( new Float32Array( _nbPointsBuffer * 3 ), 3 ));//.setDynamic(true) );
+            _bufferGeometry.addAttribute( 'uniqueid',     new THREE.BufferAttribute( new Float32Array( _nbPointsBuffer ), 1 ));//.setDynamic(true) );
+
+/*
             _bufferGeometry.attributes = {
                 position: {
                     itemSize: 3,
@@ -181,15 +180,12 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
                     itemSize: 1,
                     array: new Float32Array(_nbPointsBuffer),
                     dynamic: true
-                },
-                classe: {
-                    itemSize: 1,
-                    array: new Float32Array(_nbPointsBuffer),
-                    dynamic: true
                 }
+
             };
-       
-        
+       */
+            
+            
             //*****Picking **********************
             _geometryParticleSystemPicking = new THREE.Geometry();
             _geometryParticleSystemPicking.vertices = new Array(_nbPointsBuffer);
@@ -198,32 +194,35 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
 
             this.initializeBufferValues();
 
-            _particleSystem = new THREE.ParticleSystem(
+            _particleSystem = new THREE.Points(
                     _bufferGeometry,
                     _shaderMatLaserCloud
                     );
 
             //*****Picking **********************
             _geometryParticleSystemPicking.colors = _colorsPicking;
-            var pMaterial = new THREE.ParticleBasicMaterial({size: 0.10, vertexColors: true, depthTest: false});  // map:sprite
+            var pMaterial = new THREE.PointsMaterial({size: 0.10, vertexColors: true, depthTest: false});  // map:sprite
             // create the particle system used to get the id (3D pos). Rendered to texture, not to screen.
-            _particleSystemPicking = new THREE.ParticleSystem(_geometryParticleSystemPicking, pMaterial);
+            _particleSystemPicking = new THREE.Points(_geometryParticleSystemPicking, pMaterial);
             // Modified RTT. Texture rendering ac le Color ID for Picking 3D
             _sceneRTT = new THREE.Scene();
             _sceneRTT.add(_particleSystemPicking);
             
-            //gfxEngine.addToScene(_particleSystemPicking);
-           this.laserCloudMaster.add(_particleSystem);
+            //gfxEngine.addToScene(_particleSystemPicking); 
+            this.laserCloudMaster.add(_particleSystem);
+            this.visible = true;
+            // this.laserCloudMaster.renderOrder = 1000;
         },
         
         createShader: function() {
 
+/*
             _shaderAttributes = {
                 displacement: {type: 'v3', value: []},
                 color: {type: 'v3', value: []},
                 uniqueid: {type: 'f', value: []}
             };
-
+*/
             _shaderUniforms = {
                 indice_time_laser: {type: 'f', value: _indiceTimeLaser},
                 currentidwork: {type: 'f', value: 1000.},
@@ -241,13 +240,15 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
             // For BufferGeometry now we need to set everything here. Like transparent 
             _shaderMatLaserCloud = new THREE.ShaderMaterial({
                 uniforms: _shaderUniforms,
-                attributes: _shaderAttributes,
+            //    attributes: _bufferGeometry.attributes,// _shaderAttributes,
                 vertexShader: Shader.shaderLaserVS.join("\n"),//Shader.shaders['shaderLaser.vs'],
                 fragmentShader: Shader.shaderLaserFS.join("\n"),//Shader.shaders['shaderLaser.fs'],
                 vertexColors: THREE.VertexColors,
                 depthTest: false,
                 transparent: true
             });
+            
+       
 
         },
         
@@ -257,7 +258,7 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
             var positions = _bufferGeometry.attributes.position.array;
             var displacements = _bufferGeometry.attributes.displacement.array;
             var uniqueids = _bufferGeometry.attributes.uniqueid.array;
-            var classes = _bufferGeometry.attributes.classe.array;
+         //   var classes = _bufferGeometry.attributes.classe.array;
 
 
             var color2 = new THREE.Color();
@@ -282,7 +283,7 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
                 values_color[ n * 3 + 2 ] = color2.b;
 
                 uniqueids[ n + 0 ] = this.indiceLaserFileLoaded;
-                classes[ n + 0 ] = 0;
+             //   classes[ n + 0 ] = 0;
                 //Picking*****
                 _colorsPicking[n] = 0;
                 _geometryParticleSystemPicking.vertices[n] = new THREE.Vector3(0, 0, 0);
@@ -360,17 +361,21 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
  //       this.updateLaserAttributes(); 
           this.setLockMovement(0);
        
-          this.updateLaserAttributesSmartly(nbPoints);//offset); 
+          this.updateLaserAttributes();//(nbPoints);//offset); 
 
           _indiceTimeLaser = 0.5;                    
           if(!this.animateOn){this.animateOn = true; this.animatePoints2(); /*console.log('thisanimate');*/}  // First file
                                                                                     // start animation function
           this.indiceLaserFileLoaded++;// console.log(_currentNbPointsInBuffer);
           this.indicePacketInBuffer++;
+          
+          if(this.indiceLaserFileLoaded == 2)
+              _bufferGeometry.computeBoundingSphere();   // Once every new series load. Very important 
+           
           // Load the next file in the list if not last (seems faster than parallel load)
           if(this.indiceLaserFileLoaded < this.tabLaserFilesToLoad.length )
              this.readLaserPointsFileFromItownsGeneric(this.tabLaserFilesToLoad[this.indiceLaserFileLoaded],nbBitsPerAttribute,pivot);
-             else{
+             else{ 
                 setTimeout(function() {
                   LaserCloud.setLockMovement(1);}
                 , 800);
@@ -816,7 +821,11 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
 
 
       updateLaserAttributes: function() {
-
+/*
+            _bufferGeometry.attributes.position.updateRange.count = 3145728;
+            _bufferGeometry.attributes.color.updateRange.count = 3145728;
+            _bufferGeometry.attributes.uniqueid.updateRange.count = 1048576;
+   */         
             _bufferGeometry.attributes.position.needsUpdate = true;
             _bufferGeometry.attributes.color.needsUpdate = true; 
             _bufferGeometry.attributes.uniqueid.needsUpdate = true;
@@ -824,8 +833,10 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
             //Picking
             _geometryParticleSystemPicking.verticesNeedUpdate = true;
             _geometryParticleSystemPicking.colorsNeedUpdate = true;
+            
+            //_bufferGeometry.computeBoundingSphere();
              // _bufferGeometry.verticesNeedUpdate = true;
-
+             //console.log(_bufferGeometry.attributes.color,"  ",_bufferGeometry.attributes.uniqueid);
        },
 
         // offset is _currentNbPointsInBuffer * 3; -> the place to start writing new points
@@ -834,7 +845,7 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
         // even if multiple of typearray(float32), https://developer.mozilla.org/en-US/docs/Web/API/Float32Array
         updateLaserAttributesSmartly: function(nbPoints){
             
-
+ 
               var offsetGeometry = (_currentNbPointsInBuffer -  (nbPoints-1)) * 12;
               var offsetSub = (_currentNbPointsInBuffer - (nbPoints-1)) * 3;
               var lengthSub = (nbPoints) * 3;
@@ -1495,7 +1506,7 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
                                     //self.loadLaserBuffer(buffer);
                                     //self.addPointsToBuffer(buffer);
                                     self.addPointsToBufferGenericMesh(buffer,4,nbBitsPerAttribute,pivot);  //4 attributes of nbBitsPerAttribute bits with pivot _zero
-                    } else {
+                    } else { // Error but keep going on the stack
                                    // console.log("Error", xhr.statusText);
                                     self.indiceLaserFileLoaded++;
                                     if(self.indiceLaserFileLoaded < self.tabLaserFilesToLoad.length)
@@ -1536,61 +1547,16 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
         launchLaserAroundCurrentTime: function(duration, laserNum) {
             
             _notLoaded = false;   // Means if no movement we won t have to load again when visibility gets back on
+            var date = Panoramic.getYYMMDD();
             var hours = Panoramic.getPanoHours();
             var seconds = Panoramic.getPanoSecondsInHour();
-            var datee = Panoramic.getPanoDate();
-            var name = Panoramic.getPanoName();
             var decalageUTC = Panoramic.getDecalageUTC();
-            //console.log("laser",seconds-decalageUTC);
-            console.log("laser",name, datee, laserNum, hours, seconds, duration);
-            if(name.substr(0, 8) == "Paris_12")// Keep functioning for OLD RIEGL
-                this.launchLoadingFromSecondsIT(datee, laserNum, hours, seconds-decalageUTC, duration);
-            else {           //NEW RIEGL
-                 var prefix = name.substr(0, 5);
-                if(prefix == "TerMo") _currentLaserPivot = _pivotParis6;
-                   else 
-                if(prefix == "Nante") _currentLaserPivot = _pivotNantes;
-                   else
-                if(prefix == "Halag") _currentLaserPivot = _pivotNantesHalage;
-                    else
-                if(prefix == "CASQY") _currentLaserPivot = _pivotCasqy; 
-                    else
-                if(prefix == "Toulo") _currentLaserPivot = _pivotToulouse;
-                    else
-                if(prefix == "Auril") _currentLaserPivot = _pivotAurillac;
-                    else
-                if(prefix == "Champ") _currentLaserPivot = _pivotChampigny;
-                    else        
-                if(name.substr(0, 10) == "Paris-1405" || prefix == "Basti" || prefix == "Calib" || name.substr(0, 10) == "Paris-1404" || name.substr(0, 10) == "Paris-1406")  _currentLaserPivot = _pivotParis2014Louvre;
-                        
-            
-                var datee = name.substr(name.indexOf('-')+1,6)
-               
-                this.launchLaserNewRieglLOD(datee,hours,seconds - decalageUTC,duration/6);
-            }
-
+            console.log("laser", date, laserNum, hours, seconds, duration, _currentLaserPivot);
+            this.launchLaserNewRieglLOD(date,hours,seconds - decalageUTC,duration/6);
         },
-        
-        launchLoadingFromSecondsIT: function(datee, laserNum, hour, seconds, duration) {
-            
-            var zero = gfxEngine.getZero();
-            laserNum = 10;
-            var second = parseInt(seconds);
-            for (var i = parseInt(second - duration / 2); i < parseInt(second + duration / 2); ++i) {
-
-                var fileName = "laser3/" + datee + "/" + hour + "/" + laserNum + "_" + i + ".bin";
-                if (($.inArray(fileName, this.tabLaserFilesToLoad) === -1))
-                    this.tabLaserFilesToLoad.push(fileName);
-            }
-
-            // Then we launch the first file that after loaded will ask the next file etc.  FIFO
-            //this.readLaserPointsFileFromItownsBINARY(this.tabLaserFilesToLoad[0],64,_zero);
-            this.readLaserPointsFileFromItownsBINARY(this.tabLaserFilesToLoad[this.indiceLaserFileLoaded],64,zero);
-        },
-        
         
         //Test with riegl360
-        launchLaserNewRiegl: function(datee,hours,seconds,duration){
+        launchLaserNewRiegl: function(date,hours,seconds,duration){
 
            // duration /=2;
             var decalage = 3;
@@ -1600,7 +1566,7 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
             var second = hours * 3600 + seconds + decalage;
             for(var i = parseInt(second - duration/2) * 10 ; i< parseInt(second + duration/2) * 10 ; ++i){
 
-                var fileName = "laserNewRiegl/"+datee+"/"+i+".bin";
+                var fileName = "laserNewRiegl/"+date+"/"+i+".bin";
                 if(($.inArray(fileName, this.tabLaserFilesToLoad)=== -1)) 
                      this.tabLaserFilesToLoad.push(fileName);
             }
@@ -1612,7 +1578,7 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
         
            
         // Test with riegl360 with 2 level of definitions
-        launchLaserNewRieglLOD: function(datee,hours,seconds,duration){
+        launchLaserNewRieglLOD: function(date,hours,seconds,duration){
 
            // duration /=2;
             var decalage = 3;
@@ -1631,8 +1597,8 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
                 
                 var nummin = (second - i) * 10;
                 var nummax = (second + i) * 10;
-                fileNameMin = "laserNewRiegl/"+datee+"/LR/"+nummin+".bin";
-                fileNameMax = "laserNewRiegl/"+datee+"/LR/"+nummax+".bin";
+                fileNameMin = "laserNewRiegl/"+date+"/LR/"+nummin+".bin";
+                fileNameMax = "laserNewRiegl/"+date+"/LR/"+nummax+".bin";
                 
                 var posMin = $.inArray(fileNameMin, this.tabLaserFilesToLoad);
                 var posMax = $.inArray(fileNameMax, this.tabLaserFilesToLoad);
@@ -1649,8 +1615,8 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
                 
                 var nummin = (second - i) * 10;
                 var nummax = (second + i) * 10;
-                fileNameMin = "laserNewRiegl/"+datee+"/HR/"+nummin+".bin";
-                fileNameMax = "laserNewRiegl/"+datee+"/HR/"+nummax+".bin";
+                fileNameMin = "laserNewRiegl/"+date+"/HR/"+nummin+".bin";
+                fileNameMax = "laserNewRiegl/"+date+"/HR/"+nummax+".bin";
                 
                 var posMin = $.inArray(fileNameMin, this.tabLaserFilesToLoad);
                 var posMax = $.inArray(fileNameMax, this.tabLaserFilesToLoad);
@@ -1671,41 +1637,6 @@ define(['jquery', 'GraphicEngine', 'lib/three', 'Shader', 'Panoramic', 'Dispatch
           
         },
              
-             
-        testLaserAngular: function(){
-            console.log('test Angular');
-             //LR
-            var duration = 130;
-            var datee = "131010";
-            var zero = gfxEngine.getZero();
-            
-            //this.tabLaserFilesToLoad = [];
-            var second = 46087;// + decalage;
-            var fileNameMin="", fileNameMax="";
-            
-            for(var i = 0 ; i< 2 * duration  ; i+=0.1){
-                
-                var nummin = (second - i) * 10;
-                var nummax = (second + i) * 10;
-                fileNameMin = "laserNewRiegl/"+datee+"/LRAngular/"+nummin+".bin";
-                fileNameMax = "laserNewRiegl/"+datee+"/LRAngular/"+nummax+".bin";
-                
-                var posMin = $.inArray(fileNameMin, this.tabLaserFilesToLoad);
-                var posMax = $.inArray(fileNameMax, this.tabLaserFilesToLoad);
-                
-                if( (posMin === -1) || (this.tabLaserFilesToLoad.length - posMin> 200) ) 
-                     this.tabLaserFilesToLoad.push(fileNameMin);
-       //         if( i>0 && ((posMax === -1) || (this.tabLaserFilesToLoad.length - posMax> 200)) ) 
-        //             this.tabLaserFilesToLoad.push(fileNameMax);
-            }
-            
-             this.readLaserPointsFileFromItownsGenericMesh(this.tabLaserFilesToLoad[this.indiceLaserFileLoaded],32,
-                                                                                  {x:zero.x - _currentLaserPivot.x,
-                                                                                   y:zero.y - _currentLaserPivot.y,
-                                                                                   z:zero.z - _currentLaserPivot.z});
-        },
-        
-        
         // LAS lidar file loading function
         loadLasFile: function (filename,pivot){
 

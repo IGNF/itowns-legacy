@@ -5,7 +5,7 @@
  * 
  */
 
-define(['jquery', 'GraphicEngine', 'lib/three','Panoramic', 'Dispatcher',  'Draw', 'Navigation'],
+define(['jquery', 'GraphicEngine', 'three','Panoramic', 'Dispatcher',  'Draw', 'Navigation'],
     function($, gfxEngine, THREE, Panoramic, Dispatcher, Draw, Navigation) {
 
     var _posCurrent = null, // vec3 current position

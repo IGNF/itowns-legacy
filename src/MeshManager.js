@@ -1,6 +1,6 @@
 
 
-    define (['GraphicEngine','jquery', 'Config', 'lib/three','Utils','ProjectiveTexturing','Ori','TileTexture','Draw','CVML','Cartography'],
+    define (['GraphicEngine','jquery', 'Config', 'three','Utils','ProjectiveTexturing','Ori','TileTexture','Draw','CVML','Cartography'],
         function(gfxEngine, $, Config, THREE, Utils,  ProjectiveTexturing, Ori, TileTexture, Draw, CVML) {
 
 
@@ -505,9 +505,9 @@
                     _currentObject = mesh;
 
                     var matRotation = Ori.computeMatOriFromHeadingPitchRoll(
-                                        this.panoInfo.pan_xml_heading_pp,
-                                        this.panoInfo.pan_xml_pitch_pp,
-                                        this.panoInfo.pan_xml_roll_pp
+                                        this.panoInfo.heading,
+                                        this.panoInfo.pitch,
+                                        this.panoInfo.roll
                                     );
 
                     ProjectiveTexturing.init();
@@ -837,7 +837,8 @@
             
             
             setSkyBoxVisibility: function(b){
-                this.skyBox.visible = b;
+                if(this.skyBox && b) this.generateSkyBox();
+                if(this.skyBox) this.skyBox.visible = b;
             },
        
        

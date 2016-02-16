@@ -11,8 +11,7 @@ module.exports = {
     umdNamedDefine: true
   },
   externals: {
-    'jquery': '$',
-    'geoportail': 'Geoportal' // also provides OpenLayers
+    'jquery': '$'
   },
   resolve: {
     root: path.resolve(__dirname, 'src'),
