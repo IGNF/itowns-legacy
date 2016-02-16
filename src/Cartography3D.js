@@ -664,6 +664,7 @@ define(['jquery', 'GraphicEngine', 'three', 'lib/threeExt', 'Panoramic', 'Dispat
                 
                     var nbDallesCote = 2;
                     if (this.textureType == '.jpg') nbDallesCote = 2;
+                    /*
                     for(var i=-nbDallesCote/2 +1 ;i<nbDallesCote/2 +1;++i){
                           for(var j=-nbDallesCote/2 ;j<nbDallesCote/2 ;++j){
                              
@@ -680,8 +681,9 @@ define(['jquery', 'GraphicEngine', 'three', 'lib/threeExt', 'Panoramic', 'Dispat
                              }
                           
                           }
-                    }
+                    }*/
                     
+                    this.createTile(lon, lat, 0, 0, LODs.SECOND);
            
                 };
                 
