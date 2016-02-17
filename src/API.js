@@ -7,7 +7,6 @@
 
 define("API",['jquery', 'GraphicEngine', 'Navigation', 'MeshManager', 'Panoramic', 'LaserCloud', 'Measure', 'Dispatcher', 'Cartography', 'Cartography3D', 'Config'],
         function($, gfxEngine, Navigation, MeshManager, Panoramic,   LaserCloud,   Measure,   Dispatcher, Cartography, Cartography3D, Config){
-    
 
          API = function(options){
              

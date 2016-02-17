@@ -6,8 +6,8 @@
 		* and its projective camera information.
 		*/
 
-		define (['GraphicEngine','three','Ori','Shader', 'PanoramicProvider','url'],
-			function (graphicEngine, THREE, Ori, Shader, PanoramicProvider,url) {
+		define (['GraphicEngine','three','Ori','Shader', 'PanoramicProvider','url','string_format'],
+			function (graphicEngine, THREE, Ori, Shader, PanoramicProvider, url, string_format) {
 
 				window.requestAnimSelectionAlpha = (function(){
                          return  window.requestAnimationFrame || 
@@ -152,8 +152,10 @@
 									_shaderMat.uniforms.mask.value[m] = tex; 
 								}, m);
 							}
-							var panoUrl = PanoramicProvider.getUrlImageFile().replace("{cam}",Ori.sensors[i].infos.cam).replace("{pano}",panoInfo.pano);
-  						this.loadTexture(panoUrl, function(tex,i) { 	
+							var infos = {};
+							//Object.assign(infos,Ori.sensors[i].infos, panoInfo);
+							var panoUrl = PanoramicProvider.getUrlImageFile().format(infos);
+							this.loadTexture(panoUrl, function(tex,i) { 	
 								_shaderMat.uniforms.texture.value[i] = tex;
 							}, i);
 						}
@@ -179,7 +181,9 @@
             		},
 	         		// Load an Image(html) then use it as a texture. Wait loading before passing to the shader to avoid black effect
 	         		chargeOneImageCam: function (panoInfo,translation,rotation,i){
-								var panoUrl = PanoramicProvider.getUrlImageFile().replace("{cam}",Ori.sensors[i].infos.cam).replace("{pano}",panoInfo.pano);
+							var infos = {};
+							//Object.assign(infos,Ori.sensors[i].infos, panoInfo);
+							var panoUrl = PanoramicProvider.getUrlImageFile().format(infos);
 								var that = this;
 								this.loadTexture(panoUrl, function(tex) { 	
 										var mat = Ori.getMatrix(i).clone();
