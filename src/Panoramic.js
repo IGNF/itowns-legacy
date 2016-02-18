@@ -18,7 +18,7 @@ define (['three', 'Ori','MeshManager', 'PanoramicProvider', 'lib/when', 'Navigat
     _initiated = false,
     _visibility = true,
     _panoInfo = {
-        pano:'',
+        id:'',
         easting:0,
         northing:0,
         altitude:0,
@@ -68,7 +68,7 @@ define (['three', 'Ori','MeshManager', 'PanoramicProvider', 'lib/when', 'Navigat
                  
             }
             else {
-                 console.log("Panoramic module is initiated");
+                 console.log("Waiting for Ori module initiation");
                  setTimeout(Panoramic.testInitOri, 300);  // !! scope
             }
         },
@@ -76,7 +76,7 @@ define (['three', 'Ori','MeshManager', 'PanoramicProvider', 'lib/when', 'Navigat
         
         setInfos: function(url,infos){
             _url = url || '';
-            _panoInfo.pano = infos.pano || '';
+            _panoInfo.id = infos.id || '';
             _panoInfo.easting = parseFloat(infos.easting) || 0;
             _panoInfo.northing = parseFloat(infos.northing) || 0;                            
             _panoInfo.altitude = parseFloat(infos.altitude) || 0;

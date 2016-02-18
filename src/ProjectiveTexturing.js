@@ -81,12 +81,15 @@
 						return P;
 					},
 					
-					loadTexture: function(src,onload,data){
-	          var img = new Image(); 
-	          img.crossOrigin = 'anonymous';
-	          img.onload = function () { 	
-	          	var tex = new THREE.Texture(this,THREE.UVMapping, 
-	          		THREE.RepeatWrapping, THREE.RepeatWrapping, THREE.LinearFilter,THREE.LinearFilter,THREE.RGBFormat);
+					loadTexture: function(src,infos,onload,data){
+						console.log(src);
+						src = src.format(infos);
+						console.log(src);
+						var img = new Image(); 
+						img.crossOrigin = 'anonymous';
+						img.onload = function () { 	
+							var tex = new THREE.Texture(this,THREE.UVMapping, 
+								THREE.RepeatWrapping, THREE.RepeatWrapping, THREE.LinearFilter,THREE.LinearFilter,THREE.RGBFormat);
 							tex.needsUpdate = true;
 							tex.flipY = false;
 							onload(tex,data);
@@ -148,14 +151,13 @@
 						for (var i=0; i<N; ++i) {
 							var m= idmask[i];
 							if(m>=0) {
-								this.loadTexture(Ori.getMask(i), function(tex,m) { 	
+								this.loadTexture(Ori.getMask(i), {}, function(tex,m) { 	
 									_shaderMat.uniforms.mask.value[m] = tex; 
 								}, m);
 							}
-							var infos = {};
-							//Object.assign(infos,Ori.sensors[i].infos, panoInfo);
-							var panoUrl = PanoramicProvider.getUrlImageFile().format(infos);
-							this.loadTexture(panoUrl, function(tex,i) { 	
+							var infos = {cam:Ori.sensors[i].infos,pano:panoInfo};
+							console.log(infos);
+							this.loadTexture(PanoramicProvider.getUrlImageFile(), infos, function(tex,i) { 	
 								_shaderMat.uniforms.texture.value[i] = tex;
 							}, i);
 						}
@@ -181,23 +183,21 @@
             		},
 	         		// Load an Image(html) then use it as a texture. Wait loading before passing to the shader to avoid black effect
 	         		chargeOneImageCam: function (panoInfo,translation,rotation,i){
-							var infos = {};
-							//Object.assign(infos,Ori.sensors[i].infos, panoInfo);
-							var panoUrl = PanoramicProvider.getUrlImageFile().format(infos);
-								var that = this;
-								this.loadTexture(panoUrl, function(tex) { 	
-										var mat = Ori.getMatrix(i).clone();
-										var mvpp = (new THREE.Matrix3().multiplyMatrices( rotation,mat )).transpose();
-	            			var trans = Ori.getSommet(i).clone().applyMatrix3(rotation);
-	            			var j = i + that.nbImages();
-	            			if(j<_shaderMat.uniforms.mvpp.value.length) {
-											_shaderMat.uniforms.mvpp.value[j] = _shaderMat.uniforms.mvpp.value[i];
-											_shaderMat.uniforms.translation.value[j] = _shaderMat.uniforms.translation.value[i];
-											_shaderMat.uniforms.texture.value[j] =_shaderMat.uniforms.texture.value[i];
-											_shaderMat.uniforms.alpha.value[j] = _alpha;
-											_shaderMat.uniforms.alpha.value[i] = 0;
-											that.tweenIndiceTime(i);
-										}
+					var that = this;
+					var infos = {cam:Ori.sensors[i].infos,pano:panoInfo};
+					this.loadTexture(PanoramicProvider.getUrlImageFile(), infos, function(tex) { 	
+						var mat = Ori.getMatrix(i).clone();
+						var mvpp = (new THREE.Matrix3().multiplyMatrices( rotation,mat )).transpose();
+		            			var trans = Ori.getSommet(i).clone().applyMatrix3(rotation);
+		            			var j = i + that.nbImages();
+	        	    			if(j<_shaderMat.uniforms.mvpp.value.length) {
+							_shaderMat.uniforms.mvpp.value[j] = _shaderMat.uniforms.mvpp.value[i];
+							_shaderMat.uniforms.translation.value[j] = _shaderMat.uniforms.translation.value[i];
+							_shaderMat.uniforms.texture.value[j] =_shaderMat.uniforms.texture.value[i];
+							_shaderMat.uniforms.alpha.value[j] = _alpha;
+							_shaderMat.uniforms.alpha.value[i] = 0;
+							that.tweenIndiceTime(i);
+						}
 
 	            			_shaderMat.uniforms.mvpp.value[i] = mvpp;
 	            			_shaderMat.uniforms.translation.value[i] = translation.clone().add(trans);
