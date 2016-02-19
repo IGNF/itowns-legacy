@@ -37,7 +37,7 @@ define(['jquery', 'GraphicEngine', 'three','Panoramic', 'Dispatcher',  'Draw', '
         init: function() {
 
             console.log('Measure initiated');
-            _posCurrent = Panoramic.getPanoPos();
+            _posCurrent = Panoramic.getPosition();
             _tabMeasures = [];
             this.showUserMeasures();
             Dispatcher.register("MOVE", Measure);
@@ -47,7 +47,7 @@ define(['jquery', 'GraphicEngine', 'three','Panoramic', 'Dispatcher',  'Draw', '
         
        updateMeasureAroundPosition: function(){
                            
-             var newPos = Panoramic.getPanoPos();
+             var newPos = Panoramic.getPosition();
              var dist = newPos.distanceTo(_posCurrent);                 
              if(dist > _RAY_SEARCH){  // We remove existing measures and load new ones
                   Draw.removeAllMeasures();
@@ -63,7 +63,7 @@ define(['jquery', 'GraphicEngine', 'three','Panoramic', 'Dispatcher',  'Draw', '
         showUserMeasures: function(){
            //console.log('show user measures',$("#connected"));
             if ($("#connected").length==1){ console.log('user is connected');  // Test if user is connected
-                var currentPanoInfos = Panoramic.getPanoInfos();
+                var currentPanoInfos = Panoramic.getInfos();
                 var params = "easting="+currentPanoInfos.easting+"&northing="+currentPanoInfos.northing+"&ray="+_RAY_SEARCH;
                 $.getJSON("php/getUserInputs.php?"+params, function(data){
                     _measures = data; console.log(data);

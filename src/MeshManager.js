@@ -1,7 +1,7 @@
 
 
-    define (['GraphicEngine','jquery', 'three','Utils','ProjectiveTexturing','Ori','TileTexture','Draw','CVML','Cartography'],
-        function(gfxEngine, $, THREE, Utils,  ProjectiveTexturing, Ori, TileTexture, Draw, CVML,Cartography) {
+    define (['GraphicEngine','jquery', 'three','Utils','ProjectiveTexturing','Ori','TileTexture','Draw','CVML','Cartography','string_format'],
+        function(gfxEngine, $, THREE, Utils,  ProjectiveTexturing, Ori, TileTexture, Draw, CVML, Cartography, string_format) {
 
 
 
@@ -41,8 +41,7 @@
            _tabMapMesh = [],
            _roadOn = true,
            
-           _urlBuildingFootprint = '',
-           _urlDTM =''
+           _options = {}
 
 
         var Manager = {
@@ -50,15 +49,14 @@
             panoInfo:null,
             skyBox:null,  // Optional skybox while not at Camera original position
              
-            init : function (info, options) {
+            init : function (options) {
                   
-                _urlBuildingFootprint   = options.buildingFootprints;
-                _urlDTM                 = options.DTM;
+                _options = options;
                 
                 if(gfxEngine.isMobileEnvironment()) _radius = 100;
-                this.panoInfo           = info;
-                _rgeCurrentPositionE    = info.easting;
-                _rgeCurrentPositionN    = info.northing;
+                this.panoInfo           = options.pano;
+                _rgeCurrentPositionE    = options.pano.easting;
+                _rgeCurrentPositionN    = options.pano.northing;
                 _rgeLastPositionE       = _rgeCurrentPositionE;
                 _rgeLastPositionN       = _rgeCurrentPositionN;
                 
@@ -122,17 +120,14 @@
             */
            searchPolygonBatiAround: function(easting, northing ,radius){
                var that= this;
-               /*
-               var options = {
-                    bottomLeft : new THREE.Vector2(easting - radius, northing - radius),
-                    topRight   : new THREE.Vector2(easting + radius, northing + radius),
-                    key        : "72hpsel8j8nhb5qgdh07gcyp",
-                    service    : "service=WFS&version=2.0.0&REQUEST=GetFeature&typeName=BDTOPO_BDD_WLD_WGS84G:bati_remarquable,BDTOPO_BDD_WLD_WGS84G:bati_indifferencie"
-				}
-                    
-                var url = " http://wxs.ign.fr/{key}/geoportail/wfs?{service}&srsName=EPSG:2154&bbox={bottomLeft.x},{bottomLeft.y},{topRight.x},{topRight.y},EPSG:2154&outputFormat=json";
-                */
-               url = _urlBuildingFootprint;
+               _options.bottomLeft = new THREE.Vector2(easting - radius, northing - radius);
+               _options.topRight   = new THREE.Vector2(easting + radius, northing + radius);
+              // _options.key        = "72hpsel8j8nhb5qgdh07gcyp";
+              // _options.service    = "service=WFS&version=2.0.0&REQUEST=GetFeature&typeName=BDTOPO_BDD_WLD_WGS84G:bati_remarquable,BDTOPO_BDD_WLD_WGS84G:bati_indifferencie";
+			  // _options.buildings = " http://wxs.ign.fr/{key}/geoportail/wfs?{service}&srsName=EPSG:2154&bbox={bottomLeft.x},{bottomLeft.y},{topRight.x},{topRight.y},EPSG:2154&outputFormat=json";
+
+               var url = _options.buildings.format(_options);
+               console.log(url);
                $.getJSON(url, function (data){ that.createGeometry3DfromPoly(data,true); });
           },
           
@@ -440,7 +435,7 @@
                                         this.panoInfo.roll
                                     );
 
-                    ProjectiveTexturing.init();
+                    ProjectiveTexturing.init(_options);
                     _projectiveMaterial = ProjectiveTexturing.createShaderMat(this.panoInfo,matRotation);
                     mesh.material = _projectiveMaterial;
                     mesh.material.side = THREE.DoubleSide;  
@@ -471,91 +466,13 @@
                     
             },
                
-               
-               
-            // Simple cube geometry for a fast texturing while no RGE (or not yet loaded)
-            initGeometryWithCube: function(matRot){
-               
-                var heightCamOnTruck = 2;
-                var alti = this.panoInfo.altitude - gfxEngine.getZeroAsVec3D().y - heightCamOnTruck;
-                _geometry = new THREE.Geometry();
-               
-     //****** Let s add a road
-                var centerTruckX = this.panoInfo.easting  - gfxEngine.getZeroAsVec3D().x;
-                var centerTruckY = this.panoInfo.altitude - gfxEngine.getZeroAsVec3D().y;
-                var centerTruckZ = this.panoInfo.northing - gfxEngine.getZeroAsVec3D().z;
-               
-                var roadLength = 500
-                _geometry.vertices.push(new THREE.Vector3(centerTruckX-roadLength,alti,centerTruckX-roadLength),
-                    new THREE.Vector3(centerTruckX-roadLength,alti,centerTruckX+roadLength),
-                    new THREE.Vector3(centerTruckX+roadLength,alti,centerTruckX+ roadLength),
-                    new THREE.Vector3(centerTruckX+roadLength,alti,centerTruckX-roadLength)
-                );
-              var len = _geometry.vertices.length;
-                _geometry.faces.push( new THREE.Face4( len-4,len-3,len-2,len-1) );//new THREE.Face4( len-1,len-2,len-3,len-4) );
-
-    //**** CUBE   Let s add a big cube around position so we are sure to texture everywhere around the cameras
-                var cubeSize = 5000; // Coordinate from panoramic cam center and cube edges (in 2D) Half
-                var a,b,c,d,e,f,g,h;
-                a = new THREE.Vector3(centerTruckX-cubeSize,centerTruckY-cubeSize,centerTruckZ-cubeSize);
-                b = new THREE.Vector3(centerTruckX-cubeSize,centerTruckY+cubeSize,centerTruckZ-cubeSize);
-                c = new THREE.Vector3(centerTruckX+cubeSize,centerTruckY+cubeSize,centerTruckZ-cubeSize);
-                d = new THREE.Vector3(centerTruckX+cubeSize,centerTruckY-cubeSize,centerTruckZ-cubeSize);
-                e = new THREE.Vector3(centerTruckX-cubeSize,centerTruckY+cubeSize,centerTruckZ+cubeSize);
-                f = new THREE.Vector3(centerTruckX+cubeSize,centerTruckY+cubeSize,centerTruckZ+cubeSize);
-                g = new THREE.Vector3(centerTruckX+cubeSize,centerTruckY-cubeSize,centerTruckZ+cubeSize);
-                h = new THREE.Vector3(centerTruckX-cubeSize,centerTruckY-cubeSize,centerTruckZ+cubeSize);
-                _geometry.vertices.push(a,b,c,d,e,f,g,h);
-                len = _geometry.vertices.length;
-                _geometry.faces.push( new THREE.Face4( len-1,len-2,len-3,len-4) );
-                _geometry.faces.push( new THREE.Face4( len-6,len-3,len-2,len-5) );
-                _geometry.faces.push( new THREE.Face4( len-8,len-7,len-6,len-5) );
-                _geometry.faces.push( new THREE.Face4( len-8,len-7,len-4,len-1) );
-                _geometry.faces.push( new THREE.Face4( len-7,len-6,len-3,len-4) );
-                _geometry.faces.push( new THREE.Face4( len-8,len-5,len-2,len-1) );
-    //***********************************************************************************************************            
-
-                _geometry.computeFaceNormals();  // WARNING : VERY IMPORTANT WHILE WORKING WITH RAY CASTING ON CUSTOM MESH
-               
-               
-                 if(!ProjectiveTexturing.isInitiated()){
-
-                    var mat = new THREE.MeshBasicMaterial({color:0xff00ff});
-                    var mesh  = new THREE.Mesh(_geometry,mat);
-                    mat.side = THREE.DoubleSide;
-                    mesh.name = "RGE";
-                    _currentObject = mesh;
-
-                    ProjectiveTexturing.init();
-                    _projectiveMaterial = ProjectiveTexturing.createShaderMat(this.panoInfo.filename,50);
-                    mesh.material = _projectiveMaterial;
-                    mesh.material.side = THREE.DoubleSide;  // SEE IF BETTER TO HAVE ANOTHER MESH (CLONE) TO TEXTURE SIMPLE SIDE
-                    mesh.material.transparent = true;
-                    mesh.visible = _visibility;  
-                    gfxEngine.addToScene(_currentObject);
-
-                }else {
-                    //remove older rge in scene
-                    gfxEngine.removeFromScene(_currentObject);  console.log('remove old mesh');
-                    var mesh  = new THREE.Mesh(_geometry, _projectiveMaterial);
-                    mesh.material.side = THREE.DoubleSide;  // SEE IF BETTER TO HAVE ANOTHER MESH (CLONE) TO TEXTURE SIMPLE SIDE
-                    mesh.material.transparent = true;
-                    mesh.name = "RGE";
-                    mesh.visible = _visibility;
-                    _currentObject = mesh;
-                    gfxEngine.addToScene(_currentObject);
-                }
-                 
-     
-             },
-             
        
        //**************************************************** DTM **************************************
        
             getDTMFromTrajectory: function(){
                 var that = this;
-                var urlRequest = _urlDTM; // format({ easting : this.panoInfo.easting, northing:this.panoInfo.northing, radius:_radius});
-                $.getJSON(urlRequest, function (data){
+                var url = _options.DTM; // format({ easting : this.panoInfo.easting, northing:this.panoInfo.northing, radius:_radius});
+                $.getJSON(url, function (data){
                         that.createDTMFromTrajectory(data,that.panoInfo);
                     });
             },

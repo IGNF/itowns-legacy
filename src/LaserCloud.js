@@ -4,8 +4,8 @@
  * @class Manages laser data
  * @require THREE.JS
  */
-define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher', 'Cartography','Draw',  'CVML','Utils', 'LasReader'],
-    function($, gfxEngine, THREE, Shader, Panoramic, Dispatcher, Cartography, Draw, CVML, Utils, LasReader) {
+define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher', 'Cartography', 'Draw',  'CVML','Utils', 'LasReader', 'string_format'],
+    function($, gfxEngine, THREE, Shader, Panoramic, Dispatcher, Cartography, Draw, CVML, Utils, LasReader, string_format) {
 
     var _particleSystem = null,
         _particleSystemPicking = null,
@@ -13,7 +13,6 @@ define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher',
         _geometryParticleSystemPicking = new THREE.Geometry(), // sused for the texture rendering for picking
         //_colors = [],
         _colorsPicking = [],
-        _url = null,
         _sceneRTT, // Maybe displace to GE
         _rtTexture = null, //new THREE.WebGLRenderTarget( 1000,800),//gfxEngine.getWinWith(), gfxEngine.getWinHeight(),{ minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat }), // Maybe displace to GE
         _zeroEasting, _zeroNorthing, _zeroAltitude, // initialInfo.easting ...
@@ -50,7 +49,8 @@ define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher',
         _newBufferPosition= null,
         _globalOffset = 0,  //TEMP
         _globalOffsetByte = 0,
-        _gl = null;
+        _gl = null,
+        _options = {};
         // EVENT MANAGEMENT
         //*************************************
            
@@ -58,8 +58,8 @@ define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher',
     _events = {
         MOVE: function() {
             _notLoaded = true;
-            if(_particleSystem.visible && !_localMode)
-                LaserCloud.launchLaserAroundCurrentTime(10);
+            if(_particleSystem.visible)
+                LaserCloud.launchLaserAroundCurrentTime(_options);
                 
                 //LaserCloud.showUserMeasures();
         },
@@ -112,9 +112,9 @@ define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher',
             
         init: function(zero,options) {
 
+			_options = options;
             _currentLaserPivot = options.offset;
             _zero = zero;
-            _url = options.url;
             _rtTexture = new THREE.WebGLRenderTarget(gfxEngine.getWinWith(), gfxEngine.getWinHeight());
             this.initiated = true;
             this.initializeBufferGeometry();
@@ -1415,7 +1415,7 @@ define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher',
                             }  
                     }  
             }
-            xhr.open("GET", _url + fileName, true);//, "login", "pass");  //98_88.bin
+            xhr.open("GET", fileName, true);//, "login", "pass");  //98_88.bin
             xhr.responseType = 'arraybuffer';
             xhr.send(null);	
        },
@@ -1446,8 +1446,7 @@ define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher',
                 }
             }
             
-            var urlRequest = _url + fileName;
-            xhr.open("GET", urlRequest, true);//,  "login", "pass");  //98_88.bin
+            xhr.open("GET", fileName, true);//,  "login", "pass");  //98_88.bin
             xhr.responseType = 'arraybuffer';
             xhr.send(null);
         },
@@ -1477,7 +1476,7 @@ define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher',
                     }
                 }
             }
-            xhr.open("GET", _url + fileName, true);
+            xhr.open("GET", fileName, true);
             xhr.responseType = 'arraybuffer';
             xhr.send(null);
         },
@@ -1501,59 +1500,32 @@ define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher',
             //_bufferGeometry.attributes.position.array = new Float32Array(_nbPointsBuffer * 3);
             this.updateLaserAttributes();
         },
-       
-       
+			
         // MAIN LOADING FUNCTION
-        launchLaserAroundCurrentTime: function(duration) {
-            
+        launchLaserAroundCurrentTime: function() {
             _notLoaded = false;   // Means if no movement we won t have to load again when visibility gets back on
-            var date = Panoramic.getYYMMDD();
-            var seconds = Panoramic.getPanoHours()*3600+Panoramic.getPanoSecondsInHour();
-            var decalageUTC = Panoramic.getDecalageUTC();
-            this.launchLaserNewRieglLOD(date,seconds - decalageUTC,duration/6);
-        },
+            var options = _options;
+            options.lods = options.lods || [undefined];
+            options.images = Panoramic.getInfos();            
+            this.launchLaserNewRiegl(options);
+        },																					
         
-        //Test with riegl360
-        launchLaserNewRiegl: function(date,hours,seconds,duration){
-
-           // duration /=2;
-            var decalage = 3;
-            var zero = gfxEngine.getZero();
-            
-            //this.tabLaserFilesToLoad = [];
-            var second = hours * 3600 + seconds + decalage;
-            for(var i = parseInt(second - duration/2) * 10 ; i< parseInt(second + duration/2) * 10 ; ++i){
-
-                var fileName = date+"/"+i+".bin";
-                if(($.inArray(fileName, this.tabLaserFilesToLoad)=== -1)) 
-                     this.tabLaserFilesToLoad.push(fileName);
-            }
-            this.readLaserPointsFileFromItownsGeneric(this.tabLaserFilesToLoad[this.indiceLaserFileLoaded],32,
-                                                                                  {x:zero.x - _currentLaserPivot.x,
-                                                                                   y:zero.y - _currentLaserPivot.y,
-                                                                                   z:zero.z - _currentLaserPivot.z});
-        },
-        
-           
-        // Test with riegl360 with 2 level of definitions
-        launchLaserNewRieglLOD: function(date,seconds,duration){
-
-			var lods = ["LR","HR"];
-            var zero = gfxEngine.getZero();
-            var fileNameMin="", fileNameMax="";
-            
+        launchLaserNewRiegl: function(options){			
             // Empty files to load (temp)
             this.tabLaserFilesToLoad = [];
             this.indiceLaserFileLoaded = 0;
+            var id_backup = options.id;
+            var id = options.id();
     
-            //LR
-            for(var lod in lods){
-			  for(var i = 0 ; i< 1 * duration  ; i+=0.1){
-                
-                var nummin = (seconds - i) * 10;
-                var nummax = (seconds + i) * 10;
-                fileNameMin = date+"/"+lods[lod]+"/"+nummin+".bin";
-                fileNameMax = date+"/"+lods[lod]+"/"+nummax+".bin";
+		    for(var l = 0 ; l < options.lods.length  ; ++l){
+              options.lod = options.lods[l];
+              
+			  for(var i = 0 ; i< options.delta  ; ++i){
+                options.id = id - i;
+                var fileNameMin = options.url.format(options);
+
+                options.id = id + i;
+                var fileNameMax = options.url.format(options);
                 
                 var posMin = $.inArray(fileNameMin, this.tabLaserFilesToLoad);
                 var posMax = $.inArray(fileNameMax, this.tabLaserFilesToLoad);
@@ -1564,13 +1536,12 @@ define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher',
                      this.tabLaserFilesToLoad.push(fileNameMax);
               }
 			}
-           
-            //  console.log(this.tabLaserFilesToLoad);
-            if(this.indiceLaserFileLoaded < this.tabLaserFilesToLoad.length)
-                 this.readLaserPointsFileFromItownsGeneric(this.tabLaserFilesToLoad[this.indiceLaserFileLoaded],32,
-                                                                                  {x:zero.x - _currentLaserPivot.x,
-                                                                                   y:zero.y - _currentLaserPivot.y,
-                                                                                   z:zero.z - _currentLaserPivot.z});
+			options.id = id_backup;
+
+            var zero = gfxEngine.getZero();
+            var v = {x:zero.x - _currentLaserPivot.x, y:zero.y - _currentLaserPivot.y, z:zero.z - _currentLaserPivot.z}
+            
+            this.readLaserPointsFileFromItownsGeneric(this.tabLaserFilesToLoad[0],options.bitsPerAttribute,v);
           
         },
              
@@ -1700,8 +1671,10 @@ define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher',
                 _particleSystem.visible = !_particleSystem.visible;
         },
         setVisibility: function(b) {		
-            if (this.initiated)
+            if (this.initiated) {
                 _particleSystem.visible = !!b;
+                if(b && this.getNotLoaded) LaserCloud.launchLaserAroundCurrentTime(_options);
+			}
         },
         changeAlpha: function(val) {
             if (this.initiated)
@@ -2604,8 +2577,8 @@ define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher',
 
             _nbLabel++;
             
-            _currentClassEditing = 0;//require('GUI').getCurrentClassEditing();
-            _idSurface = 0;//require('GUI').getIdFromFR("surface");
+            _currentClassEditing = 0;
+            _idSurface = 0;
             
             this.changeRepere(ptA, ptB, ptC, ptD, alpha);
             this.nbPointsInBB = 0;
@@ -2711,16 +2684,6 @@ define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher',
         setFilterSurface: function(filterBool){
             _filterFacadeAndGround = filterBool;
             console.log(filterBool);
-        },
-
-        // Cartography conversion
-        convert: function(x1, y1) {
-
-            var p1 = Cartography.convertCoord({x: x1, y: y1}, "EPSG:27561", "EPSG:2154");
-            //var currentPosGeom = new OpenLayers.Geometry.Point(_currentPos.easting, _currentPos.northing);                    
-            // converting from lambert93 to viewer srs
-            //currentPosGeom = currentPosGeom.transform(new OpenLayers.Projection("EPSG:2154"), _viewer.getMap().getProjectionObject());
-            //console.log(p1.x,p1.y);
         },
         
         pairWiseRegistration: function() {

@@ -23,14 +23,13 @@
 				var _shaderMat = null;
 				var _initiated = false;
 				var _alpha = 1;
-				var _targetNbPanoramics;
-				var _withMask = true;
-				var _withDistortion = true;
+				var _infos = {};
 
 				var ProjectiveTexturing = {
 					
-					init: function(targetNbPanoramics){
-						_targetNbPanoramics = targetNbPanoramics || 2;
+					init: function(infos){
+						_infos = infos;
+						_infos.targetNbPanoramics = _infos.targetNbPanoramics || 2;
 						_initiated = true;
 					},
 					
@@ -57,7 +56,7 @@
 					},
 					
 					nbMasks: function(){
-						if(!_withMask) return 0;
+						if(!_infos.noMask) return 0;
 						var count = 0;
 						for (var i=0; i<this.nbImages(); ++i)
 							if(Ori.getMask(i)) ++count;
@@ -72,10 +71,10 @@
 						var maxVaryingVec = gl.getParameter(gl.MAX_VARYING_VECTORS);
 						var maxTextureImageUnits = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
 						var maxNbPanoramics = Math.floor(Math.min(maxVaryingVec,(maxTextureImageUnits-M))/N);
-						var P = Math.min(_targetNbPanoramics,maxNbPanoramics);
+						var P = Math.min(_infos.targetNbPanoramics,maxNbPanoramics);
 						console.log("Masks : ", M);
 						console.log("Images per panoramic  : ", N );
-						console.log("Panoramics : ", P ," displayed /",_targetNbPanoramics, " targeted");
+						console.log("Panoramics : ", P ," displayed /",_infos.targetNbPanoramics, " targeted");
 						console.log("Varyings : ", (N*P) ," used /",maxVaryingVec, " available");
 						console.log("Texture units : ", (M+N*P) ," used /",maxTextureImageUnits," available");
 						return P;
@@ -116,12 +115,12 @@
 							var mvpp = (new THREE.Matrix3().multiplyMatrices(rot,mat)).transpose();
 							var trans = Ori.getSommet(i).clone().applyMatrix3(rot);
 							var m = -1;
-							if(_withMask && Ori.getMask(i)) {
+							if(!_infos.noMask && Ori.getMask(i)) {
 								m = uniforms.mask.value.length;
 								uniforms.mask.value[m] = null;
 							}
 							var d = -1;
-							if(_withDistortion && Ori.getDistortion(i)) {
+							if(!_infos.noDistortion && Ori.getDistortion(i)) {
 								d = uniforms.distortion.value.length;
 								uniforms.distortion.value[d] = Ori.getDistortion(i);
 								uniforms.pps.value[d] = Ori.getPPS(i);
@@ -146,16 +145,19 @@
           		transparent:true
           	});
 
+						_infos.pano = panoInfo;
 						for (var i=0; i<N; ++i) {
+							_infos.cam  = Ori.sensors[i].infos;
 							var m= idmask[i];
 							if(m>=0) {
 								this.loadTexture(Ori.getMask(i), {}, function(tex,m) { 	
 									_shaderMat.uniforms.mask.value[m] = tex; 
+									console.log("mask loaded");
 								}, m);
 							}
-							var infos = {cam:Ori.sensors[i].infos,pano:panoInfo};
-							this.loadTexture(PanoramicProvider.getUrlImageFile(), infos, function(tex,i) { 	
+							this.loadTexture(_infos.url, _infos, function(tex,i) { 	
 								_shaderMat.uniforms.texture.value[i] = tex;
+									console.log("texture loaded");
 							}, i);
 						}
             return _shaderMat;
@@ -181,8 +183,9 @@
 	         		// Load an Image(html) then use it as a texture. Wait loading before passing to the shader to avoid black effect
 	         		chargeOneImageCam: function (panoInfo,translation,rotation,i){
 					var that = this;
-					var infos = {cam:Ori.sensors[i].infos,pano:panoInfo};
-					this.loadTexture(PanoramicProvider.getUrlImageFile(), infos, function(tex) { 	
+					_infos.cam = Ori.sensors[i].infos;
+					_infos.pano = panoInfo;
+					this.loadTexture(_infos.url, _infos, function(tex) { 	
 						var mat = Ori.getMatrix(i).clone();
 						var mvpp = (new THREE.Matrix3().multiplyMatrices( rotation,mat )).transpose();
 		            			var trans = Ori.getSommet(i).clone().applyMatrix3(rotation);

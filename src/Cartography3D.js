@@ -932,11 +932,13 @@ define(['jquery', 'GraphicEngine', 'three', 'lib/threeExt', 'Panoramic', 'Dispat
                                   this.createGMap();
                                   this.generateGrid();
                                  // this.generateSeeds();
-                                  gfxEngine.translateCameraSmoothly(-10001,100,0);   // Translate to 100 meters up
+                                  if(options.visible)
+									gfxEngine.translateCameraSmoothly(-10001,100,0);   // Translate to 100 meters up
                                   if(this.isDataAvailable(pos.add(this.zero))){ 
                                        this.loadDallesAroundPosition(pos,this.zero);
                                        this.setInitStatus(true);
                                   }    
+								  this.setVisibility(!!options.visible);
                             },
                             setActivatedCarte3D : function(v){
                                   this.carte3Dactivated = v;  

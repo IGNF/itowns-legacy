@@ -69,8 +69,7 @@ define("API",['jquery', 'GraphicEngine', 'Navigation', 'MeshManager', 'Panoramic
         
         // Get current pos
         API.prototype.getPanoramicPosition = function() {
-            var v = Panoramic.getPanoPos();
-            return {easting:v.x, northing:v.z, height:v.y};
+            return Panoramic.getPosition();
         };
         
         // Set where to look at just in plani, One angle from north, heading (same as yaw)
@@ -132,13 +131,13 @@ define("API",['jquery', 'GraphicEngine', 'Navigation', 'MeshManager', 'Panoramic
                 if(Panoramic.isInitiated()){  // PointCloud depends on pano info (time)
 					
                     if (LaserCloud.initiated) {
-                        LaserCloud.launchLaserAroundCurrentTime(10);
+                        LaserCloud.launchLaserAroundCurrentTime();
                         
                     } else if (LaserCloud.getNotLoaded()) {
                         Measure.init();
                         LaserCloud.init(gfxEngine.getZero(), options);
                         gfxEngine.addToScene(LaserCloud.laserCloudMaster);
-                        LaserCloud.launchLaserAroundCurrentTime(10);
+                        if(options.visible) LaserCloud.launchLaserAroundCurrentTime();
                     }
 
                     LaserCloud.setVisibility(options.visible);
@@ -149,10 +148,8 @@ define("API",['jquery', 'GraphicEngine', 'Navigation', 'MeshManager', 'Panoramic
             }
 
             if(layerName == "buildings"){
-                    if (!Cartography3D.isCartoInitialized()) {
+                    if (!Cartography3D.isCartoInitialized())
                         Cartography3D.initCarto3D(options);
-						Cartography3D.setVisibility(options.visible);
-                    }
             }
             
             if(layerName == "images"){

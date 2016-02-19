@@ -420,7 +420,7 @@ define(
                 if (MeshManager.getOrthoPhotoOn()) {
 
                     var layer = "ORTHOIMAGERY.ORTHOPHOTOS";//.PARIS";
-                    var info = Panoramic.getPanoInfos();
+                    var info = Panoramic.getInfos();
                     if (info.easting > 656000 || info.easting < 640000 || info.northing > 6869000 || info.northing < 6860000)
                         layer = "ORTHOIMAGERY.ORTHOPHOTOS";
 
