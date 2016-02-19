@@ -29,6 +29,7 @@
 					
 					init: function(infos){
 						_infos = infos;
+						_infos.lods = _infos.lods || [undefined];
 						_infos.targetNbPanoramics = _infos.targetNbPanoramics || 2;
 						_initiated = true;
 					},
@@ -146,23 +147,21 @@
           	});
 
 						_infos.pano = panoInfo;
+						_infos.lod = _infos.lods[0];
 						for (var i=0; i<N; ++i) {
 							_infos.cam  = Ori.sensors[i].infos;
 							var m= idmask[i];
 							if(m>=0) {
 								this.loadTexture(Ori.getMask(i), {}, function(tex,m) { 	
 									_shaderMat.uniforms.mask.value[m] = tex; 
-									console.log("mask loaded");
 								}, m);
 							}
 							this.loadTexture(_infos.url, _infos, function(tex,i) { 	
 								_shaderMat.uniforms.texture.value[i] = tex;
-									console.log("texture loaded");
 							}, i);
 						}
             return _shaderMat;
           },
-
 					tweenIndiceTime: function (i){
             			var alpha = _shaderMat.uniforms.alpha.value[i];
             			if(alpha<1){
@@ -176,21 +175,30 @@
            	 			}	
 					},
             		changePanoTextureAfterloading: function (panoInfo,translation,rotation){
-            			for (var i=0; i< Ori.sensors.length; ++i){            			
-            				this.chargeOneImageCam(panoInfo,translation,rotation,i);
-            			}
+						this.todo = [];
+						_infos.pano = panoInfo;
+						this.translation=translation;
+						this.rotation=rotation;
+            			for (var l=0; l< _infos.lods.length; ++l)
+							for (var i=0; i< Ori.sensors.length; ++i)
+								this.todo.push({l:l,i:i});
+            			this.chargeOneImageCam();
             		},
 	         		// Load an Image(html) then use it as a texture. Wait loading before passing to the shader to avoid black effect
-	         		chargeOneImageCam: function (panoInfo,translation,rotation,i){
+	         		chargeOneImageCam: function (){
+					if(this.todo.length==0) return;
+					var todo = this.todo.shift();
+					var i = todo.i;
+					var lod = todo.l;
 					var that = this;
-					_infos.cam = Ori.sensors[i].infos;
-					_infos.pano = panoInfo;
+					_infos.cam = Ori.sensors[todo.i].infos;
+					_infos.lod = _infos.lods[todo.l];
 					this.loadTexture(_infos.url, _infos, function(tex) { 	
 						var mat = Ori.getMatrix(i).clone();
-						var mvpp = (new THREE.Matrix3().multiplyMatrices( rotation,mat )).transpose();
-		            			var trans = Ori.getSommet(i).clone().applyMatrix3(rotation);
+						var mvpp = (new THREE.Matrix3().multiplyMatrices( that.rotation,mat )).transpose();
+		            			var trans = Ori.getSommet(i).clone().applyMatrix3(that.rotation);
 		            			var j = i + that.nbImages();
-	        	    			if(j<_shaderMat.uniforms.mvpp.value.length) {
+	        	    			if(lod == 0 && j<_shaderMat.uniforms.mvpp.value.length) {
 							_shaderMat.uniforms.mvpp.value[j] = _shaderMat.uniforms.mvpp.value[i];
 							_shaderMat.uniforms.translation.value[j] = _shaderMat.uniforms.translation.value[i];
 							_shaderMat.uniforms.texture.value[j] =_shaderMat.uniforms.texture.value[i];
@@ -199,11 +207,17 @@
 							that.tweenIndiceTime(i);
 						}
 
-	            			_shaderMat.uniforms.mvpp.value[i] = mvpp;
-	            			_shaderMat.uniforms.translation.value[i] = translation.clone().add(trans);
-	            			_shaderMat.uniforms.texture.value[i] = tex;
-									});
-								} 
+							_shaderMat.uniforms.mvpp.value[i] = mvpp;
+							_shaderMat.uniforms.translation.value[i] = that.translation.clone().add(trans);
+							_shaderMat.uniforms.texture.value[i] = tex;
+	            			if(lod==0) {
+								that.chargeOneImageCam();
+							} else {
+								setTimeout(function(){that.chargeOneImageCam();},500);
+							}
+						});
+					}
+						
 	            }
 	            return ProjectiveTexturing
 	        	}
