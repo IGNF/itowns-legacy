@@ -2,8 +2,8 @@
  * To manage Bati 3D layer
  * quocdinh dot nguyen at gmail dot com
  */
-define(['jquery', 'GraphicEngine', 'three', 'lib/threeExt', 'Panoramic', 'Dispatcher', 'Cartography','lib/3DSLoader', 'Shader','lib/B3DLoader','lib/DDSLoader','Draw', 'Utils', 'Config'],
-    function($, gfxEngine, THREE, THREEExt, Panoramic, Dispatcher, Cartography, DS3Loader, Shader, B3DLoader, DDSLoader, Draw, Utils, Config) {
+define(['jquery', 'GraphicEngine', 'three', 'lib/threeExt', 'Panoramic', 'Dispatcher', 'Cartography','lib/3DSLoader', 'Shader','lib/B3DLoader','lib/DDSLoader','Draw', 'Utils'],
+    function($, gfxEngine, THREE, THREEExt, Panoramic, Dispatcher, Cartography, DS3Loader, Shader, B3DLoader, DDSLoader, Draw, Utils) {
         
         
                
@@ -755,7 +755,7 @@ define(['jquery', 'GraphicEngine', 'three', 'lib/threeExt', 'Panoramic', 'Dispat
                                                  ymax : bbox.ymax*500 
                                                },
                             videoGamesOn        : false,    
-                            dataURL : Config.dataURL.defaultUrl3DBuilding,
+                            dataURL : "",
                             nbSeeds:5,
                             dateNow : null,
                             timeLapse: null,
@@ -920,9 +920,9 @@ define(['jquery', 'GraphicEngine', 'three', 'lib/threeExt', 'Panoramic', 'Dispat
                             },
                                    
                  
-                            initCarto3D : function(dataURL){
+                            initCarto3D : function(options){
                                   
-                                  this.dataURL = dataURL.url3DBuilding || Config.dataURL.defaultUrl3DBuilding;
+                                  this.dataURL = options.url;
                                   this.zero = gfxEngine.getZeroAsVec3D(); 
                                   this.textureType = gfxEngine.isMobileEnvironment() ? '.jpg' : '.dds'; console.log("this.textureType",this.textureType);
                                   _textureType = this.textureType;
@@ -938,12 +938,6 @@ define(['jquery', 'GraphicEngine', 'three', 'lib/threeExt', 'Panoramic', 'Dispat
                                        this.setInitStatus(true);
                                   }    
                             },
-                            
-                            /*
-                            initCarto3D : function(){
-                                 this.createQuadTreePlanet();
-                            },
-                            */
                             setActivatedCarte3D : function(v){
                                   this.carte3Dactivated = v;  
                                 //  this.setVisibility(v);

@@ -5,8 +5,8 @@
 
 
 
-    define (['GraphicEngine','jquery', 'Config', 'three','Utils','Ori','TileTexture','Draw','CVML','Cartography'],
-        function(gfxEngine, $, Config, THREE, Utils, Ori, TileTexture, Draw, CVML) {
+    define (['GraphicEngine','jquery', 'three','Utils','Ori','TileTexture','Draw','CVML','Cartography'],
+        function(gfxEngine, $, THREE, Utils, Ori, TileTexture, Draw, CVML) {
             
             
             

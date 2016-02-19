@@ -1,5 +1,5 @@
-define (['three', 'GraphicEngine', 'RequestManager', 'Config', 'Utils',  'Panoramic', 'PanoramicProvider', 'Dispatcher','ProjectiveTexturing','MeshManager', 'Ori', 'Draw', 'Cartography3D', 'lib/when'],
-function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicProvider, Dispatcher, ProjectiveTexturing, MeshManager,  Ori, Draw, Cartography3D, when)
+define (['three', 'GraphicEngine', 'Utils',  'Panoramic', 'PanoramicProvider', 'Dispatcher','ProjectiveTexturing','MeshManager', 'Ori', 'Draw', 'Cartography3D', 'lib/when'],
+function(THREE, gfxEngine,  Utils, Panoramic, PanoramicProvider, Dispatcher, ProjectiveTexturing, MeshManager,  Ori, Draw, Cartography3D, when)
 {
 
     //***************************** PRIVATE MEMBERS OF MODULE ************************************************/

@@ -1,5 +1,5 @@
-define(['three', 'jquery', 'Utils', 'Panoramic', 'Navigation','Config'],
-        function(THREE, $, Utils, Panoramic, Navigation,  Config) {
+define(['three', 'jquery', 'Utils', 'Panoramic', 'Navigation'],
+        function(THREE, $, Utils, Panoramic, Navigation) {
 
             //***************************** PRIVATE MEMBERS OF MODULE ************************************************/
 

@@ -5,89 +5,28 @@
  * @requires ThreeJS
  * 
  */ 
- define (['three', 'Utils', 'Config', 'jquery', 'lib/when'], function ( THREE, Utils, Config, $, when) {
+ define (['three', 'Utils', 'jquery', 'lib/when'], function ( THREE, Utils, $, when) {
     
         
-    var _urlMetaDataProviderPos = "",
-        _urlMetaDataProviderName = "",
-        _urlImageFile = "",
-        _urlMetaProviderSensor = "",
-        _currentMetaData = null,
-        _localModeProviderPos = false,
-        _localImages = false,
-        _localPanoramicsMetaData = null,
-        _localModeProviderSensor = false;
+    var _urlPano = "",
+        _urlImage = "",
+        _urlCam = "",
+        _panoramicsMetaData;
     
     
     var PanoramicProvider =  {
 
-        init: function(dataURL){
+        init: function(options){
             
-            _urlMetaDataProviderPos  = dataURL.urlMetaDataProviderPos  ||  Config.dataURL.defaultUrlMetaDataProviderPos;
-            _urlMetaDataProviderName = dataURL.urlMetaDataProviderName ||  Config.dataURL.defaultUrlMetaDataProviderName;
-            _urlImageFile            = dataURL.urlImageFile            ||  Config.dataURL.defaultUrlImageFile;
-            _urlMetaProviderSensor   = dataURL.urlMetaProviderSensor   ||  Config.dataURL.defaultUrlMetaProviderSensor;
-            
-            _localModeProviderPos    = _urlMetaDataProviderPos.indexOf("php") < 0;
-            _localImages             = _urlImageFile.indexOf("www") < 0;
-            _localModeProviderSensor = _urlMetaProviderSensor.indexOf("php") < 0;
+            _urlPano  = options.pano;
+            _urlImage = options.url;
+            _urlCam   = options.cam;
         },
-        
- 
-        
-        getMetaDataPHPFromPosRequest: function(easting, northing, distance){
-            
-            return _urlMetaDataProviderPos + "easting=" + easting +
-                     "&northing=" + northing + "&distneighbours=" + distance;
-             
-        },
-        
-        
-        getMetaDataPHPFromPosJSON: function(easting, northing, distance){
-            
-            var request = this.getMetaDataPHPFromPosRequest(easting, northing, distance);
-            $.getJSON( request, function( data ) {
-                _currentMetaData = data[0];  // We get the first (and only pano)
-                return _currentMetaData;
-            });
-           
-        },
-        
-        
-        
         
         getMetaDataFromPos: function(easting, northing, distance){
-            
-            if(!_localModeProviderPos){
-                var requestURL = this.getMetaDataPHPFromPosRequest(easting, northing, distance);
-
-                return new Promise(function(resolve, reject) {
-
-                  var req = new XMLHttpRequest();
-                  req.open('GET', requestURL);
-
-                  req.onload = function() {
-
-                        if (req.status === 200) {
-                          resolve(JSON.parse(req.response));//req.response);
-                        }
-                        else {
-                          reject(Error(req.statusText));
-                        }
-                  };
-
-                  req.onerror = function() {
-                        reject(Error("Network Error"));
-                  };
-
-                  req.send();
-                });
-            }
-            else{
+                if(!_panoramicsMetaData){
                   
-                if(_localPanoramicsMetaData === null){      // Local mode and not yet loaded
-                  
-                    var requestURL = _urlMetaDataProviderPos;    // local file/JSON
+                    var requestURL = _urlPano;    // TODO : string_format
                     return new Promise(function(resolve, reject) {
 
                       var req = new XMLHttpRequest();
@@ -97,7 +36,7 @@
 
                             if (req.status === 200) {
                                 
-                                _localPanoramicsMetaData = JSON.parse(req.response);
+                                _panoramicsMetaData = JSON.parse(req.response);
                                 var closestPano = PanoramicProvider.getClosestPanoInMemory(easting, northing, distance);
                                 resolve(closestPano);
                             }
@@ -118,8 +57,6 @@
                          var closestPano = PanoramicProvider.getClosestPanoInMemory(easting, northing, distance);
                          return new Promise(function(resolve, reject) {resolve(closestPano);});
                     }
-                
-            }
         },
         
         // USING MEMORISED TAB or JSON ORI
@@ -127,41 +64,21 @@
             
             var indiceClosest = 0;
             var distMin = 99999;
-            for (var i=0; i< _localPanoramicsMetaData.length; ++i){
+            for (var i=0; i< _panoramicsMetaData.length; ++i){
                 
-                var p = _localPanoramicsMetaData[i];
+                var p = _panoramicsMetaData[i];
                 var dist = Math.sqrt( (p.easting - easting) * (p.easting - easting) + (p.northing - northing) * (p.northing - northing) );
                 if(dist< distMin) {indiceClosest = i; distMin = dist;}
             }
-            return [_localPanoramicsMetaData[indiceClosest]];
+            return [_panoramicsMetaData[indiceClosest]];
         },
-        
         
         getUrlImageFile: function(){
-            
-            return _urlImageFile;
+            return _urlImage;
         },
         
-        getImageLocal: function(){
-          
-            return _localImages;
-        },
-        
-        // Return the full request depending if local mode or Database
-        getMetaDataSensorURL: function(idChantier){
-            
-            var urlRequest = ""
-            if(_localModeProviderSensor)
-                urlRequest = _urlMetaProviderSensor;
-            else
-                urlRequest = _urlMetaProviderSensor+"?idChantier="+idChantier;
-            
-            return urlRequest;
-        },
-        
-        getLocalModeProviderSensor: function(){
-            
-            return _localModeProviderSensor;
+        getMetaDataSensorURL: function(){
+            return _urlCam;
         }
         
     };

@@ -1,4 +1,4 @@
-define(['RequestManager'], function (RequestManager) {
+define(function () {
     
     /**
      * Tools used by iTOWNS modules

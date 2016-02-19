@@ -27,7 +27,7 @@ define (['three', 'Ori','MeshManager', 'PanoramicProvider', 'lib/when', 'Navigat
         roll:0,
         date:new Date()
     },
-    _dataURL = null,
+    _options = null,
     _decalageUTC = 15;
 
        
@@ -41,10 +41,9 @@ define (['three', 'Ori','MeshManager', 'PanoramicProvider', 'lib/when', 'Navigat
     
     var Panoramic =  {
   
-        init: function(pos, dataURL){
-            
-            _dataURL = dataURL;
-            PanoramicProvider.init(_dataURL);
+        init: function(pos, options){
+            _options = options;
+            PanoramicProvider.init(_options);
             var that = this;
             // Get info for initPosition from Data base
             PanoramicProvider.getMetaDataFromPos(pos.x, pos.z, 50).then(
@@ -64,7 +63,7 @@ define (['three', 'Ori','MeshManager', 'PanoramicProvider', 'lib/when', 'Navigat
        testInitOri: function() {
 
             if (Ori.initiated){
-                 MeshManager.init(_panoInfo, _dataURL);
+                 MeshManager.init(_panoInfo, _options);
                  
             }
             else {
@@ -228,10 +227,6 @@ define (['three', 'Ori','MeshManager', 'PanoramicProvider', 'lib/when', 'Navigat
         setDecalageUTC: function(decalageUTC){
             _decalageUTC = decalageUTC;
         },
-
-        setPanoInfos: function(panoInfos){
-            _panoInfo = panoInfos;
-        },
         
         setPosition: function(pos){
             _panoInfo.easting = pos.x;
@@ -240,8 +235,8 @@ define (['three', 'Ori','MeshManager', 'PanoramicProvider', 'lib/when', 'Navigat
         },
 
         setVisibility: function(b){
+			b = !!b;
             console.log('panoramic visibility: ',b)
-            if (b == null) b = true;
             _visibility = b;
             MeshManager.setVisibility(b);
             

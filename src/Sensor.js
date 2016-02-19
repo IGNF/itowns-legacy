@@ -1,8 +1,7 @@
 
 /**
 * @author AD IGN
-* Class where we get the Intrinseque parameters of the system. Camera (laser soon).
-* load configuration from DB (t_camera INNER JOIN tl_stereopolis_capteurs )
+* Class where we get the Intrinsic parameters of the system.
 */
 
 

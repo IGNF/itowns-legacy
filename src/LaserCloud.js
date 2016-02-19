@@ -4,8 +4,8 @@
  * @class Manages laser data
  * @require THREE.JS
  */
-define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher', 'Cartography','Draw',  'CVML','ProjectiveTexturing2','Utils', 'LasReader', 'Config'],
-    function($, gfxEngine, THREE, Shader, Panoramic, Dispatcher, Cartography, Draw, CVML, ProjectiveTexturing2, Utils, LasReader, Config) {
+define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher', 'Cartography','Draw',  'CVML','Utils', 'LasReader'],
+    function($, gfxEngine, THREE, Shader, Panoramic, Dispatcher, Cartography, Draw, CVML, Utils, LasReader) {
 
     var _particleSystem = null,
         _particleSystemPicking = null,
@@ -13,8 +13,7 @@ define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher',
         _geometryParticleSystemPicking = new THREE.Geometry(), // sused for the texture rendering for picking
         //_colors = [],
         _colorsPicking = [],
-        _dataURL = null,
-        _localURL = false,
+        _url = null,
         _sceneRTT, // Maybe displace to GE
         _rtTexture = null, //new THREE.WebGLRenderTarget( 1000,800),//gfxEngine.getWinWith(), gfxEngine.getWinHeight(),{ minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat }), // Maybe displace to GE
         _zeroEasting, _zeroNorthing, _zeroAltitude, // initialInfo.easting ...
@@ -111,13 +110,11 @@ define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher',
         annotationOn : false,
             
             
-        init: function(zero,dataURL,infos) {
+        init: function(zero,options) {
 
-            _currentLaserPivot = infos.offset;
+            _currentLaserPivot = options.offset;
             _zero = zero;
-            _dataURL = dataURL.urlPointCloud || Config.dataURL.defaultUrlPointCloud;
-            _localURL = _dataURL.indexOf("www") < 0;
-           // if(nbPointsBuffer) _nbPointsBuffer = nbPointsBuffer; 
+            _url = options.url;
             _rtTexture = new THREE.WebGLRenderTarget(gfxEngine.getWinWith(), gfxEngine.getWinHeight());
             this.initiated = true;
             this.initializeBufferGeometry();
@@ -1455,7 +1452,7 @@ define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher',
                             }  
                     }  
             }
-            xhr.open("GET", _dataURL + fileName, true);//, "login", "pass");  //98_88.bin
+            xhr.open("GET", _url + fileName, true);//, "login", "pass");  //98_88.bin
             xhr.responseType = 'arraybuffer';
             xhr.send(null);	
        },
@@ -1486,7 +1483,7 @@ define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher',
                 }
             }
             
-            var urlRequest = _localURL ? (_dataURL + fileName.substring(fileName.indexOf("/") + 1) ) : _dataURL + fileName;
+            var urlRequest = _url + fileName;
             xhr.open("GET", urlRequest, true);//,  "login", "pass");  //98_88.bin
             xhr.responseType = 'arraybuffer';
             xhr.send(null);
@@ -1517,7 +1514,7 @@ define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher',
                     }
                 }
             }
-            xhr.open("GET", _dataURL + fileName, true);//,  "login", "pass");  //98_88.bin
+            xhr.open("GET", _url + fileName, true);
             xhr.responseType = 'arraybuffer';
             xhr.send(null);
         },
@@ -1566,7 +1563,7 @@ define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher',
             var second = hours * 3600 + seconds + decalage;
             for(var i = parseInt(second - duration/2) * 10 ; i< parseInt(second + duration/2) * 10 ; ++i){
 
-                var fileName = "laserNewRiegl/"+date+"/"+i+".bin";
+                var fileName = date+"/"+i+".bin";
                 if(($.inArray(fileName, this.tabLaserFilesToLoad)=== -1)) 
                      this.tabLaserFilesToLoad.push(fileName);
             }
@@ -1597,8 +1594,8 @@ define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher',
                 
                 var nummin = (second - i) * 10;
                 var nummax = (second + i) * 10;
-                fileNameMin = "laserNewRiegl/"+date+"/LR/"+nummin+".bin";
-                fileNameMax = "laserNewRiegl/"+date+"/LR/"+nummax+".bin";
+                fileNameMin = date+"/LR/"+nummin+".bin";
+                fileNameMax = date+"/LR/"+nummax+".bin";
                 
                 var posMin = $.inArray(fileNameMin, this.tabLaserFilesToLoad);
                 var posMax = $.inArray(fileNameMax, this.tabLaserFilesToLoad);
@@ -1615,8 +1612,8 @@ define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher',
                 
                 var nummin = (second - i) * 10;
                 var nummax = (second + i) * 10;
-                fileNameMin = "laserNewRiegl/"+date+"/HR/"+nummin+".bin";
-                fileNameMax = "laserNewRiegl/"+date+"/HR/"+nummax+".bin";
+                fileNameMin = date+"/HR/"+nummin+".bin";
+                fileNameMax = date+"/HR/"+nummax+".bin";
                 
                 var posMin = $.inArray(fileNameMin, this.tabLaserFilesToLoad);
                 var posMax = $.inArray(fileNameMax, this.tabLaserFilesToLoad);
@@ -1762,9 +1759,9 @@ define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher',
             if (this.initiated)
                 _particleSystem.visible = !_particleSystem.visible;
         },
-        setVisibility: function(b) {
+        setVisibility: function(b) {		
             if (this.initiated)
-                _particleSystem.visible = b;
+                _particleSystem.visible = !!b;
         },
         changeAlpha: function(val) {
             if (this.initiated)
@@ -2831,24 +2828,8 @@ define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher',
 
 
         getGeometryVertices: function(){
-          
             return _bufferGeometry;
-            //_geometryParticleSystemPicking.vertices;
         },     
-        /*
-        savePOIInputs: function(pt1, description) {
-            console.log('save POI');
-            $.post("php/postUserInputs.php",
-                    {
-                        inputType: 0,
-                        p1: [pt1.x, pt1.y, pt1.z],
-                        text: description
-                    },
-            function(resultMsg) {
-                console.log("Storing operation : " + resultMsg);
-            });
-       },
-         */
         
        savePointInputs: function(pt1) {
             $.post("php/postUserInputs.php",

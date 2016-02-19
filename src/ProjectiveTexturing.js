@@ -82,9 +82,7 @@
 					},
 					
 					loadTexture: function(src,infos,onload,data){
-						console.log(src);
 						src = src.format(infos);
-						console.log(src);
 						var img = new Image(); 
 						img.crossOrigin = 'anonymous';
 						img.onload = function () { 	
@@ -156,7 +154,6 @@
 								}, m);
 							}
 							var infos = {cam:Ori.sensors[i].infos,pano:panoInfo};
-							console.log(infos);
 							this.loadTexture(PanoramicProvider.getUrlImageFile(), infos, function(tex,i) { 	
 								_shaderMat.uniforms.texture.value[i] = tex;
 							}, i);

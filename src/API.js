@@ -5,35 +5,25 @@
  */
 
 
-define("API",['jquery', 'GraphicEngine', 'Navigation', 'MeshManager', 'Panoramic', 'LaserCloud', 'Measure', 'Dispatcher', 'Cartography', 'Cartography3D', 'Config'],
-        function($, gfxEngine, Navigation, MeshManager, Panoramic,   LaserCloud,   Measure,   Dispatcher, Cartography, Cartography3D, Config){
+define("API",['jquery', 'GraphicEngine', 'Navigation', 'MeshManager', 'Panoramic', 'LaserCloud', 'Measure', 'Dispatcher', 'Cartography3D'],
+        function($, gfxEngine, Navigation, MeshManager, Panoramic,   LaserCloud,   Measure,   Dispatcher, Cartography3D){
 
          API = function(options){
-             
-           this.laser = options.laser;
-           this.dataURL = options.dataURL || Config.dataURL;  // Specify if using local files or distant : "local", "distant"
-           // Config.init("stereopolis");
-            
-            this.positionInit = options.positionInit || {x:651182.91,y:39.6,z:6861343.03};
-            gfxEngine.setZero(this.positionInit);
-            
-            Panoramic.init(this.positionInit, this.dataURL);   // By default
-            Dispatcher.register("MOVE", Panoramic);
+			 
+            gfxEngine.setZero(options.position);
 
-            if(options.usingBati3D) {
-                this.addLayer("3DBuilding",this.dataURL);
-            }
-            
-            if(options.usingLaserCloud) {
-                this.addLayer("pointCloud",this.dataURL,this.laser);
-            }
+            this.addLayer("images",options.images);
+            this.addLayer("buildings",options.buildings);
+            this.addLayer("pointCloud",options.pointCloud);
 
             this.version = 0.1;
+            Dispatcher.register('MOVE', Panoramic);
             Dispatcher.register('MOVE', API);
             Dispatcher.register('ZOOM', API);
             Dispatcher.register('ORIENTATION', API);
             Dispatcher.register('MEASURE', API);
             this.initialized = true;
+            
         };
         
         
@@ -61,33 +51,12 @@ define("API",['jquery', 'GraphicEngine', 'Navigation', 'MeshManager', 'Panoramic
                 _events[event]();
             }
         };
-
-
-/*
-        API.prototype.initialize = function() {
-
-            console.log('initializing API');
-
-            var mapOptions = {
-              center: { easting: 651473, northing: 6862600}, 
-              zoom: 8
-            };
-
-        };
- */       
-        API.prototype.setInitialized = function(b){
-            
-            this.initialized = b;
-        };
         
         API.prototype.isInitialized = function(){
             
             return this.initialized;
         };
         
-        
-        
-
         // PANORAMIC **************************************************************************
         
         // Set position to go usin object {x,y,z} or 3 parameters 
@@ -100,10 +69,8 @@ define("API",['jquery', 'GraphicEngine', 'Navigation', 'MeshManager', 'Panoramic
         
         // Get current pos
         API.prototype.getPanoramicPosition = function() {
-           
             var v = Panoramic.getPanoPos();
-            return {easting:v.x, northing:v.z, hauteur:v.y};
-            // Send signal to linked object
+            return {easting:v.x, northing:v.z, height:v.y};
         };
         
         // Set where to look at just in plani, One angle from north, heading (same as yaw)
@@ -157,57 +124,51 @@ define("API",['jquery', 'GraphicEngine', 'Navigation', 'MeshManager', 'Panoramic
         
         // Layers **************************************************************************
         
-        API.prototype.addLayer = function(layerName, dataURL, infos){
-            
-           // console.log("addLayer", layerName);
-            
+        API.prototype.addLayer = function(layerName, options){
+			if(!options) return;
+			            
             if(layerName == "pointCloud"){
                 
                 if(Panoramic.isInitiated()){  // PointCloud depends on pano info (time)
-                
-                    if (!LaserCloud.initiated) {
-                            Measure.init();
-                            LaserCloud.init(gfxEngine.getZero(), dataURL, infos); //Init itself and its shaders
-                            gfxEngine.addToScene(LaserCloud.laserCloudMaster);
-                            LaserCloud.launchLaserAroundCurrentTime(10, 11);
-                            //LaserCloud.setVisibility(true);
-                        }
-                        else {
-                            if (LaserCloud.getNotLoaded() && !LaserCloud.getLocalMode())
-                                LaserCloud.launchLaserAroundCurrentTime(10, 11);
-                        }
+					
+                    if (LaserCloud.initiated) {
+                        LaserCloud.launchLaserAroundCurrentTime(10, 11);
+                        
+                    } else if (LaserCloud.getNotLoaded()) {
+                        Measure.init();
+                        LaserCloud.init(gfxEngine.getZero(), options);
+                        gfxEngine.addToScene(LaserCloud.laserCloudMaster);
+                        LaserCloud.launchLaserAroundCurrentTime(10, 11);
+                    }
 
-                        LaserCloud.setVisibility(true);
-                        LaserCloud.btnSwitchPoint = true;
-                 }else{
-                    setTimeout(function(){API.prototype.addLayer("pointCloud",dataURL,infos);}, 150);
+                    LaserCloud.setVisibility(options.visible);
+                    LaserCloud.btnSwitchPoint = true;
+                } else {
+                    setTimeout(function(){API.prototype.addLayer(layerName,options);}, 150);
                 }
             }
 
-            if(layerName == "3DBuilding"){
+            if(layerName == "buildings"){
                     if (!Cartography3D.isCartoInitialized()) {
-                                Cartography3D.initCarto3D(dataURL,infos); // todo : handle offset
-                                Panoramic.setVisibility(false);
+                        Cartography3D.initCarto3D(options);
+						Cartography3D.setVisibility(options.visible);
                     }
-            }   
-            
-            /*
-            if(layerName == "TerrestrialImages"){
-                Panoramic.init();
             }
-            */
+            
+            if(layerName == "images"){
+				Panoramic.init(gfxEngine.getZero(), options);
+                Panoramic.setVisibility(options.visible);
+            }
         };
         
         
          API.prototype.removeLayer = function(layerName){
              
-             console.log("removeLayer", layerName);
-             //Change setvitibility to remove ???
              if(layerName == "pointCloud"){
                 LaserCloud.setVisibility(false);
              }
              
-             if(layerName == "3DBuilding"){
+             if(layerName == "buildings"){
                 Cartography3D.removeAllDalles();
              }
              
@@ -215,39 +176,27 @@ define("API",['jquery', 'GraphicEngine', 'Navigation', 'MeshManager', 'Panoramic
         
 
         API.prototype.setLayerVisibility = function(layerName, b){
-             
-             console.log("removeLayer", layerName);
+			
              if(layerName == "pointCloud"){
                 LaserCloud.setVisibility(b);
              }
              
-             if(layerName == "3DBuilding"){
+             if(layerName == "buildings"){
                 Cartography3D.setVisibility(b);
              }
              
          };
-
-            
-            
     
          // Events **************************************************************************
         
-        
-        /**
-         * 
-         * @param {type} obj
-         * @param {type} att
-         * @param {type} call
-         * @returns {undefined}
-         */
-        API.prototype.addListener = function(obj,att,call){
+        API.prototype.addListener = function(call){
             
             // Static test for juste move function
             if(att=="MOVE")
-                _events.MOVE = call;//function(){console.log("waoooooooooooooooo");};
+                _events.MOVE = call;
             else
                 if(att=="ZOOM")
-                    _events.ZOOM = call;//function(){console.log("waoooooooooooooooo");};
+                    _events.ZOOM = call;
             else
                 if(att=="ORIENTATION")
                     _events.ORIENTATION = call;
@@ -257,46 +206,6 @@ define("API",['jquery', 'GraphicEngine', 'Navigation', 'MeshManager', 'Panoramic
             
         };
         
-        
-        
-        // INPUTS DIV **************************************************************
-         API.prototype.createSearchInput = function(){
-                         
-            $containerSE = $(gfxEngine.getContainerID());
-            //$container = $('#containerITOWNS');
-            $containerSE.append('<div id="divSearchInput"> <input  name="myfieldname" id="searchInput" value="Adresse, Ville..." style="background-color: rgba(0,0,0,0.5); position:absolute;  right: 50px; width: 250px; top:50px;  z-index: 99;" /> </div>');
-            $('#divSearchInput').mousedown(this.textInputClick);
-            $('#divSearchInput').mouseup(this.textInputClick);
-            $('#divSearchInput').mousemove(this.textInputClick);
-            $('#divSearchInput').click(this.textInputClick);
-            $('#divSearchInput').keyup(this.textInputChange);
-        };
-        
-        API.prototype.textInputClick = function(e){
-            console.log("click");
-            e.stopPropagation();
-          //  e.originalEvent.preventDefault();
-        };
-        
-        API.prototype.textInputChange = function(e){
-            
-               if (e.keyCode == 13) {  // Enter key
-
-                    var p = $("#searchInput").val();
-                    if (parseFloat(p.substring(3, 4)) >= 0.0) {  // Coordinate
-                        var tabCoord = p.split(" ");
-                        Navigation.goToClosestPosition({x: tabCoord[0], y: 0, z: tabCoord[1]}, {distance: 250});
-                    } else
-                    if (p.indexOf('_') > 0) {
-                        Navigation.loadPanoFromNameAndLookAtIntersection(p);
-                    }    // Pano name
-                    else
-                        Cartography.sendOLSRequest(p, false);  // Address
-
-                    }
-        };
-        // LASER    
-   
         return API;
     
 });

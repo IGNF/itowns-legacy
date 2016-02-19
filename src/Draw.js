@@ -1,5 +1,5 @@
-define(['three', 'GraphicEngine','Utils','ProjectiveTexturing2', 'Shader'],
-    function(THREE, gfxEngine, Utils, ProjectiveTexturing2, Shader) {
+define(['three', 'GraphicEngine','Utils','ProjectiveTexturing', 'Shader'],
+    function(THREE, gfxEngine, Utils, ProjectiveTexturing, Shader) {
 
     //PRIVATE MEMBERS******************************************************************************************
     //*********************************************************************************************************
@@ -452,7 +452,7 @@ define(['three', 'GraphicEngine','Utils','ProjectiveTexturing2', 'Shader'],
            //var mat = new THREE.MeshBasicMaterial({wireframe: true, wireframeLinewidth : 4, depthTest:false, depthWrite : false, color: 0xaaff0f});
            //var mat = new THREE.MeshBasicMaterial({wireframe: false, wireframeLinewidth : 4, depthTest:false, depthWrite : false, color: 0xffffff});
            
-             var mat = ProjectiveTexturing2.getShaderMat();
+             var mat = ProjectiveTexturing.getShaderMat();
               
            
            
@@ -565,7 +565,7 @@ define(['three', 'GraphicEngine','Utils','ProjectiveTexturing2', 'Shader'],
            if(_roadMesh) gfxEngine.removeFromScene(_roadMesh);
            
            //var mat = new THREE.MeshBasicMaterial({wireframe: true, wireframeLinewidth : 4, depthTest:false, depthWrite : false, color: 0xaaff0f});
-           var mat = ProjectiveTexturing2.getShaderMat();
+           var mat = ProjectiveTexturing.getShaderMat();
               
            _roadMesh = new THREE.Mesh(geometry, mat );
            
