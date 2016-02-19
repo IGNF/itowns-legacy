@@ -132,13 +132,13 @@ define("API",['jquery', 'GraphicEngine', 'Navigation', 'MeshManager', 'Panoramic
                 if(Panoramic.isInitiated()){  // PointCloud depends on pano info (time)
 					
                     if (LaserCloud.initiated) {
-                        LaserCloud.launchLaserAroundCurrentTime(10, 11);
+                        LaserCloud.launchLaserAroundCurrentTime(10);
                         
                     } else if (LaserCloud.getNotLoaded()) {
                         Measure.init();
                         LaserCloud.init(gfxEngine.getZero(), options);
                         gfxEngine.addToScene(LaserCloud.laserCloudMaster);
-                        LaserCloud.launchLaserAroundCurrentTime(10, 11);
+                        LaserCloud.launchLaserAroundCurrentTime(10);
                     }
 
                     LaserCloud.setVisibility(options.visible);

@@ -59,7 +59,7 @@ define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher',
         MOVE: function() {
             _notLoaded = true;
             if(_particleSystem.visible && !_localMode)
-                LaserCloud.launchLaserAroundCurrentTime(10, 11);
+                LaserCloud.launchLaserAroundCurrentTime(10);
                 
                 //LaserCloud.showUserMeasures();
         },
@@ -152,35 +152,6 @@ define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher',
 	        _bufferGeometry.addAttribute( 'color',        new THREE.BufferAttribute( new Float32Array( _nbPointsBuffer * 3 ), 3 ));//.setDynamic(true) );
             _bufferGeometry.addAttribute( 'displacement', new THREE.BufferAttribute( new Float32Array( _nbPointsBuffer * 3 ), 3 ));//.setDynamic(true) );
             _bufferGeometry.addAttribute( 'uniqueid',     new THREE.BufferAttribute( new Float32Array( _nbPointsBuffer ), 1 ));//.setDynamic(true) );
-
-/*
-            _bufferGeometry.attributes = {
-                position: {
-                    itemSize: 3,
-                    array: new Float32Array(_nbPointsBuffer * 3), // ! not float64 to gpu
-                    numItems: _nbPointsBuffer * 3,
-                    dynamic: true
-                },
-                color: {
-                    itemSize: 3,
-                    array: new Float32Array(_nbPointsBuffer * 3),
-                    numItems: _nbPointsBuffer * 3,
-                    dynamic: true
-                },
-                displacement: {
-                    itemSize: 3,
-                    array: new Float32Array(_nbPointsBuffer * 3),
-                    numItems: _nbPointsBuffer * 3,
-                    dynamic: true
-                },
-                uniqueid: {
-                    itemSize: 1,
-                    array: new Float32Array(_nbPointsBuffer),
-                    dynamic: true
-                }
-
-            };
-       */
             
             
             //*****Picking **********************
@@ -212,14 +183,7 @@ define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher',
         },
         
         createShader: function() {
-
-/*
-            _shaderAttributes = {
-                displacement: {type: 'v3', value: []},
-                color: {type: 'v3', value: []},
-                uniqueid: {type: 'f', value: []}
-            };
-*/
+			
             _shaderUniforms = {
                 indice_time_laser: {type: 'f', value: _indiceTimeLaser},
                 currentidwork: {type: 'f', value: 1000.},
@@ -237,7 +201,6 @@ define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher',
             // For BufferGeometry now we need to set everything here. Like transparent 
             _shaderMatLaserCloud = new THREE.ShaderMaterial({
                 uniforms: _shaderUniforms,
-            //    attributes: _bufferGeometry.attributes,// _shaderAttributes,
                 vertexShader: Shader.shaderLaserVS.join("\n"),//Shader.shaders['shaderLaser.vs'],
                 fragmentShader: Shader.shaderLaserFS.join("\n"),//Shader.shaders['shaderLaser.fs'],
                 vertexColors: THREE.VertexColors,
@@ -1541,15 +1504,13 @@ define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher',
        
        
         // MAIN LOADING FUNCTION
-        launchLaserAroundCurrentTime: function(duration, laserNum) {
+        launchLaserAroundCurrentTime: function(duration) {
             
             _notLoaded = false;   // Means if no movement we won t have to load again when visibility gets back on
             var date = Panoramic.getYYMMDD();
-            var hours = Panoramic.getPanoHours();
-            var seconds = Panoramic.getPanoSecondsInHour();
+            var seconds = Panoramic.getPanoHours()*3600+Panoramic.getPanoSecondsInHour();
             var decalageUTC = Panoramic.getDecalageUTC();
-            console.log("laser", date, laserNum, hours, seconds, duration, _currentLaserPivot);
-            this.launchLaserNewRieglLOD(date,hours,seconds - decalageUTC,duration/6);
+            this.launchLaserNewRieglLOD(date,seconds - decalageUTC,duration/6);
         },
         
         //Test with riegl360
@@ -1575,14 +1536,10 @@ define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher',
         
            
         // Test with riegl360 with 2 level of definitions
-        launchLaserNewRieglLOD: function(date,hours,seconds,duration){
+        launchLaserNewRieglLOD: function(date,seconds,duration){
 
-           // duration /=2;
-            var decalage = 3;
+			var lods = ["LR","HR"];
             var zero = gfxEngine.getZero();
-            
-            //this.tabLaserFilesToLoad = [];
-            var second = 3600 * hours + seconds;// + decalage;
             var fileNameMin="", fileNameMax="";
             
             // Empty files to load (temp)
@@ -1590,30 +1547,13 @@ define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher',
             this.indiceLaserFileLoaded = 0;
     
             //LR
-            for(var i = 0 ; i< 1 * duration  ; i+=0.1){
+            for(var lod in lods){
+			  for(var i = 0 ; i< 1 * duration  ; i+=0.1){
                 
-                var nummin = (second - i) * 10;
-                var nummax = (second + i) * 10;
-                fileNameMin = date+"/LR/"+nummin+".bin";
-                fileNameMax = date+"/LR/"+nummax+".bin";
-                
-                var posMin = $.inArray(fileNameMin, this.tabLaserFilesToLoad);
-                var posMax = $.inArray(fileNameMax, this.tabLaserFilesToLoad);
-                
-                if( (posMin === -1) || (this.tabLaserFilesToLoad.length - posMin> 20) ) 
-                     this.tabLaserFilesToLoad.push(fileNameMin);
-                if( i>0 && ((posMax === -1) || (this.tabLaserFilesToLoad.length - posMax> 20)) ) 
-                     this.tabLaserFilesToLoad.push(fileNameMax);
-            }
-            
-            
-            // HR
-            for(var i = 0 ; i< 1*duration ; i+=0.1){
-                
-                var nummin = (second - i) * 10;
-                var nummax = (second + i) * 10;
-                fileNameMin = date+"/HR/"+nummin+".bin";
-                fileNameMax = date+"/HR/"+nummax+".bin";
+                var nummin = (seconds - i) * 10;
+                var nummax = (seconds + i) * 10;
+                fileNameMin = date+"/"+lods[lod]+"/"+nummin+".bin";
+                fileNameMax = date+"/"+lods[lod]+"/"+nummax+".bin";
                 
                 var posMin = $.inArray(fileNameMin, this.tabLaserFilesToLoad);
                 var posMax = $.inArray(fileNameMax, this.tabLaserFilesToLoad);
@@ -1622,9 +1562,9 @@ define(['jquery', 'GraphicEngine', 'three', 'Shader', 'Panoramic', 'Dispatcher',
                      this.tabLaserFilesToLoad.push(fileNameMin);
                 if( i>0 && ((posMax === -1) || (this.tabLaserFilesToLoad.length - posMax> 20)) ) 
                      this.tabLaserFilesToLoad.push(fileNameMax);
-            }
-            
-       
+              }
+			}
+           
             //  console.log(this.tabLaserFilesToLoad);
             if(this.indiceLaserFileLoaded < this.tabLaserFilesToLoad.length)
                  this.readLaserPointsFileFromItownsGeneric(this.tabLaserFilesToLoad[this.indiceLaserFileLoaded],32,

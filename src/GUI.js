@@ -451,11 +451,11 @@ define(
 
                     LaserCloud.init(gfxEngine.getZero()); //Init itself and its shaders
                     gfxEngine.addToScene(LaserCloud.laserCloudMaster);
-                    LaserCloud.launchLaserAroundCurrentTime(10, 11);
+                    LaserCloud.launchLaserAroundCurrentTime(10);
                 }
                 else {
                     if (LaserCloud.getNotLoaded() && !LaserCloud.getLocalMode())
-                        LaserCloud.launchLaserAroundCurrentTime(10, 11);
+                        LaserCloud.launchLaserAroundCurrentTime(10);
 
                     LaserCloud.setVisibility($(this).prop("checked"));
                 }
@@ -550,11 +550,11 @@ define(
                         Measure.init();
                         LaserCloud.init(gfxEngine.getZero()); //Init itself and its shaders
                         gfxEngine.addToScene(LaserCloud.laserCloudMaster);
-                        LaserCloud.launchLaserAroundCurrentTime(10, 11);
+                        LaserCloud.launchLaserAroundCurrentTime(10);
                     }
                     else {
                         if (LaserCloud.getNotLoaded())
-                            LaserCloud.launchLaserAroundCurrentTime(10, 11);
+                            LaserCloud.launchLaserAroundCurrentTime(10);
 
                     }
 
@@ -587,11 +587,11 @@ define(
                         Measure.init();
                         LaserCloud.init(gfxEngine.getZero()); //Init itself and its shaders
                         gfxEngine.addToScene(LaserCloud.laserCloudMaster);
-                        LaserCloud.launchLaserAroundCurrentTime(10, 11);
+                        LaserCloud.launchLaserAroundCurrentTime(10);
                     }
                     else {
                         if (LaserCloud.getNotLoaded())
-                            LaserCloud.launchLaserAroundCurrentTime(10, 11);
+                            LaserCloud.launchLaserAroundCurrentTime(10);
                     }
                     $("#checkbox1").prop("checked", true);
                     LaserCloud.setVisibility(true);
@@ -611,11 +611,11 @@ define(
                         Measure.init();
                         LaserCloud.init(gfxEngine.getZero()); //Init itself and its shaders
                         gfxEngine.addToScene(LaserCloud.laserCloudMaster);
-                        LaserCloud.launchLaserAroundCurrentTime(10, 11);
+                        LaserCloud.launchLaserAroundCurrentTime(10);
                     }
                     else {
                         if (LaserCloud.getNotLoaded())
-                            LaserCloud.launchLaserAroundCurrentTime(10, 11);
+                            LaserCloud.launchLaserAroundCurrentTime(10);
                     }
                     $("#checkbox1").prop("checked", true);
                     LaserCloud.setVisibility(true);
@@ -695,7 +695,7 @@ define(
                         Measure.init();
                         LaserCloud.init(gfxEngine.getZero()); //Init itself and its shaders
                         gfxEngine.addToScene(LaserCloud.laserCloudMaster);
-                        LaserCloud.launchLaserAroundCurrentTime(10, 11);
+                        LaserCloud.launchLaserAroundCurrentTime(10);
                }
 
                $("#checkbox1").prop("checked", true);
@@ -814,11 +814,11 @@ define(
 
                             LaserCloud.init(gfxEngine.getZero()); //Init itself and its shaders
                             gfxEngine.addToScene(LaserCloud.laserCloudMaster);
-                            LaserCloud.launchLaserAroundCurrentTime(10, 11);
+                            LaserCloud.launchLaserAroundCurrentTime(10);
                         }
                         else {
                             if (LaserCloud.getNotLoaded())
-                                LaserCloud.launchLaserAroundCurrentTime(10, 11);
+                                LaserCloud.launchLaserAroundCurrentTime(10);
                             LaserCloud.setVisibility(true);
                         }
                     }
