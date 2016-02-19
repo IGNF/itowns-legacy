@@ -160,6 +160,7 @@
 								_shaderMat.uniforms.texture.value[i] = tex;
 							}, i);
 						}
+			this.changePanoTextureAfterloading(panoInfo,null,rot,1);
             return _shaderMat;
           },
 					tweenIndiceTime: function (i){
@@ -174,12 +175,12 @@
                 			requestAnimSelectionAlpha(function() { that.tweenIndiceTime(i); });                			
            	 			}	
 					},
-            		changePanoTextureAfterloading: function (panoInfo,translation,rotation){
+            		changePanoTextureAfterloading: function (panoInfo,translation,rotation,lod){
 						this.todo = [];
 						_infos.pano = panoInfo;
-						this.translation=translation;
-						this.rotation=rotation;
-            			for (var l=0; l< _infos.lods.length; ++l)
+						this.translation=translation || new THREE.Vector3();
+						this.rotation=rotation || new THREE.Matrix3();
+            			for (var l=lod||0; l< _infos.lods.length; ++l)
 							for (var i=0; i< Ori.sensors.length; ++i)
 								this.todo.push({l:l,i:i});
             			this.chargeOneImageCam();
