@@ -30,7 +30,7 @@ git add -u
 git commit -m "iTowns at $(date)"
 
 # Push the new files up to GitHub
-git push git@github.com:iTowns/itowns.git gh-pages
+git push https://github.com/iTowns/itowns.git gh-pages
 
 # Delete our temp folder
 cd ..
