@@ -1,5 +1,5 @@
-define(['three', 'jquery', 'Utils', 'Panoramic', 'Navigation','Config'],
-        function(THREE, $, Utils, Panoramic, Navigation,  Config) {
+define(['three', 'jquery', 'Utils', 'Panoramic', 'Navigation'],
+        function(THREE, $, Utils, Panoramic, Navigation) {
 
             //***************************** PRIVATE MEMBERS OF MODULE ************************************************/
 
@@ -337,8 +337,8 @@ define(['three', 'jquery', 'Utils', 'Panoramic', 'Navigation','Config'],
                         //we assumed that the current panoramic position has been udpated
                         pos =
                                 {
-                                    x: Panoramic.getPanoInfos().easting - _currentPos.easting,
-                                    y: Panoramic.getPanoInfos().northing - _currentPos.northing
+                                    x: Panoramic.getInfos().easting - _currentPos.easting,
+                                    y: Panoramic.getInfos().northing - _currentPos.northing
                                 };
                     }
 
@@ -524,7 +524,7 @@ define(['three', 'jquery', 'Utils', 'Panoramic', 'Navigation','Config'],
                                                 street = street.substring(0,street.indexOf('['));
                                                 street = street.substring(0,street.lastIndexOf(','));
                                                 //console.log(street);
-                                                $(".localisation-text").text(street + "   |   Easting : " + Panoramic.getPanoInfos().easting + " - Northing : " + Panoramic.getPanoInfos().northing + " (lambert 93)");
+                                                $(".localisation-text").text(street + "   |   Easting : " + Panoramic.getInfos().easting + " - Northing : " + Panoramic.getInfos().northing + " (lambert 93)");
                                                 //return street;
                                             }
                                         }

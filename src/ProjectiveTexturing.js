@@ -23,14 +23,14 @@
 				var _shaderMat = null;
 				var _initiated = false;
 				var _alpha = 1;
-				var _targetNbPanoramics;
-				var _withMask = true;
-				var _withDistortion = true;
+				var _infos = {};
 
 				var ProjectiveTexturing = {
 					
-					init: function(targetNbPanoramics){
-						_targetNbPanoramics = targetNbPanoramics || 2;
+					init: function(infos){
+						_infos = infos;
+						_infos.lods = _infos.lods || [undefined];
+						_infos.targetNbPanoramics = _infos.targetNbPanoramics || 2;
 						_initiated = true;
 					},
 					
@@ -57,7 +57,7 @@
 					},
 					
 					nbMasks: function(){
-						if(!_withMask) return 0;
+						if(!_infos.noMask) return 0;
 						var count = 0;
 						for (var i=0; i<this.nbImages(); ++i)
 							if(Ori.getMask(i)) ++count;
@@ -72,19 +72,17 @@
 						var maxVaryingVec = gl.getParameter(gl.MAX_VARYING_VECTORS);
 						var maxTextureImageUnits = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
 						var maxNbPanoramics = Math.floor(Math.min(maxVaryingVec,(maxTextureImageUnits-M))/N);
-						var P = Math.min(_targetNbPanoramics,maxNbPanoramics);
+						var P = Math.min(_infos.targetNbPanoramics,maxNbPanoramics);
 						console.log("Masks : ", M);
 						console.log("Images per panoramic  : ", N );
-						console.log("Panoramics : ", P ," displayed /",_targetNbPanoramics, " targeted");
+						console.log("Panoramics : ", P ," displayed /",_infos.targetNbPanoramics, " targeted");
 						console.log("Varyings : ", (N*P) ," used /",maxVaryingVec, " available");
 						console.log("Texture units : ", (M+N*P) ," used /",maxTextureImageUnits," available");
 						return P;
 					},
 					
 					loadTexture: function(src,infos,onload,data){
-						console.log(src);
 						src = src.format(infos);
-						console.log(src);
 						var img = new Image(); 
 						img.crossOrigin = 'anonymous';
 						img.onload = function () { 	
@@ -118,12 +116,12 @@
 							var mvpp = (new THREE.Matrix3().multiplyMatrices(rot,mat)).transpose();
 							var trans = Ori.getSommet(i).clone().applyMatrix3(rot);
 							var m = -1;
-							if(_withMask && Ori.getMask(i)) {
+							if(!_infos.noMask && Ori.getMask(i)) {
 								m = uniforms.mask.value.length;
 								uniforms.mask.value[m] = null;
 							}
 							var d = -1;
-							if(_withDistortion && Ori.getDistortion(i)) {
+							if(!_infos.noDistortion && Ori.getDistortion(i)) {
 								d = uniforms.distortion.value.length;
 								uniforms.distortion.value[d] = Ori.getDistortion(i);
 								uniforms.pps.value[d] = Ori.getPPS(i);
@@ -148,22 +146,23 @@
           		transparent:true
           	});
 
+						_infos.pano = panoInfo;
+						_infos.lod = _infos.lods[0];
 						for (var i=0; i<N; ++i) {
+							_infos.cam  = Ori.sensors[i].infos;
 							var m= idmask[i];
 							if(m>=0) {
 								this.loadTexture(Ori.getMask(i), {}, function(tex,m) { 	
 									_shaderMat.uniforms.mask.value[m] = tex; 
 								}, m);
 							}
-							var infos = {cam:Ori.sensors[i].infos,pano:panoInfo};
-							console.log(infos);
-							this.loadTexture(PanoramicProvider.getUrlImageFile(), infos, function(tex,i) { 	
+							this.loadTexture(_infos.url, _infos, function(tex,i) { 	
 								_shaderMat.uniforms.texture.value[i] = tex;
 							}, i);
 						}
+			this.changePanoTextureAfterloading(panoInfo,null,rot,1);
             return _shaderMat;
           },
-
 					tweenIndiceTime: function (i){
             			var alpha = _shaderMat.uniforms.alpha.value[i];
             			if(alpha<1){
@@ -176,21 +175,31 @@
                 			requestAnimSelectionAlpha(function() { that.tweenIndiceTime(i); });                			
            	 			}	
 					},
-            		changePanoTextureAfterloading: function (panoInfo,translation,rotation){
-            			for (var i=0; i< Ori.sensors.length; ++i){            			
-            				this.chargeOneImageCam(panoInfo,translation,rotation,i);
-            			}
+            		changePanoTextureAfterloading: function (panoInfo,translation,rotation,lod){
+						this.todo = [];
+						_infos.pano = panoInfo;
+						this.translation=translation || new THREE.Vector3();
+						this.rotation=rotation || new THREE.Matrix3();
+            			for (var l=lod||0; l< _infos.lods.length; ++l)
+							for (var i=0; i< Ori.sensors.length; ++i)
+								this.todo.push({l:l,i:i});
+            			this.chargeOneImageCam();
             		},
 	         		// Load an Image(html) then use it as a texture. Wait loading before passing to the shader to avoid black effect
-	         		chargeOneImageCam: function (panoInfo,translation,rotation,i){
+	         		chargeOneImageCam: function (){
+					if(this.todo.length==0) return;
+					var todo = this.todo.shift();
+					var i = todo.i;
+					var lod = todo.l;
 					var that = this;
-					var infos = {cam:Ori.sensors[i].infos,pano:panoInfo};
-					this.loadTexture(PanoramicProvider.getUrlImageFile(), infos, function(tex) { 	
+					_infos.cam = Ori.sensors[todo.i].infos;
+					_infos.lod = _infos.lods[todo.l];
+					this.loadTexture(_infos.url, _infos, function(tex) { 	
 						var mat = Ori.getMatrix(i).clone();
-						var mvpp = (new THREE.Matrix3().multiplyMatrices( rotation,mat )).transpose();
-		            			var trans = Ori.getSommet(i).clone().applyMatrix3(rotation);
+						var mvpp = (new THREE.Matrix3().multiplyMatrices( that.rotation,mat )).transpose();
+		            			var trans = Ori.getSommet(i).clone().applyMatrix3(that.rotation);
 		            			var j = i + that.nbImages();
-	        	    			if(j<_shaderMat.uniforms.mvpp.value.length) {
+	        	    			if(lod == 0 && j<_shaderMat.uniforms.mvpp.value.length) {
 							_shaderMat.uniforms.mvpp.value[j] = _shaderMat.uniforms.mvpp.value[i];
 							_shaderMat.uniforms.translation.value[j] = _shaderMat.uniforms.translation.value[i];
 							_shaderMat.uniforms.texture.value[j] =_shaderMat.uniforms.texture.value[i];
@@ -199,11 +208,17 @@
 							that.tweenIndiceTime(i);
 						}
 
-	            			_shaderMat.uniforms.mvpp.value[i] = mvpp;
-	            			_shaderMat.uniforms.translation.value[i] = translation.clone().add(trans);
-	            			_shaderMat.uniforms.texture.value[i] = tex;
-									});
-								} 
+							_shaderMat.uniforms.mvpp.value[i] = mvpp;
+							_shaderMat.uniforms.translation.value[i] = that.translation.clone().add(trans);
+							_shaderMat.uniforms.texture.value[i] = tex;
+	            			if(lod==0) {
+								that.chargeOneImageCam();
+							} else {
+								setTimeout(function(){that.chargeOneImageCam();},500);
+							}
+						});
+					}
+						
 	            }
 	            return ProjectiveTexturing
 	        	}

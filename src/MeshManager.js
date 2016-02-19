@@ -1,7 +1,7 @@
 
 
-    define (['GraphicEngine','jquery', 'Config', 'three','Utils','ProjectiveTexturing','Ori','TileTexture','Draw','CVML','Cartography'],
-        function(gfxEngine, $, Config, THREE, Utils,  ProjectiveTexturing, Ori, TileTexture, Draw, CVML) {
+    define (['GraphicEngine','jquery', 'three','Utils','ProjectiveTexturing','Ori','TileTexture','Draw','CVML','Cartography','string_format'],
+        function(gfxEngine, $, THREE, Utils,  ProjectiveTexturing, Ori, TileTexture, Draw, CVML, Cartography, string_format) {
 
 
 
@@ -12,8 +12,6 @@
             _projectiveMaterial = null,
             _currentMeshForClickAndGo = null,  // Simplify mesh for faster search
             _visibility = true,
-            _configStereo = 1,    // indicates what stereopolis version we use
-                                  // 0 old version 10 cam, 1 for the 5 cam new version
 
             //RGE
            _rgeCurrentPositionE  = 0.0,
@@ -43,10 +41,7 @@
            _tabMapMesh = [],
            _roadOn = true,
            
-           _urlBuildingFootprint = '',
-           _urlDTM ='',
-           _localFootprintFile = false,
-           _localDTMFile = false;
+           _options = {}
 
 
         var Manager = {
@@ -54,38 +49,18 @@
             panoInfo:null,
             skyBox:null,  // Optional skybox while not at Camera original position
              
-            init : function (info, dataURL) {
-                
-                // URL Service/DATA from DATAURL     
-                _urlBuildingFootprint   = dataURL.urlBuildingFootprint || Config.dataURL.defaultUrlBuildingFootprint;
-                _localFootprintFile     = _urlBuildingFootprint.indexOf("http") < 0;
-                _urlDTM                 = dataURL.urlDTM   || Config.dataURL.defaultUrlDTM;
-                _localDTMFile           = _urlDTM.indexOf("php") < 0;
+            init : function (options) {
+                  
+                _options = options;
                 
                 if(gfxEngine.isMobileEnvironment()) _radius = 100;
-             
-                this.panoInfo           = info;
-                _rgeCurrentPositionE    = info.easting;
-                _rgeCurrentPositionN    = info.northing;
+                this.panoInfo           = options.pano;
+                _rgeCurrentPositionE    = options.pano.easting;
+                _rgeCurrentPositionN    = options.pano.northing;
                 _rgeLastPositionE       = _rgeCurrentPositionE;
                 _rgeLastPositionN       = _rgeCurrentPositionN;
                 
-                
-               
-                // *************** TEMP to switch between stereopolis config *******
-                 this.checkStereopolisVersionFromPosition();
                  this.loadAndCreateMeshFromDB();
-
-                /*
-                    var layer = "ORTHOIMAGERY.ORTHOPHOTOS.PARIS"//.PARIS";
-                    if (info.easting > 656000 || info.easting < 640000 || info.northing > 6869000 || info.northing < 6860000)
-                        layer = "ORTHOIMAGERY.ORTHOPHOTOS.ORTHOPHOTOS";
-
-                    var currentPos = {x: info.easting, z: info.northing};
-                    MeshManager.generateCartoPlane({x: currentPos.x, y: currentPos.z}, 18, 10, layer, "jpeg");
-		   // this.generateCartoPlanePARIS({x: currentPos.x, y: currentPos.z}, 18, 10, layer, "jpeg");
-		*/			
-					
             },
 
            updateDataFromRGE: function(){
@@ -112,18 +87,6 @@
                  }            
            },
            
-           // SOON Removed after 12 area redone
-           checkStereopolisVersionFromPosition: function(){
-     
-            _configStereo = 1; // New camera system 
-            var name = this.panoInfo.filename;
-            //if(name.substr(0, 6) == 'Paris_' || name.substr(0, 2) == 'Te')
-            //    _configStereo = 0;  // Old Stereopolis
-
-
-           },
-           
-           
            forceUpdateRGE: function(){
                
                  console.log("forceUpdateRGE");
@@ -138,18 +101,13 @@
              
            },
 
-
-           // Load a mesh from PostGIS DB. Example: RGE, Bati
            loadAndCreateMeshFromDB: function(){
-               
-               console.log("load and create mesh DTM then BATI from footprint");
                this.getDTMFromTrajectory();
-               //this.searchPolygonBatiAround(_rgeCurrentPositionE,_rgeCurrentPositionN,_radius);
+             //  this.searchPolygonBatiAround(_rgeCurrentPositionE,_rgeCurrentPositionN,_radius);
            },
 
            // Load jsut Cubic geometry for new cam configuration
            loadAndCreateMeshFromDBNewCam: function(){
-
              this.createGeometry3DfromPoly2([]);
            },
 
@@ -159,47 +117,18 @@
             * @param {type} easting
             * @param {type} northing
             * @param {type} radius
-            * @returns {undefined}
             */
            searchPolygonBatiAround: function(easting, northing ,radius){
-               
-               
-               /******** TEMP
-                *  allow switching between stereopolis configuration
-                *  supposing that east north not in paris implies acquisition with new config
-                */
-               this.checkStereopolisVersionFromPosition();
-               // **********************************************************************************************
-               console.log('config', _configStereo);
-               //*****************************************
                var that= this;
-               
-               if(!_localFootprintFile){        // WFS BATITOPO
-                   
-                    var bottomLeft = new THREE.Vector2(easting - radius, northing - radius);
-                    var topRight   = new THREE.Vector2(easting + radius, northing + radius);
-                    var key = "72hpsel8j8nhb5qgdh07gcyp";
-                    var serviceVersionRequestLayer = "service=WFS&version=2.0.0&REQUEST=GetFeature&typeName=BDTOPO_BDD_WLD_WGS84G:bati_remarquable,BDTOPO_BDD_WLD_WGS84G:bati_indifferencie"
-                    //http://wxs.ign.fr/72hpsel8j8nhb5qgdh07gcyp/geoportail/wfs?service=WFS&version=2.0.0&REQUEST=GetFeature
-                    //&typeName=BDTOPO_BDD_WLD_WGS84G:bati_indifferencie&srsName=EPSG:2154&bbox=651941.31,6861621.12,652341.31,6862021.12,EPSG:2154&outputFormat=json
-                    
-                    var urlWFS = _urlBuildingFootprint+key+"/geoportail/wfs?"+serviceVersionRequestLayer+
-                                 "&srsName=EPSG:2154&bbox="+bottomLeft.x+","+bottomLeft.y+","+topRight.x+","+topRight.y+",EPSG:2154&outputFormat=json";
-                    $.getJSON(urlWFS, function (data){
-                            that.createGeometry3DfromPoly(data,true);
-                        });
-               }else{    
-                    $.getJSON(_urlBuildingFootprint, function (data){
-                            that.createGeometry3DfromPoly(data,true);
-                        });
-                  /*
-                   // DATABASE POSTGIS
-                        var server = (location.host == "www.itowns.fr") ? "itowns" : "local";
-                        $.getJSON(Config.phpDir + "getBatiRGE.php?easting="+ easting +"&northing="+northing+"&radius="+radius+"&server="+server, function (data){
-                                that.createGeometry3DfromPoly(data);//,pointBB);
-                            });
-                   */
-                }
+               _options.bottomLeft = new THREE.Vector2(easting - radius, northing - radius);
+               _options.topRight   = new THREE.Vector2(easting + radius, northing + radius);
+              // _options.key        = "72hpsel8j8nhb5qgdh07gcyp";
+              // _options.service    = "service=WFS&version=2.0.0&REQUEST=GetFeature&typeName=BDTOPO_BDD_WLD_WGS84G:bati_remarquable,BDTOPO_BDD_WLD_WGS84G:bati_indifferencie";
+			  // _options.buildings = " http://wxs.ign.fr/{key}/geoportail/wfs?{service}&srsName=EPSG:2154&bbox={bottomLeft.x},{bottomLeft.y},{topRight.x},{topRight.y},EPSG:2154&outputFormat=json";
+
+               var url = _options.buildings.format(_options);
+               console.log(url);
+               $.getJSON(url, function (data){ that.createGeometry3DfromPoly(data,true); });
           },
           
         
@@ -239,10 +168,8 @@
           
 
           // [{"geom":"POLYGON((651317.7 6861303.4,651317.3 6861308.8,651308.6 6861304.1,651308.6 6861302.4,651317.7 6861303.4))","h":"3.7","alti":"38"}...]
-          // configStereo indicates what camera type we have 0 is 10 cam, 1 is the new config with 5 cam
           createGeometry3DfromPoly: function(data,WFSOption){
 
-             
               _geometry = new THREE.Geometry();
               var geometry = new THREE.Geometry();  // for the roof
               var geometryClickToGo = new THREE.Geometry();  // facades with Simple road  (no dtm)
@@ -482,10 +409,8 @@
                 _geometry.faces.push( new THREE.Face3( len-8,len-5,len-2));
                 _geometry.faces.push( new THREE.Face3( len-8,len-2,len-1));
             }
-    //***********************************************************************************************************            
-
+    //***********************************************************************************************************     
                 console.log("RGE Bati loaded and transformed to mesh OK");
-                console.log('_configStereo: ',_configStereo);
   
                 _geometry.computeFaceNormals();  // WARNING : VERY IMPORTANT WHILE WORKING WITH RAY CASTING ON CUSTOM MESH
 
@@ -510,14 +435,12 @@
                                         this.panoInfo.roll
                                     );
 
-                    ProjectiveTexturing.init();
+                    ProjectiveTexturing.init(_options);
                     _projectiveMaterial = ProjectiveTexturing.createShaderMat(this.panoInfo,matRotation);
                     mesh.material = _projectiveMaterial;
                     mesh.material.side = THREE.DoubleSide;  
                     mesh.material.transparent = false;
-                    mesh.visible = _visibility;  
-                    //ProjectiveTexturing.changePanoTextureAfterloading(this.panoInfo,posWithPivot,matRotation);
-                    // ProjectiveTexturing2.changePanoTextureAfterloading(this.panoInfo.filename,128,50,posWithPivot,matRotation,1);
+                    mesh.visible = _visibility;                      
 
                 }else {
                     
@@ -543,101 +466,20 @@
                     
             },
                
-               
-               
-            // Simple cube geometry for a fast texturing while no RGE (or not yet loaded)
-            initGeometryWithCube: function(matRot){
-               
-                var heightCamOnTruck = 2;
-                var alti = this.panoInfo.altitude - gfxEngine.getZeroAsVec3D().y - heightCamOnTruck;
-                _geometry = new THREE.Geometry();
-               
-     //****** Let s add a road
-                var centerTruckX = this.panoInfo.easting  - gfxEngine.getZeroAsVec3D().x;
-                var centerTruckY = this.panoInfo.altitude - gfxEngine.getZeroAsVec3D().y;
-                var centerTruckZ = this.panoInfo.northing - gfxEngine.getZeroAsVec3D().z;
-               
-                var roadLength = 500
-                _geometry.vertices.push(new THREE.Vector3(centerTruckX-roadLength,alti,centerTruckX-roadLength),
-                    new THREE.Vector3(centerTruckX-roadLength,alti,centerTruckX+roadLength),
-                    new THREE.Vector3(centerTruckX+roadLength,alti,centerTruckX+ roadLength),
-                    new THREE.Vector3(centerTruckX+roadLength,alti,centerTruckX-roadLength)
-                );
-              var len = _geometry.vertices.length;
-                _geometry.faces.push( new THREE.Face4( len-4,len-3,len-2,len-1) );//new THREE.Face4( len-1,len-2,len-3,len-4) );
-
-    //**** CUBE   Let s add a big cube around position so we are sure to texture everywhere around the cameras
-                var cubeSize = 5000; // Coordinate from panoramic cam center and cube edges (in 2D) Half
-                var a,b,c,d,e,f,g,h;
-                a = new THREE.Vector3(centerTruckX-cubeSize,centerTruckY-cubeSize,centerTruckZ-cubeSize);
-                b = new THREE.Vector3(centerTruckX-cubeSize,centerTruckY+cubeSize,centerTruckZ-cubeSize);
-                c = new THREE.Vector3(centerTruckX+cubeSize,centerTruckY+cubeSize,centerTruckZ-cubeSize);
-                d = new THREE.Vector3(centerTruckX+cubeSize,centerTruckY-cubeSize,centerTruckZ-cubeSize);
-                e = new THREE.Vector3(centerTruckX-cubeSize,centerTruckY+cubeSize,centerTruckZ+cubeSize);
-                f = new THREE.Vector3(centerTruckX+cubeSize,centerTruckY+cubeSize,centerTruckZ+cubeSize);
-                g = new THREE.Vector3(centerTruckX+cubeSize,centerTruckY-cubeSize,centerTruckZ+cubeSize);
-                h = new THREE.Vector3(centerTruckX-cubeSize,centerTruckY-cubeSize,centerTruckZ+cubeSize);
-                _geometry.vertices.push(a,b,c,d,e,f,g,h);
-                len = _geometry.vertices.length;
-                _geometry.faces.push( new THREE.Face4( len-1,len-2,len-3,len-4) );
-                _geometry.faces.push( new THREE.Face4( len-6,len-3,len-2,len-5) );
-                _geometry.faces.push( new THREE.Face4( len-8,len-7,len-6,len-5) );
-                _geometry.faces.push( new THREE.Face4( len-8,len-7,len-4,len-1) );
-                _geometry.faces.push( new THREE.Face4( len-7,len-6,len-3,len-4) );
-                _geometry.faces.push( new THREE.Face4( len-8,len-5,len-2,len-1) );
-    //***********************************************************************************************************            
-
-                _geometry.computeFaceNormals();  // WARNING : VERY IMPORTANT WHILE WORKING WITH RAY CASTING ON CUSTOM MESH
-               
-               
-                 if(!ProjectiveTexturing.isInitiated()){
-
-                    var mat = new THREE.MeshBasicMaterial({color:0xff00ff});
-                    var mesh  = new THREE.Mesh(_geometry,mat);
-                    mat.side = THREE.DoubleSide;
-                    mesh.name = "RGE";
-                    _currentObject = mesh;
-
-                    ProjectiveTexturing.init();
-                    _projectiveMaterial = ProjectiveTexturing.createShaderMat(this.panoInfo.filename,50);
-                    mesh.material = _projectiveMaterial;
-                    mesh.material.side = THREE.DoubleSide;  // SEE IF BETTER TO HAVE ANOTHER MESH (CLONE) TO TEXTURE SIMPLE SIDE
-                    mesh.material.transparent = true;
-                    mesh.visible = _visibility;  
-                    gfxEngine.addToScene(_currentObject);
-
-                }else {
-                    //remove older rge in scene
-                    gfxEngine.removeFromScene(_currentObject);  console.log('remove old mesh');
-                    var mesh  = new THREE.Mesh(_geometry, _projectiveMaterial);
-                    mesh.material.side = THREE.DoubleSide;  // SEE IF BETTER TO HAVE ANOTHER MESH (CLONE) TO TEXTURE SIMPLE SIDE
-                    mesh.material.transparent = true;
-                    mesh.name = "RGE";
-                    mesh.visible = _visibility;
-                    _currentObject = mesh;
-                    gfxEngine.addToScene(_currentObject);
-                }
-                 
-     
-             },
-             
        
        //**************************************************** DTM **************************************
        
             getDTMFromTrajectory: function(){
-                
-                console.log('getDTM');            
-                var  info = this.panoInfo;
                 var that = this;
-                var urlRequest = _localDTMFile ? _urlDTM : _urlDTM+"easting="+ info.easting +"&northing="+info.northing+"&radius="+_radius;
-                $.getJSON(urlRequest, function (data){
-                        that.createDTMFromTrajectory(data,info);
+                var url = _options.DTM; // format({ easting : this.panoInfo.easting, northing:this.panoInfo.northing, radius:_radius});
+                $.getJSON(url, function (data){
+                        that.createDTMFromTrajectory(data,that.panoInfo);
                     });
             },
 
 
             createDTMFromTrajectory: function(data,info){
-               
+ 
                 var radiusMarge = _radius + 100;
                 var heightApplanixOnTruck = 2.1;
                 var zero = gfxEngine.getZeroAsVec3D();
@@ -961,25 +803,25 @@
              generateCartoPlaneWMTSMercator: function(pos,level,radius,layer,format,alti){
 
              // We need to compute the size of the tiles (depends on level) in meters mercator sys
-                  _sizeTile = require("Cartography").computeSizeTile(level);
+                  _sizeTile = Cartography.computeSizeTile(level);
 
             //   We need to get to position of the tileTexture around our position in lamb93
-                  var tileInfo = require("Cartography").getTileCoordAtPos(pos,_sizeTile);
+                  var tileInfo = Cartography.getTileCoordAtPos(pos,_sizeTile);
                   var tilePosX = tileInfo.x *_sizeTile + _topLeftCorner.x;
                   var tilePosY = -tileInfo.y *_sizeTile + _topLeftCorner.y;
-                  var posLamb = require("Cartography").convertCoord({x:tilePosX, y:tilePosY},"EPSG:3857","EPSG:2154");        
+                  var posLamb = Cartography.convertCoord({x:tilePosX, y:tilePosY},"EPSG:3857","EPSG:2154");        
                  
               // Then we need to know the width and height of the Tile Texture
               // And we calcul the corners position of the Tile Texture (composed of 8*8 tiles)
                   var tilePosBottomCornerX = tilePosX + 8 *_sizeTile;
                   var tilePosBottomCornerY = tilePosY - 8 *_sizeTile;
-                  var posLambCorner = require("Cartography").convertCoord({x:tilePosBottomCornerX, y:tilePosBottomCornerY},"EPSG:3857","EPSG:2154");
+                  var posLambCorner = Cartography.convertCoord({x:tilePosBottomCornerX, y:tilePosBottomCornerY},"EPSG:3857","EPSG:2154");
                   var widTileTexture = posLambCorner.x - posLamb.x;
                   var heiTileTexture = posLambCorner.y - posLamb.y;
                  
                // We transform the 2 other corners in local projection  
-                  var posLambCorner11 = require("Cartography").convertCoord({x:tilePosBottomCornerX, y:tilePosY},"EPSG:3857","EPSG:2154");
-                  var posLambCorner21 = require("Cartography").convertCoord({x:tilePosX, y:tilePosBottomCornerY},"EPSG:3857","EPSG:2154");
+                  var posLambCorner11 = Cartography.convertCoord({x:tilePosBottomCornerX, y:tilePosY},"EPSG:3857","EPSG:2154");
+                  var posLambCorner21 = Cartography.convertCoord({x:tilePosX, y:tilePosBottomCornerY},"EPSG:3857","EPSG:2154");
                  
                   var zero = gfxEngine.getZeroAsVec3D();
                   var posLambLocal         = new THREE.Vector3(posLamb.x - zero.x,         alti,   posLamb.y - zero.z);
@@ -1071,15 +913,6 @@
              
              getCurrentObjectToDrag : function(){
                  return _currentObjectToDrag;
-             },
-             
-             getConfigStereo: function(){
-                 return _configStereo;
-             },
-             
-             // Version is 0 or 1
-             setConfigStereo: function(version){
-                _configStereo = version ;
              },
 
             getOrthoPhotoOn: function(){

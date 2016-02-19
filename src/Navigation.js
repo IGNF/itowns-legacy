@@ -1,5 +1,5 @@
-define (['three', 'GraphicEngine', 'RequestManager', 'Config', 'Utils',  'Panoramic', 'PanoramicProvider', 'Dispatcher','ProjectiveTexturing','MeshManager', 'Ori', 'Draw', 'Cartography3D', 'lib/when'],
-function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicProvider, Dispatcher, ProjectiveTexturing, MeshManager,  Ori, Draw, Cartography3D, when)
+define (['three', 'GraphicEngine', 'Utils',  'Panoramic', 'PanoramicProvider', 'Dispatcher','ProjectiveTexturing','MeshManager', 'Ori', 'Draw', 'Cartography3D', 'lib/when'],
+function(THREE, gfxEngine,  Utils, Panoramic, PanoramicProvider, Dispatcher, ProjectiveTexturing, MeshManager,  Ori, Draw, Cartography3D, when)
 {
 
     //***************************** PRIVATE MEMBERS OF MODULE ************************************************/
@@ -75,7 +75,7 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
         init: function(initialInfos) {
 
             _initialPositionInfos = initialInfos;
-            _currentPanoInfo = Panoramic.getPanoInfos();
+            _currentPanoInfo = Panoramic.getInfos();
             _distThreshold = 2;
             _minAngle = 0.52;
 
@@ -100,7 +100,7 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
                 }
 
                 //  targetPanoInfo.easting = 354881.41; targetPanoInfo.northing = 6689609.56;
-                Panoramic.setInfos(targetPanoInfo.url,targetPanoInfo);
+                Panoramic.setInfos(targetPanoInfo);
 
                 var posWithPivot = new THREE.Vector4(parseFloat(targetPanoInfo.easting)  - gfxEngine.getZeroAsVec3D().x,
                                                      parseFloat(targetPanoInfo.altitude) - gfxEngine.getZeroAsVec3D().y,
@@ -166,7 +166,7 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
                 gfxEngine.translateCameraSmoothly(posWithPivot.x, posWithPivot.y , posWithPivot.z);
               //ProjectiveTexturing.tweenGeneralOpacity();
 
-               Panoramic.setInfos(targetPanoInfo.url,targetPanoInfo);
+               Panoramic.setInfos(targetPanoInfo);
              /*************************** Projection ******************************************************************/
                 // rotation from heading TODO real 3D Rotation with pitch and roll
                 var teta = parseFloat(targetPanoInfo.heading)/ 180 * Math.PI;  // Deg to Rad
@@ -218,7 +218,7 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
                 }
 
                //  targetPanoInfo.easting = 354881.41; targetPanoInfo.northing = 6689609.56;
-                Panoramic.setInfos(targetPanoInfo.url,targetPanoInfo);
+                Panoramic.setInfos(targetPanoInfo);
 
                 var posWithPivot = new THREE.Vector4(parseFloat(targetPanoInfo.easting)  - gfxEngine.getZeroAsVec3D().x,
                                                      parseFloat(targetPanoInfo.altitude) - gfxEngine.getZeroAsVec3D().y,
@@ -290,7 +290,7 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
                 }
 
                //  targetPanoInfo.easting = 354881.41; targetPanoInfo.northing = 6689609.56;
-                Panoramic.setInfos(targetPanoInfo.url,targetPanoInfo);
+                Panoramic.setInfos(targetPanoInfo);
 
                 var posWithPivot = new THREE.Vector4(parseFloat(targetPanoInfo.easting)  - gfxEngine.getZeroAsVec3D().x,
                                                      parseFloat(targetPanoInfo.altitude) - gfxEngine.getZeroAsVec3D().y,
@@ -575,7 +575,6 @@ function(THREE, gfxEngine, RequestManager, Config, Utils, Panoramic, PanoramicPr
 	                    gfxEngine.setSpeedTransCam(0.04);
 	                    gfxEngine.setSpeedTurnCam(0.1);
 	                },2000);
-	             //require('GUI').setViewModeOn(false);
             }
         },
 
