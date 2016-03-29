@@ -10,7 +10,7 @@ define("API",['jquery', 'GraphicEngine', 'Navigation', 'MeshManager', 'Panoramic
 
          API = function(options){
 			 
-            gfxEngine.setZero(options.positionInit);
+            gfxEngine.setZero(options.position);
 
             this.addLayer("images",options.images);
             this.addLayer("buildings",options.buildings);
