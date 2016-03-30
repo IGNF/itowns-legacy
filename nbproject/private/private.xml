@@ -2,34 +2,6 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group>
-<<<<<<< HEAD
-            <file>file:/D:/public_html/itownsV0/src/Ori.js</file>
-            <file>file:/D:/public_html/itownsV0/src/Config.js</file>
-            <file>file:/D:/public_html/itownsV0/src/app.js</file>
-            <file>file:/D:/public_html/itownsV0/src/MeshManager.js</file>
-            <file>file:/D:/public_html/itownsV0/src/LaserCloud.js</file>
-            <file>file:/D:/public_html/itownsV0/src/PanoramicProvider.js</file>
-            <file>file:/D:/public_html/itownsV0/src/API.js</file>
-            <file>file:/D:/public_html/itownsV0/index.html</file>
-            <file>file:/D:/public_html/itownsV0/src/ProjectiveTexturing2.js</file>
-            <file>file:/D:/public_html/itownsV0/src/Navigation.js</file>
-            <file>file:/D:/public_html/itownsV0/src/GraphicEngine.js</file>
-            <file>file:/D:/public_html/itownsV0/src/Panoramic.js</file>
-=======
-            <file>file:/D:/wamp/www/Github/itownsV0/src/API.js</file>
-            <file>file:/D:/wamp/www/Github/itownsV0/src/lib/3DSLoader.js</file>
-            <file>file:/D:/wamp/www/Github/itownsV0/src/lib/PlatformInfo.js</file>
-            <file>file:/D:/wamp/www/Github/itownsV0/src/lib/BinaryStream.js</file>
-            <file>file:/D:/wamp/www/Github/itownsV0/src/PanoramicProvider.js</file>
-            <file>file:/D:/wamp/www/Github/itownsV0/src/GUI.js</file>
-            <file>file:/D:/wamp/www/Github/itownsV0/src/Panoramic.js</file>
-            <file>file:/D:/wamp/www/Github/itownsV0/src/GraphicEngine.js</file>
-            <file>file:/D:/wamp/www/Github/itownsV0/src/lib/B3DLoader.js</file>
-            <file>file:/D:/wamp/www/Github/itownsV0/README.md</file>
-            <file>file:/D:/wamp/www/Github/itownsV0/src/Cartography3D.js</file>
-            <file>file:/D:/wamp/www/Github/itownsV0/index.html</file>
->>>>>>> origin/master
-        </group>
+        <group/>
     </open-files>
 </project-private>
