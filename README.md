@@ -129,7 +129,7 @@ The following tasks are currently worked on :
 - Offline examples
 - Python code for data preparation
 
-Meanwhile, iTowns version 2 is also at the design phase.
+Meanwhile, [iTowns Version 2](https://github.com/iTowns/itowns2) is also being developped.
 
 ### Support
 
