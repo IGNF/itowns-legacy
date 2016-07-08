@@ -10,34 +10,86 @@ define ('Sensor',['three','Utils','url'], function (THREE,Utils,url) {
 
     Sensor = function (infos){
         this.infos = infos;
-        this.position = new THREE.Vector3().fromArray( infos.position );
-        this.rotation = new THREE.Matrix3().fromArray( infos.rotation );
-        this.projection = new THREE.Matrix3().fromArray( infos.projection );
         this.size = new THREE.Vector2().fromArray(infos.size);
-        if(infos.distortion) {
-            this.pps = new THREE.Vector2().fromArray(infos.distortion.pps);
-            var disto = new THREE.Vector3().fromArray(infos.distortion.poly357);
-            var r2max = this.getDistortion_r2max(disto);
-            this.distortion = new THREE.Vector4(disto.x,disto.y,disto.z,r2max);
-        }
         this.mask = infos.mask;
 
-        // change conventions
-        this.orientation = infos.orientation;
-        this._itownsWay = new THREE.Matrix3().set(0, 1, 0,
-                                             0, 0,-1,
-                                             1, 0, 0);
-                                           
-        this.Photogram_JMM = new THREE.Matrix3().set(0, 0,-1,
-                                               -1, 0, 0,
-                                                0, 1, 0);
-                                               
-        this.photgramme_image = new THREE.Matrix3().set(1, 0, 0,
-                                                  0,-1, 0,
-                                                  0, 0,-1);
+        if(infos.transfo) {
+            this.matrix = new THREE.Matrix3();
+            this.position = new THREE.Vector3();
+            for(i = 0; i < infos.transfo.length; i++)
+            { 
+                var t = infos.transfo[i];
+                //console.log(t);
+                switch(t.type)
+                {
+                    case "affine" : 
+                    case "translation" : 
+                        if(t.vec3)
+                        {
+                            var p = new THREE.Vector3().fromArray( t.vec3 );
+                            p.applyMatrix3(this.matrix);
+                            this.position = this.position.sub(p);
+                        } else {
+                            console.log("ERROR: this is not a supported ",t.type," transfo : ",t);            
+                        }
+                        if(t.type=="translation") break; // affine is translation followed by linear
 
-        this.rotation = this.getMatOrientationTotal();
-        this.position.applyMatrix3(this._itownsWay);
+                    case "linear" : 
+                        if(t.mat3)
+                        {
+                            this.matrix = new THREE.Matrix3().multiplyMatrices( this.matrix, new THREE.Matrix3().fromArray( t.mat3 ));
+                        } else if(t.orientation)
+                        {
+                            this.matrix = new THREE.Matrix3().multiplyMatrices( this.matrix, this.getMatOrientationCapteur(t.orientation));
+                        } else 
+                        {
+                            console.log("ERROR: this is not a supported ",t.type," transfo : ",t);            
+                        }
+                        break;
+
+                    case "distortion" :
+                        this.pps = new THREE.Vector2().fromArray(t.pps);
+                        var disto = new THREE.Vector3().fromArray(t.poly357);
+                        var r2max = this.getDistortion_r2max(disto);
+                        this.distortion = new THREE.Vector4(disto.x,disto.y,disto.z,r2max);
+                        break;
+
+                    default :
+                        console.log("ERROR ", t.type, " is not a supported transfo type in ",t);            
+                }
+            }
+
+        } else {
+            if(infos.distortion) {
+                this.pps = new THREE.Vector2().fromArray(infos.distortion.pps);
+                var disto = new THREE.Vector3().fromArray(infos.distortion.poly357);
+                var r2max = this.getDistortion_r2max(disto);
+                this.distortion = new THREE.Vector4(disto.x,disto.y,disto.z,r2max);
+            }
+
+            // change conventions
+            var itownsWay = new THREE.Matrix3().set(0, 1, 0,
+                                                 0, 0,-1,
+                                                 1, 0, 0);
+                                               
+            var Photogram_JMM = new THREE.Matrix3().set(0, 0,-1,
+                                                   -1, 0, 0,
+                                                    0, 1, 0);
+                                                   
+            var photgramme_image = new THREE.Matrix3().set(1, 0, 0,
+                                                      0,-1, 0,
+                                                      0, 0,-1);
+
+            this.matrix = itownsWay;
+            this.matrix = new THREE.Matrix3().multiplyMatrices( this.matrix, new THREE.Matrix3().fromArray( infos.rotation ));    
+            this.matrix = new THREE.Matrix3().multiplyMatrices( this.matrix, Photogram_JMM );
+            this.matrix = new THREE.Matrix3().multiplyMatrices( this.matrix, this.getMatOrientationCapteur(infos.orientation));
+            this.matrix = new THREE.Matrix3().multiplyMatrices( this.matrix, photgramme_image);
+            this.matrix = new THREE.Matrix3().multiplyMatrices( this.matrix, new THREE.Matrix3().fromArray( infos.projection ));
+
+            this.position = new THREE.Vector3().fromArray( infos.position );
+            this.position.applyMatrix3(itownsWay);
+        }
      };
 
 
@@ -54,45 +106,27 @@ define ('Sensor',['three','Utils','url'], function (THREE,Utils,url) {
         
 
 
-// rotation * Photogram_JMM * getMatOrientationCapteur * photgramme_image
-     Sensor.prototype.getMatOrientationTotal =
-       function(){
-        var out = this.rotation.clone();
-        out = new THREE.Matrix3().multiplyMatrices( out.clone(), this.Photogram_JMM.clone() );
-        
-        out = new THREE.Matrix3().multiplyMatrices( out.clone(), this.getMatOrientationCapteur().clone());
-        out = new THREE.Matrix3().multiplyMatrices( out.clone(), this.photgramme_image.clone());
 
-        out = new THREE.Matrix3().multiplyMatrices(this._itownsWay, out.clone());    
-        return out;
-        
-      }
-      
-    Sensor.prototype.getMatOrientationCapteur =  function(){
+    Sensor.prototype.getMatOrientationCapteur =  function(orientation){
          
-            var ori0 = new THREE.Matrix3().set( 0,-1, 0,
-												1, 0, 0,
-												0, 0, 1);
+            var m = [
+                new THREE.Matrix3().set( 0,-1, 0,
+										1, 0, 0,
+										0, 0, 1),
+                new THREE.Matrix3().set( 0, 1, 0,
+									   -1, 0, 0,
+										0, 0, 1),
+                new THREE.Matrix3().set(-1, 0, 0,
+										0,-1, 0,
+										0, 0, 1),
+                new THREE.Matrix3().set( 1, 0, 0,
+										0, 1, 0,
+										0, 0, 1)
+            ];
 
-            var ori1 = new THREE.Matrix3().set( 0, 1, 0,
-											   -1, 0, 0,
-												0, 0, 1);
-
-            var ori2 = new THREE.Matrix3().set(-1, 0, 0,
-												0,-1, 0,
-												0, 0, 1);
-
-            var ori3 = new THREE.Matrix3().set( 1, 0, 0,
-												0, 1, 0,
-												0, 0, 1);
-
-            switch(this.orientation){
-                case 0: return ori0;
-                case 1: return ori1;
-                case 2: return ori2; 
-                case 3: return ori3; 
-            }                              
+            return m[orientation];                              
        }
+
     return Sensor
 
 });

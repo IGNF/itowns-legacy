@@ -52,12 +52,10 @@ define(['three','Sensor','jquery', 'PanoramicProvider'],
       // deprecated methods
       getDistortion: function(i){ return this.sensors[i].distortion; },
       getSommet    : function(i){ return this.sensors[i].position;   },
-      getProjection: function(i){ return this.sensors[i].projection; },
-      getRotation  : function(i){ return this.sensors[i].rotation;   },
       getMask      : function(i){ return this.sensors[i].mask;   },
       getSize      : function(i){ return this.sensors[i].size;   },
       getPPS       : function(i){ return this.sensors[i].pps;   },
-      getMatrix    : function(i){ return new THREE.Matrix3().multiplyMatrices(this.getRotation(i),this.getProjection(i)); }
+      getMatrix    : function(i){ return this.sensors[i].matrix; }
     };
 
     return Ori;
